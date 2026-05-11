@@ -1,0 +1,9 @@
+nombre,marca,categoria,tipo_piel,ingredientes,beneficios,precio,descripcion
+"Crema Hidratante Revitalift","L'Oreal","cuidado_facial","seca,normal","acido hialuronico, pro-retinol","hidratacion profunda, reduce lineas",12990,"Crema de dia para hidratar y mejorar apariencia de lineas finas."
+"Gel Limpiador Effaclar","La Roche-Posay","limpieza","grasa,mixta,sensible","zinc, agua termal","limpia exceso de sebo, no reseca",18990,"Gel de limpieza para piel grasa o con tendencia a imperfecciones."
+"Serum Hyalu B5","La Roche-Posay","cuidado_facial","seca,sensible,normal","acido hialuronico, vitamina B5","rellena, calma, hidrata",35990,"Serum hidratante para piel deshidratada o sensible."
+"Protector Solar Anthelios FPS50","La Roche-Posay","proteccion_solar","grasa,mixta,sensible","filtros solares, niacinamida","proteccion UV, acabado ligero",22990,"Protector solar facial de alta proteccion para uso diario."
+"Agua Micelar Sensibio","Bioderma","limpieza","sensible,normal,seca","micelas, extracto de pepino","desmaquilla, calma, limpia",13990,"Agua micelar suave para retirar maquillaje e impurezas."
+"Crema CeraVe Reparadora","CeraVe","cuidado_facial","seca,sensible","ceramidas, acido hialuronico","repara barrera, hidratacion prolongada",16990,"Crema para piel seca o sensibilizada con barrera cutanea comprometida."
+"Serum Niacinamida 10%","The Ordinary","cuidado_facial","grasa,mixta","niacinamida, zinc","control de brillo, mejora textura",11990,"Serum para piel grasa con poros visibles o brillo excesivo."
+"Base Fit Me Mate","Maybelline","maquillaje","grasa,mixta,normal","pigmentos minerales","unifica tono, acabado mate",8990,"Base liquida de cobertura media para piel normal a grasa."

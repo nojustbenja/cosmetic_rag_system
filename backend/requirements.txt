@@ -1,0 +1,9 @@
+chromadb>=0.4
+sentence-transformers
+PyMuPDF
+openai
+fastapi
+uvicorn
+python-dotenv
+pydantic-settings
+sse-starlette

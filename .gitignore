@@ -1,0 +1,29 @@
+# Environment files
+.env
+
+# Editor/OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+.venv-run/
+backend/.venv-run/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Databases
+*.sqlite3
+chroma_db/
