@@ -20,7 +20,10 @@ def extract_pdf_pages(pdf_path: Path) -> list[tuple[int, str]]:
 
 def ingest_pdfs(guides_path: Path = GUIDES_PATH) -> int:
     client = chromadb.PersistentClient(path=settings.chroma_path)
-    collection = client.get_or_create_collection(name="guias")
+    collection = client.get_or_create_collection(
+        name="guias",
+        metadata={"hnsw:space": "cosine"},
+    )
     total = 0
 
     for pdf_path in sorted(guides_path.glob("*.pdf")):

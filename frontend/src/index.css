@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%; /* Zinc 50 / Off-white for a clean gallery feel */
+    --foreground: 240 10% 4%; /* Zinc 950 for sharp contrast */
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 4%;
+
+    --primary: 240 10% 4%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 4%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%; /* Zinc 500 */
+
+    --accent: 240 5% 96%;
+    --accent-foreground: 240 10% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 240 10% 4%;
+
+    --radius: 1.5rem;
+
+    /* High-End Liquid Glass Tokens */
+    --glass-surface: 0 0% 100% / 0.6;
+    --glass-edge: 0 0% 100% / 0.8;
+    --glass-deep: 0 0% 100% / 0.4;
+    --glass-input: 0 0% 100% / 0.7;
+
+    /* Ambient blobs (desaturated, tasteful) */
+    --blob-violet: 240 20% 90%;
+    --blob-blue: 210 20% 90%;
+    --blob-peach: 30 20% 92%;
+
+    /* Diffusion Shadows (Soft & Wide) */
+    --shadow-glass: 0 20px 40px -15px rgba(0,0,0,0.05);
+    --shadow-glass-lg: 0 30px 60px -20px rgba(0,0,0,0.08);
+    --shadow-soft: 0 4px 20px -2px rgba(0,0,0,0.03);
+    
+    /* Liquid Refraction Border */
+    --shadow-refraction: inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.02);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html, body, #root { 
+    height: 100%; 
+    font-family: 'Geist Sans', system-ui, sans-serif;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/10 selection:text-primary;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: hsl(var(--glass-surface));
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border: 1px solid hsl(var(--glass-edge));
+    box-shadow: var(--shadow-glass), var(--shadow-refraction);
+  }
+  .glass-card {
+    background: hsl(var(--glass-deep));
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid hsl(var(--glass-edge));
+    box-shadow: var(--shadow-soft), var(--shadow-refraction);
+  }
+  .glass-input {
+    background: hsl(var(--glass-input));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--glass-edge));
+    box-shadow: var(--shadow-refraction);
+  }
+  .ambient-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(50% 50% at 10% 20%, hsl(var(--blob-violet) / 0.5) 0%, transparent 60%),
+      radial-gradient(60% 60% at 90% 80%, hsl(var(--blob-blue) / 0.4) 0%, transparent 60%),
+      radial-gradient(40% 40% at 50% 100%, hsl(var(--blob-peach) / 0.4) 0%, transparent 60%);
+    filter: blur(80px);
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Typography tokens — pesos consistentes en toda la app */
+  .text-eyebrow {
+    @apply text-[12px] uppercase tracking-[0.2em] font-bold text-muted-foreground;
+  }
+  .text-label {
+    @apply text-[12px] font-semibold tracking-tight text-foreground;
+  }
+  .text-body {
+    @apply text-[14px] font-medium text-muted-foreground leading-relaxed max-w-[65ch];
+  }
+  .text-product-name {
+    @apply text-[15px] font-semibold tracking-tight text-foreground leading-snug;
+  }
+  .text-price {
+    @apply text-[16px] font-bold tabular-nums text-foreground;
+  }
+  .text-title {
+    @apply text-xl font-bold tracking-tight text-foreground;
+  }
+  .text-display {
+    @apply text-4xl lg:text-5xl tracking-tighter text-foreground text-balance font-medium leading-none;
+  }
+  .text-cta {
+    @apply text-sm font-bold tracking-tight;
+  }
+  .text-subtitle {
+    @apply text-base font-bold tracking-tight text-foreground;
+  }
+  .text-meta {
+    @apply text-xs font-medium text-muted-foreground;
+  }
+  .text-badge {
+    @apply text-[10px] font-bold tracking-wider uppercase;
+  }
+  .text-description {
+    @apply text-[14px] font-medium leading-relaxed text-muted-foreground text-pretty;
+  }
+}
+
+@layer base {
+  strong, b { font-weight: 600; }
+  h1, h2, h3, h4, h5, h6 { font-weight: 600; }
+  body { font-feature-settings: "ss01", "cv11"; }
+}
+
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-float-up { animation: float-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+.animate-pulse-dot { animation: pulse-dot 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.25s ease-out both; }
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in-right { animation: slide-in-right 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media print {
+  /* Ocultar elementos de pantalla del DOM */
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Ocultar UI principal del chat y catálogo */
+  main, 
+  aside, 
+  nav, 
+  footer, 
+  button, 
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Asegurar que el contenedor del ticket ocupe todo el ancho */
+  #lumi-receipt-ticket {
+    display: block !important;
+    position: absolute !important;
+    left: 50% !important;
+    top: 20px !important;
+    transform: translateX(-50%) !important;
+    width: 100% !important;
+    max-width: 80mm !important; /* Ancho estándar de impresora térmica */
+    margin: 0 auto !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Configuraciones de página para evitar encabezados automáticos del navegador */
+  @page {
+    margin: 0;
+    size: auto;
+  }
+}
+
+

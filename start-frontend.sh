@@ -13,8 +13,9 @@ require_command() {
 }
 
 port_in_use() {
-  lsof -ti "tcp:$1" >/dev/null 2>&1
+  lsof -i "tcp:$1" -sTCP:LISTEN -t >/dev/null 2>&1
 }
+
 
 require_command npm
 require_command lsof

@@ -7,3 +7,4 @@ uvicorn
 python-dotenv
 pydantic-settings
 sse-starlette
+anthropic

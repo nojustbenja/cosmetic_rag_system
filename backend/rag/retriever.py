@@ -11,14 +11,16 @@ def _client() -> chromadb.PersistentClient:
 
 
 def _format_results(results: dict) -> list[dict]:
+    ids = results.get("ids", [[]])[0]
     documents = results.get("documents", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
     distances = results.get("distances", [[]])[0]
     formatted: list[dict] = []
 
-    for document, metadata, distance in zip(documents, metadatas, distances):
+    for id_, document, metadata, distance in zip(ids, documents, metadatas, distances):
         formatted.append(
             {
+                "id": id_,
                 "text": document,
                 "metadata": metadata,
                 "score": 1 - float(distance),
@@ -52,7 +54,10 @@ def _split_filters(filters: dict | None) -> tuple[dict | None, dict[str, str]]:
 def _matches_contains_filters(result: dict, contains_filters: dict[str, str]) -> bool:
     metadata = result["metadata"]
     for key, expected in contains_filters.items():
-        if expected not in str(metadata.get(key, "")).lower():
+        val = str(metadata.get(key, "")).lower()
+        if key == "skin_types" and "todas" in val:
+            continue
+        if expected not in val:
             return False
     return True
 
@@ -62,7 +67,10 @@ def retrieve_products(
     filters: dict | None = None,
     top_k: int = 6,
 ) -> list[dict]:
-    collection = _client().get_or_create_collection(name="productos")
+    collection = _client().get_or_create_collection(
+        name="productos",
+        metadata={"hnsw:space": "cosine"},
+    )
     if collection.count() == 0:
         return []
     exact_filters, contains_filters = _split_filters(filters)
@@ -79,7 +87,10 @@ def retrieve_products(
 
 
 def retrieve_guides(query_embedding: list[float], top_k: int = 4) -> list[dict]:
-    collection = _client().get_or_create_collection(name="guias")
+    collection = _client().get_or_create_collection(
+        name="guias",
+        metadata={"hnsw:space": "cosine"},
+    )
     if collection.count() == 0:
         return []
     results = collection.query(
@@ -105,6 +116,13 @@ def infer_filters(query: str) -> dict | None:
         "maquillaje": "maquillaje",
         "limpiador": "limpieza",
         "limpieza": "limpieza",
+        "perfume": "fragancias",
+        "fragancia": "fragancias",
+        "cabello": "cabello",
+        "pelo": "cabello",
+        "champu": "cabello",
+        "shampoo": "cabello",
+        "aceite capilar": "cabello",
     }
     for alias, category in category_aliases.items():
         if alias in normalized:
@@ -123,3 +141,35 @@ def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
     active_filters = filters if filters is not None else infer_filters(query)
     results = retrieve_products(query_embedding, active_filters) + retrieve_guides(query_embedding)
     return sorted(results, key=lambda item: item["score"], reverse=True)[:10]
+
+
+def get_all_products_from_db() -> list[dict]:
+    client = _client()
+    collection = client.get_or_create_collection(
+        name="productos",
+        metadata={"hnsw:space": "cosine"},
+    )
+    if collection.count() == 0:
+        return []
+    results = collection.get(include=["documents", "metadatas"])
+    
+    ids = results.get("ids", [])
+    documents = results.get("documents", [])
+    metadatas = results.get("metadatas", [])
+    
+    formatted: list[dict] = []
+    for id_, doc, meta in zip(ids, documents, metadatas):
+        formatted.append({
+            "id": id_,
+            "name": meta.get("product_name") or "Producto",
+            "brand": meta.get("brand", ""),
+            "price": float(meta.get("price") or 0),
+            "category": meta.get("category", ""),
+            "skin_types": [item.strip() for item in str(meta.get("skin_types", "")).split(",") if item.strip()],
+            "description": doc,
+            "source": "catalog",
+            "image_url": meta.get("image_url", ""),
+            "stock": int(meta.get("stock") or 0),
+            "tags": [item.strip() for item in str(meta.get("tags", "")).split(",") if item.strip()],
+        })
+    return formatted

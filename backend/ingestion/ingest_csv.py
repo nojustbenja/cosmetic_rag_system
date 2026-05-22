@@ -41,7 +41,14 @@ def ingest_products(csv_path: Path = DATA_PATH) -> int:
         products = list(csv.DictReader(file))
 
     client = chromadb.PersistentClient(path=settings.chroma_path)
-    collection = client.get_or_create_collection(name="productos")
+    try:
+        client.delete_collection(name="productos")
+    except Exception:
+        pass
+    collection = client.get_or_create_collection(
+        name="productos",
+        metadata={"hnsw:space": "cosine"},
+    )
 
     ids = [f"producto-{index}-{product.get('nombre', '').lower().replace(' ', '-')}" for index, product in enumerate(products)]
     documents = [product_to_text(product) for product in products]
@@ -54,6 +61,9 @@ def ingest_products(csv_path: Path = DATA_PATH) -> int:
             "skin_types": product.get("tipo_piel", ""),
             "price": float(product.get("precio") or 0),
             "product_name": product.get("nombre", ""),
+            "image_url": product.get("image_url", ""),
+            "stock": int(product.get("stock") or 0),
+            "tags": product.get("tags", ""),
         }
         for product in products
     ]
@@ -63,5 +73,63 @@ def ingest_products(csv_path: Path = DATA_PATH) -> int:
     return len(ids)
 
 
+def add_product_to_csv(product: dict[str, object], csv_path: Path = DATA_PATH) -> None:
+    fieldnames = ["nombre", "marca", "categoria", "tipo_piel", "ingredientes", "beneficios", "precio", "descripcion", "image_url", "stock", "tags"]
+    row = {k: str(product.get(k, "")).strip() for k in fieldnames}
+    try:
+        row["precio"] = str(int(float(str(product.get("precio", 0)))))
+    except (ValueError, TypeError):
+        row["precio"] = "0"
+    try:
+        row["stock"] = str(int(float(str(product.get("stock", 0)))))
+    except (ValueError, TypeError):
+        row["stock"] = "0"
+
+    file_exists = csv_path.exists()
+    with csv_path.open("a", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        if not file_exists or csv_path.stat().st_size == 0:
+            writer.writeheader()
+        writer.writerow(row)
+
+
+def import_csv_content(csv_content: str, mode: str = "merge", csv_path: Path = DATA_PATH) -> int:
+    fieldnames = ["nombre", "marca", "categoria", "tipo_piel", "ingredientes", "beneficios", "precio", "descripcion", "image_url", "stock", "tags"]
+    existing_products: list[dict] = []
+    
+    if mode == "merge" and csv_path.exists():
+        with csv_path.open(newline="", encoding="utf-8") as file:
+            existing_products = list(csv.DictReader(file))
+
+    # Parse raw csv content
+    lines = csv_content.strip().splitlines()
+    reader = csv.DictReader(lines)
+    new_products = list(reader)
+
+    if mode == "replace":
+        final_products = []
+        for np in new_products:
+            row = {k: str(np.get(k, "")).strip() for k in fieldnames}
+            if row["nombre"]:
+                final_products.append(row)
+    else:  # merge
+        product_map = {str(p.get("nombre", "")).lower().strip(): p for p in existing_products if p.get("nombre")}
+        for np in new_products:
+            name = str(np.get("nombre", "")).lower().strip()
+            if not name:
+                continue
+            row = {k: str(np.get(k, "")).strip() for k in fieldnames}
+            product_map[name] = row
+        final_products = list(product_map.values())
+
+    with csv_path.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(final_products)
+
+    return len(final_products)
+
+
 if __name__ == "__main__":
     print(f"Productos ingresados: {ingest_products()}")
+

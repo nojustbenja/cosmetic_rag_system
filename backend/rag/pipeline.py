@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 
-from openai import OpenAI
+from rag.llm_client import LLMClient
 
 from config import settings
 from rag.prompt_templates import FEW_SHOT_MESSAGES, SYSTEM_PROMPT, build_context
@@ -60,6 +60,7 @@ def _product_context_item(item: dict, message: str) -> dict:
     metadata = item["metadata"]
     text = item["text"]
     return {
+        "id": item.get("id") or metadata.get("product_name", "product").lower().replace(" ", "-"),
         "name": metadata.get("product_name") or _extract_field(text, "Producto") or "Producto",
         "brand": metadata.get("brand") or _extract_field(text, "Marca"),
         "price": metadata.get("price"),
@@ -71,6 +72,9 @@ def _product_context_item(item: dict, message: str) -> dict:
         "reason": _build_product_reason(message, metadata, text),
         "source": metadata.get("source", "catalog"),
         "score": round(float(item.get("score", 0)), 4),
+        "image_url": metadata.get("image_url", ""),
+        "stock": int(metadata.get("stock") or 0),
+        "tags": _split_csv(metadata.get("tags") or ""),
     }
 
 
@@ -138,20 +142,8 @@ async def generate_response(
             yield token
         return
 
-    default_headers = {}
-    if "kilo.ai" in settings.llm_base_url and settings.kilo_mode:
-        default_headers["x-kilocode-mode"] = settings.kilo_mode
+    client = LLMClient()
+    messages = _build_messages(message, session_history, build_context(retrieved_items))
+    async for token in client.stream_completion(messages):
+        yield token
 
-    client = OpenAI(
-        base_url=settings.llm_base_url,
-        api_key=settings.llm_api_key,
-        default_headers=default_headers,
-    )
-    stream = client.chat.completions.create(
-        model=settings.llm_model,
-        messages=_build_messages(message, session_history, build_context(retrieved_items)),
-        stream=True,
-    )
-    for chunk in stream:
-        if chunk.choices and chunk.choices[0].delta.content:
-            yield chunk.choices[0].delta.content
