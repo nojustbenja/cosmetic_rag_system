@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Product } from "@/types/shop";
 import { ChatPanel } from "@/components/ChatPanel";
 import { ProductStage } from "@/components/ProductStage";
@@ -10,14 +10,28 @@ import { fetchProducts } from "@/lib/api";
 import { toast } from "sonner";
 
 const Index = () => {
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [recIds, setRecIds] = useState<string[]>([]);
   const [guides, setGuides] = useState<any[]>([]);
   const { profile } = useProfile();
 
+  const loadCatalog = useCallback(() => {
+    fetchProducts()
+      .then((data) => {
+        setAllProducts(data);
+        setProducts(data);
+      })
+      .catch((err) => {
+        console.error("Error al cargar catálogo:", err);
+        toast.error("No se pudo conectar con el catálogo. Asegúrate de que el backend esté corriendo.");
+      });
+  }, []);
+
   useEffect(() => {
     document.title = "Lumi · Asesora de cosmética con IA";
-    const desc = "Lumi, asesora digital con IA especializada en cosmética: skincare, maquillaje, fragancias y cabello. Recomendaciones personalizadas según tu piel y estilo. 24/7.";
+    const desc =
+      "Lumi, asesora digital con IA especializada en cosmética: skincare, maquillaje, fragancias y cabello. Recomendaciones personalizadas según tu piel y estilo. 24/7.";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", desc);
     else {
@@ -27,16 +41,20 @@ const Index = () => {
       document.head.appendChild(m);
     }
 
-    // Cargar catálogo inicial de productos
-    fetchProducts()
-      .then((data) => {
-        setProducts(data);
-      })
-      .catch((err) => {
-        console.error("Error al cargar catálogo:", err);
-        toast.error("No se pudo conectar con el catálogo. Asegúrate de que el backend esté corriendo.");
-      });
-  }, []);
+    loadCatalog();
+  }, [loadCatalog]);
+
+  /** Called by ChatPanel when user clicks "Nueva consulta". */
+  const handleClearChat = useCallback(() => {
+    // Remove recommendation overlays and restore the full clean catalog
+    setRecIds([]);
+    setGuides([]);
+    setProducts(allProducts.map((p) => {
+      // Strip RAG-specific overlaid fields so cards render as catalog items
+      const { score, reason, rag_source, product_index, ...clean } = p as any;
+      return clean as Product;
+    }));
+  }, [allProducts]);
 
   return (
     <CartProvider>
@@ -45,9 +63,10 @@ const Index = () => {
         <MobileRecsSheet products={products} recIds={recIds} />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[420px_1fr] min-h-[100dvh] w-full max-w-[1600px] mx-auto p-4 lg:p-6 gap-6">
-          <ChatPanel 
+          <ChatPanel
+            onClearChat={handleClearChat}
             onRecommendations={(recProducts, newGuides) => {
-              // Fusionar productos recomendados en el estado para actualizar score/reason
+              // Merge recommended products (with scores/reasons) into current catalog state
               setProducts((prev) => {
                 const merged = [...prev];
                 recProducts.forEach((rp) => {
@@ -62,10 +81,10 @@ const Index = () => {
               });
               setRecIds(recProducts.map((p) => p.id));
               setGuides(newGuides);
-            }} 
+            }}
           />
 
-          {/* Desktop: panel siempre visible al lado */}
+          {/* Desktop: product panel always visible to the right */}
           <section className="hidden lg:block flex-1 min-h-[100dvh] rounded-[2.5rem] glass-panel">
             <h2 className="sr-only">Productos recomendados por Lumi</h2>
             <ProductStage products={products} recIds={recIds} />

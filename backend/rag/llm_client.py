@@ -148,3 +148,10 @@ class LLMClient:
                     yield token
                 return
             raise
+
+    async def generate_completion(self, messages: list[dict[str, str]]) -> str:
+        """Helper method that consumes the stream and returns the full string."""
+        content = []
+        async for token in self.stream_completion(messages):
+            content.append(token)
+        return "".join(content)

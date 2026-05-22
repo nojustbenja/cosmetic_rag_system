@@ -7,13 +7,14 @@ from sse_starlette.sse import EventSourceResponse
 
 from api.models import (
     ChatRequest,
+    ReasonRequest,
     ProductCreateRequest,
     AiAssistRequest,
     OrderCreateRequest,
     CsvImportRequest,
     ProductUpdateRequest
 )
-from rag.pipeline import generate_response, retrieve_context
+from rag.pipeline import generate_response, retrieve_context, generate_product_reason
 from rag.retriever import get_all_products_from_db
 from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_products, update_product_in_csv
 from rag.llm_client import LLMClient
@@ -68,6 +69,15 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
             yield {"event": "error", "data": json.dumps({"error": str(exc)})}
 
     return EventSourceResponse(event_generator())
+
+
+@router.post("/chat/reason")
+async def get_product_reason(request: ReasonRequest) -> dict[str, str]:
+    try:
+        reason = await generate_product_reason(request.message, request.product)
+        return {"reason": reason}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.post("/products")

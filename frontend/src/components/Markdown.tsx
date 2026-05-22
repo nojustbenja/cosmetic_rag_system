@@ -39,7 +39,7 @@ export function Markdown({ content }: Props) {
           return (
             <blockquote
               key={blockIdx}
-              className="border-l-2 border-foreground/20 pl-3 text-[12.5px] text-muted-foreground italic leading-relaxed"
+              className="border-l-2 border-foreground/20 pl-3 text-[13px] text-muted-foreground italic leading-relaxed text-justify"
             >
               {parseInlineMarkdown(quoteText)}
             </blockquote>
@@ -56,7 +56,7 @@ export function Markdown({ content }: Props) {
           return (
             <ul key={blockIdx} className="list-disc pl-5 flex flex-col gap-1.5 my-1.5 text-foreground/95">
               {items.map((item, itemIdx) => (
-                <li key={itemIdx} className="leading-relaxed">
+                <li key={itemIdx} className="leading-relaxed text-justify">
                   {parseInlineMarkdown(item)}
                 </li>
               ))}
@@ -74,7 +74,7 @@ export function Markdown({ content }: Props) {
           return (
             <ol key={blockIdx} className="list-decimal pl-5 flex flex-col gap-1.5 my-1.5 text-foreground/95">
               {items.map((item, itemIdx) => (
-                <li key={itemIdx} className="leading-relaxed">
+                <li key={itemIdx} className="leading-relaxed text-justify">
                   {parseInlineMarkdown(item)}
                 </li>
               ))}
@@ -85,7 +85,7 @@ export function Markdown({ content }: Props) {
         // Standard text block, parse single line breaks as <br />
         const lines = trimmed.split(/\n/);
         return (
-          <p key={blockIdx} className="leading-relaxed text-foreground/90">
+          <p key={blockIdx} className="leading-relaxed text-foreground/90 text-justify">
             {lines.map((line, lineIdx) => (
               <React.Fragment key={lineIdx}>
                 {lineIdx > 0 && <br />}

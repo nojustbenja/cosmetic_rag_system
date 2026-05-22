@@ -11,6 +11,8 @@ export type Product = {
   // RAG Specific fields
   score?: number;
   reason?: string;
+  query?: string;
+  rag_source?: string;
   skin_types?: string[];
   benefits?: string[];
   source?: string;
@@ -22,6 +24,7 @@ export type ChatMessage = {
   role: "user" | "assistant";
   content: string;
   recIds?: string[];
+  products?: Product[];
 };
 
 export type CartItem = { product: Product; qty: number };

@@ -13,6 +13,11 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class ReasonRequest(BaseModel):
+    message: str
+    product: dict
+
+
 class ProductCreateRequest(BaseModel):
     nombre: str = Field(min_length=1)
     marca: str = Field(min_length=1)

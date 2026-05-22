@@ -187,5 +187,17 @@ export async function checkHealth(): Promise<boolean> {
   }
 }
 
-
+export async function fetchProductReason(message: string, product: any): Promise<string> {
+  const url = `${API_URL}/reason`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, product }),
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo obtener la razón del producto.');
+  }
+  const data = await response.json();
+  return data.reason;
+}
 
