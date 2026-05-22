@@ -130,6 +130,50 @@ def import_csv_content(csv_content: str, mode: str = "merge", csv_path: Path = D
     return len(final_products)
 
 
+def update_product_in_csv(original_name: str, updated_product: dict[str, object], csv_path: Path = DATA_PATH) -> bool:
+    fieldnames = ["nombre", "marca", "categoria", "tipo_piel", "ingredientes", "beneficios", "precio", "descripcion", "image_url", "stock", "tags"]
+    
+    if not csv_path.exists():
+        return False
+        
+    products: list[dict] = []
+    with csv_path.open(newline="", encoding="utf-8") as file:
+        products = list(csv.DictReader(file))
+        
+    found = False
+    original_name_lower = original_name.lower().strip()
+    
+    for product in products:
+        if str(product.get("nombre", "")).lower().strip() == original_name_lower:
+            # Update all fields
+            for key in fieldnames:
+                product[key] = str(updated_product.get(key, "")).strip()
+            
+            # Format numeric fields
+            try:
+                product["precio"] = str(int(float(str(updated_product.get("precio", 0)))))
+            except (ValueError, TypeError):
+                product["precio"] = "0"
+            try:
+                product["stock"] = str(int(float(str(updated_product.get("stock", 0)))))
+            except (ValueError, TypeError):
+                product["stock"] = "0"
+                
+            found = True
+            break
+            
+    if not found:
+        return False
+        
+    with csv_path.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(products)
+        
+    return True
+
+
 if __name__ == "__main__":
     print(f"Productos ingresados: {ingest_products()}")
+
 

@@ -10,11 +10,12 @@ from api.models import (
     ProductCreateRequest,
     AiAssistRequest,
     OrderCreateRequest,
-    CsvImportRequest
+    CsvImportRequest,
+    ProductUpdateRequest
 )
 from rag.pipeline import generate_response, retrieve_context
 from rag.retriever import get_all_products_from_db
-from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_products
+from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_products, update_product_in_csv
 from rag.llm_client import LLMClient
 
 
@@ -66,6 +67,23 @@ async def create_product(product: ProductCreateRequest) -> dict[str, str]:
         return {"status": "ok"}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.put("/products")
+async def update_product(request: ProductUpdateRequest) -> dict[str, str]:
+    try:
+        # Actualizar en productos.csv
+        success = update_product_in_csv(request.original_name, request.model_dump())
+        if not success:
+            raise HTTPException(status_code=404, detail="Product not found in catalog.")
+        # Re-ingestar en ChromaDB
+        ingest_products()
+        return {"status": "ok"}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 
 
 @router.post("/products/import-csv")
