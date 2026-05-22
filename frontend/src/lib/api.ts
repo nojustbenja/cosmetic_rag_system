@@ -1,6 +1,6 @@
 import { Product } from "@/types/shop";
 
-const API_URL = 'http://127.0.0.1:8000/chat';
+const API_URL = 'http://localhost:8000/chat';
 
 function parseSseFrame(frame: string) {
   let event = 'message';

@@ -16,6 +16,36 @@ export function Markdown({ content }: Props) {
         const trimmed = block.trim();
         if (!trimmed) return null;
 
+        // Horizontal rule
+        if (trimmed === "---" || trimmed === "***" || trimmed === "___") {
+          return <hr key={blockIdx} className="border-none border-t border-border/40 my-1" />;
+        }
+
+        // H3 heading (### ...)
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h3 key={blockIdx} className="text-[13px] font-bold text-foreground mt-1">
+              {parseInlineMarkdown(trimmed.slice(4).trim())}
+            </h3>
+          );
+        }
+
+        // Blockquote (lines starting with ">")
+        if (trimmed.startsWith("> ") || trimmed.startsWith(">\n")) {
+          const quoteText = trimmed
+            .split("\n")
+            .map((l) => (l.startsWith("> ") ? l.slice(2) : l.startsWith(">") ? l.slice(1) : l))
+            .join(" ");
+          return (
+            <blockquote
+              key={blockIdx}
+              className="border-l-2 border-foreground/20 pl-3 text-[12.5px] text-muted-foreground italic leading-relaxed"
+            >
+              {parseInlineMarkdown(quoteText)}
+            </blockquote>
+          );
+        }
+
         // Check if block is a bulleted list (lines starting with "-" or "*")
         if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
           const items = trimmed

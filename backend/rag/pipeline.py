@@ -32,28 +32,54 @@ def _extract_field(text: str, label: str) -> str:
 
 
 def _build_product_reason(message: str, metadata: dict, text: str) -> str:
-    normalized = message.lower()
-    matches: list[str] = []
+    """Build a human-readable, cause-effect explanation for a recommendation.
 
+    Combines the original user query, matched product attributes and the
+    document source to produce a specific (non-generic) reasoning string.
+    """
+    normalized = message.lower()
+
+    # --- Collect matched attributes ---
+    matched_skin: list[str] = []
     for skin_type in _split_csv(metadata.get("skin_types")):
-        if skin_type.lower() in normalized:
-            matches.append(f"piel {skin_type}")
+        if skin_type.lower() in normalized or "todas" in skin_type.lower():
+            matched_skin.append(f"piel {skin_type}")
 
     category = str(metadata.get("category") or "")
     category_label = category.replace("_", " ")
-    if category and any(part in normalized for part in category_label.split()):
-        matches.append(category_label)
+    category_hit = category and any(
+        part in normalized for part in category_label.split()
+    )
 
     benefits = _split_csv(_extract_field(text, "Beneficios"))
+    matched_benefits: list[str] = []
     for benefit in benefits:
-        terms = [term for term in benefit.lower().split() if len(term) > 4]
-        if any(term in normalized for term in terms):
-            matches.append(benefit)
+        terms = [t for t in benefit.lower().split() if len(t) > 4]
+        if any(t in normalized for t in terms):
+            matched_benefits.append(benefit)
 
-    if matches:
-        unique_matches = list(dict.fromkeys(matches))
-        return "Coincide con: " + ", ".join(unique_matches[:3]) + "."
-    return "Aparece como relevante para la consulta por similitud con el catalogo recuperado."
+    # --- Build the cause-effect sentence ---
+    query_snippet = message[:60].strip()
+    parts: list[str] = []
+
+    if matched_skin:
+        skin_str = ", ".join(list(dict.fromkeys(matched_skin))[:2])
+        parts.append(f"Se ajusta a tu consulta de {skin_str}")
+    elif category_hit:
+        parts.append(f"Corresponde a la categoría {category_label} que buscas")
+    else:
+        parts.append(f'Recuperado por similitud semántica con "{query_snippet}"')
+
+    if matched_benefits:
+        benefit_str = ", ".join(list(dict.fromkeys(matched_benefits))[:2])
+        parts.append(f"ofrece {benefit_str}")
+
+    brand = metadata.get("brand", "")
+    if brand:
+        parts.append(f"de {brand}")
+
+    sentence = " · ".join(parts) + "."
+    return sentence
 
 
 def _product_context_item(item: dict, message: str) -> dict:

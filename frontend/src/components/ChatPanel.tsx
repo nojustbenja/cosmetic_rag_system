@@ -69,13 +69,17 @@ export function ChatPanel({ onRecommendations }: Props) {
           onRecommendations(streamedProducts, []);
 
           const num = product.product_index as number;
-          const line = `**Producto ${num}** · ${product.name}${product.reason ? `\n> ${product.reason}` : ""}`;
+          // Each product: bold name line + (optional) reason as its own blockquote block
+          // Double newlines between blocks so Markdown parser creates separate elements
+          const nameLine = `**${num}.** ${product.name}`;
+          const reasonLine = product.reason ? `\n\n> ${product.reason}` : "";
+          const entry = `${nameLine}${reasonLine}`;
 
           if (!hasToken) {
-            assistantText = `Encontré estos productos para ti:\n\n${line}\n`;
+            assistantText = `Encontré estos productos para ti:\n\n${entry}`;
             hasToken = true;
           } else {
-            assistantText += `\n${line}\n`;
+            assistantText += `\n\n---\n\n${entry}`;
           }
           setMessages((prev) =>
             prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
