@@ -4,7 +4,7 @@ import { ShoppingBag, X, Trash2 } from "lucide-react";
 import { formatCLP } from "@/lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReceiptModal } from "./ReceiptModal";
-import { getProductImage } from "@/lib/images";
+import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 
 export function CartDrawer() {
   const { items, remove, clear, total, count } = useCart();
@@ -81,7 +81,7 @@ export function CartDrawer() {
                         src={getProductImage(i.product)}
                         alt={i.product.name}
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+                          (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
                         }}
                         className="size-16 rounded-xl object-cover"
                       />

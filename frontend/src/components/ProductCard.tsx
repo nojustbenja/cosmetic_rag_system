@@ -5,7 +5,7 @@ import { Plus } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
-import { getProductImage } from "@/lib/images";
+import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import {
   Dialog,
   DialogContent,
@@ -76,7 +76,7 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
               alt={product.name}
               loading="lazy"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+                (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
               }}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -149,7 +149,7 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
                   alt={product.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+                    (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
                   }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-background/20 pointer-events-none" />
@@ -262,4 +262,3 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
     </>
   );
 }
-

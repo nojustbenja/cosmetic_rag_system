@@ -18,7 +18,7 @@ export function ProductStage({ products, recIds }: Props) {
   const isRecMode = recIds.length > 0;
 
   return (
-    <div className="h-full w-full p-6 lg:p-12 lg:overflow-y-auto scrollbar-hide">
+    <div className="w-full p-6 lg:p-12">
       <AnimatePresence mode="popLayout">
         {isRecMode && (
           <motion.div

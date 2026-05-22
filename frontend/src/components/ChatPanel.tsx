@@ -18,8 +18,9 @@ const SUGGESTIONS = [
 ];
 
 export function ChatPanel({ onRecommendations }: Props) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
+      id: crypto.randomUUID(),
       role: "assistant",
       content:
         "Hola. Describe el perfil del cliente y te ayudo a recomendar productos del catalogo cargado.",
@@ -41,14 +42,22 @@ export function ChatPanel({ onRecommendations }: Props) {
   async function send(text: string) {
     if (!text.trim() || loading) return;
     setInput("");
-    const userMsg: ChatMessage = { role: "user", content: text };
+    const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text };
     const history = [...messages, userMsg];
     setMessages(history);
     setLoading(true);
 
     let assistantText = "";
     let hasToken = false;
-    setMessages((prev) => [...prev, { role: "assistant", content: "Buscando productos relevantes en el catalogo..." }]);
+    const assistantMessageId = crypto.randomUUID();
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: assistantMessageId,
+        role: "assistant",
+        content: "Buscando productos relevantes en el catalogo...",
+      },
+    ]);
 
     try {
       await streamChat(text, sessionId, {
@@ -63,7 +72,7 @@ export function ChatPanel({ onRecommendations }: Props) {
               ? `He encontrado ${count} producto${count > 1 ? 's' : ''} excelente${count > 1 ? 's' : ''} en nuestro catálogo:\n\n`
               : "No encontré productos específicos en nuestro catálogo actual que coincidan directamente, pero permíteme asesorarte con algunas pautas generales:\n\n";
             setMessages((prev) =>
-              prev.map((m, idx) => (idx === prev.length - 1 ? { ...m, content: assistantText } : m))
+              prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
             );
             hasToken = true;
           }
@@ -71,7 +80,7 @@ export function ChatPanel({ onRecommendations }: Props) {
         onToken: (token) => {
           assistantText += token;
           setMessages((prev) =>
-            prev.map((m, idx) => (idx === prev.length - 1 ? { ...m, content: assistantText } : m))
+            prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
           );
         }
       });
@@ -79,7 +88,9 @@ export function ChatPanel({ onRecommendations }: Props) {
       console.error(e);
       toast.error(e.message || "Error de conexión con RAG.");
       setMessages((prev) =>
-        prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: "Error inesperado al consultar el RAG." } : m))
+        prev.map((m) =>
+          m.id === assistantMessageId ? { ...m, content: "Error inesperado al consultar el RAG." } : m
+        )
       );
     } finally {
       setLoading(false);
@@ -87,7 +98,7 @@ export function ChatPanel({ onRecommendations }: Props) {
   }
 
   return (
-    <div className="w-full h-full lg:h-[calc(100vh-3rem)] lg:sticky lg:top-6 self-start flex flex-col glass-panel rounded-[2.5rem] p-6 lg:p-8 overflow-hidden">
+    <div className="w-full lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100dvh-3rem)] flex flex-col glass-panel rounded-[2.5rem] p-6 lg:p-8 overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -99,7 +110,7 @@ export function ChatPanel({ onRecommendations }: Props) {
           </div>
           <div>
             <h1 className="text-subtitle">Lumi</h1>
-            <p className="text-[12px] font-medium text-muted-foreground">Asesora de belleza · 24/7</p>
+            <p className="text-[12px] font-medium text-muted-foreground">Asesora de belleza</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -123,9 +134,9 @@ export function ChatPanel({ onRecommendations }: Props) {
         className="flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-6 pb-4 pr-1"
       >
         <AnimatePresence mode="popLayout">
-          {messages.map((m, i) => (
+          {messages.map((m) => (
             <motion.div
-              key={i}
+              key={m.id}
               initial={{ opacity: 0, y: 10, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -137,7 +148,7 @@ export function ChatPanel({ onRecommendations }: Props) {
                   {m.content}
                 </div>
               ) : (
-                <div className="text-[14px] leading-relaxed text-foreground/80 font-medium">
+                <div className="bg-secondary/75 border border-border/60 px-5 py-3.5 rounded-3xl rounded-tl-sm text-[14px] leading-relaxed text-foreground/85 font-medium">
                   {m.content ? (
                     <Markdown content={m.content} />
                   ) : loading ? (

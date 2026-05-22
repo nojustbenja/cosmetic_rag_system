@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useProfile } from "@/hooks/useProfile";
 import { X, Printer, Sparkles, RefreshCw } from "lucide-react";
@@ -17,10 +17,12 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
   const { profile } = useProfile();
   const [ticketNumber, setTicketNumber] = useState("");
   const [timestamp, setTimestamp] = useState("");
+  const hasSentOrder = useRef(false);
 
   // Generar datos únicos del ticket una vez cuando se abre
   useEffect(() => {
     if (isOpen) {
+      hasSentOrder.current = false;
       const randNum = Math.floor(100000 + Math.random() * 900000);
       setTicketNumber(`LM-${randNum}`);
       
@@ -40,7 +42,8 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
 
   // Registrar la orden en el Back Office cuando se genere el ticket
   useEffect(() => {
-    if (isOpen && ticketNumber && timestamp && items.length > 0) {
+    if (isOpen && ticketNumber && timestamp && items.length > 0 && !hasSentOrder.current) {
+      hasSentOrder.current = true;
       const orderData = {
         ticket_number: ticketNumber,
         timestamp: timestamp,
@@ -65,7 +68,7 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
           console.error("Error al registrar la orden en el Back Office:", err);
         });
     }
-  }, [isOpen, ticketNumber, timestamp]);
+  }, [isOpen, items, profile?.name, profile?.skin_type, ticketNumber, timestamp, total]);
 
 
   const handlePrint = () => {

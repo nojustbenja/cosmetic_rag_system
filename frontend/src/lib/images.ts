@@ -1,5 +1,8 @@
 import { Product } from "@/types/shop";
 
+export const FALLBACK_IMAGE_URL =
+  "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+
 export function getProductImage(product: Product): string {
   if (product.image_url && product.image_url.startsWith('http')) {
     return product.image_url;
@@ -44,5 +47,5 @@ export function getProductImage(product: Product): string {
     return "https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=600&q=80";
   }
   
-  return "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+  return FALLBACK_IMAGE_URL;
 }

@@ -109,6 +109,8 @@
       radial-gradient(60% 60% at 90% 80%, hsl(var(--blob-blue) / 0.4) 0%, transparent 60%),
       radial-gradient(40% 40% at 50% 100%, hsl(var(--blob-peach) / 0.4) 0%, transparent 60%);
     filter: blur(80px);
+    transform: translateZ(0);
+    will-change: filter, transform;
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -224,5 +226,4 @@
     size: auto;
   }
 }
-
 

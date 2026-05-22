@@ -1,8 +1,8 @@
 # Custom Source-Available License + Commons Clause
 
 **Sistema RAG para Asesoramiento de Cosméticos**  
-Universidad San Sebastián - Taller de Innovación  
-© 2026 Estudiantes del Taller de Innovación  
+El equipo y Benjamín (@nojustbenja)  
+© 2026 El equipo y Benjamín (@nojustbenja)  
 
 ---
 
@@ -58,8 +58,7 @@ Si usas cualquier parte significativa de este código, DEBES incluir:
 
 ```
 Sistema basado en "Sistema RAG para Asesoramiento de Cosméticos"
-Desarrollo original: Estudiantes del Taller de Innovación, 2026
-Universidad San Sebastián
+Desarrollo original: El equipo y Benjamín (@nojustbenja), 2026
 Repositorio original: [insertar URL del repositorio]
 Licencia: Custom Source-Available License + Commons Clause
 ```
@@ -188,9 +187,8 @@ Si deseas usar este sistema para:
 
 ### Contacto para Autorización
 ```
-Universidad San Sebastián
-Taller de Innovación - 3er Año
-Email: [información de contacto del proyecto]
+Benjamín (@nojustbenja)
+Email: nojustbenja@gmail.com
 ```
 
 Negarse a contactar y usar de todas formas = violación de licencia
@@ -338,7 +336,7 @@ Los autores pueden actualizar esta licencia como crean conveniente.
 CUSTOM SOURCE-AVAILABLE LICENSE + COMMONS CLAUSE
 
 Software: Sistema RAG para Asesoramiento de Cosméticos
-Licensor: Studenteantes del Taller de Innovación, USS, 2026
+Licensor: El equipo y Benjamín (@nojustbenja), 2026
 Base License: Apache 2.0 Modified + Commons Clause v1.0
 
 GRANT:

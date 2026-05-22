@@ -66,7 +66,7 @@ const Index = () => {
           />
 
           {/* Desktop: panel siempre visible al lado */}
-          <section className="hidden lg:block flex-1 h-full relative overflow-hidden rounded-[2.5rem] glass-panel">
+          <section className="hidden lg:block flex-1 min-h-[100dvh] rounded-[2.5rem] glass-panel">
             <h2 className="sr-only">Productos recomendados por Lumi</h2>
             <ProductStage products={products} recIds={recIds} />
           </section>

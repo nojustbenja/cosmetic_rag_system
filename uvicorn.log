@@ -31,3 +31,90 @@ INFO:     127.0.0.1:61872 - "OPTIONS /orders HTTP/1.1" 200 OK
 INFO:     127.0.0.1:61872 - "GET /orders HTTP/1.1" 200 OK
 INFO:     127.0.0.1:61874 - "OPTIONS /products HTTP/1.1" 200 OK
 INFO:     127.0.0.1:61874 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61882 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61882 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61882 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61882 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63232 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63232 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63238 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63238 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63238 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63238 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63254 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63254 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63254 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63254 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63285 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63285 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63285 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63285 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63295 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63295 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63311 - "OPTIONS /products HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63311 - "OPTIONS /orders HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63314 - "OPTIONS /products HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63314 - "OPTIONS /chat HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63317 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63317 - "POST /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63393 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63393 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63397 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63400 - "OPTIONS /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63400 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63404 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63404 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63451 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63451 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63451 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63451 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63452 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63454 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63454 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63454 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63491 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 20.202188417s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '20s'}]}}]
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "OPTIONS /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63536 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 13.404918424s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '13s'}]}}]
+INFO:     127.0.0.1:63568 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63568 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 27.046598966s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'model': 'gemini-2.5-flash', 'location': 'global'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '27s'}]}}]
+INFO:     127.0.0.1:63604 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63604 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63604 - "POST /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63614 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63617 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 503 - [{'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}]
+INFO:     127.0.0.1:63630 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63630 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 47.596427682s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '47s'}]}}]
+INFO:     127.0.0.1:63642 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63642 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 6.406370679s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '6s'}]}}]
+INFO:     127.0.0.1:63664 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63665 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63665 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63664 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63678 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63678 - "POST /chat HTTP/1.1" 200 OK
+Error en streaming compatible con OpenAI (gemini): Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 55.620043122s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '55s'}]}}]
+INFO:     127.0.0.1:63710 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63710 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63714 - "GET /products HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [38782]
+/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/multiprocessing/resource_tracker.py:216: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

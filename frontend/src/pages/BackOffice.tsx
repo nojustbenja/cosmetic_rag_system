@@ -31,7 +31,7 @@ import {
 } from "@/lib/api";
 import { Product } from "@/types/shop";
 import { formatCLP } from "@/lib/format";
-import { getProductImage } from "@/lib/images";
+import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -316,7 +316,7 @@ export default function BackOffice() {
       <div className="max-w-6xl mx-auto glass-panel rounded-[2.5rem] p-6 lg:p-10 relative z-10 shadow-2xl flex flex-col lg:flex-row gap-8">
         
         {/* Sidebar Nav */}
-        <aside className="w-full lg:w-64 flex flex-col gap-2 shrink-0">
+        <aside className="w-full lg:w-64 flex flex-col gap-2 shrink-0 lg:sticky lg:top-10 lg:self-start">
           <div className="mb-4">
             <h1 className="text-xl font-bold tracking-tight text-foreground">Back Office</h1>
             <p className="text-xs text-muted-foreground">Sistema de Control RAG & Ventas</p>
@@ -364,7 +364,7 @@ export default function BackOffice() {
         </aside>
 
         {/* Content Area */}
-        <section className="flex-1 min-w-0">
+        <section className="flex-1 min-w-0 lg:max-h-[calc(100dvh-200px)] lg:overflow-y-auto lg:pr-2">
           <AnimatePresence mode="wait">
             
             {/* PESTAÑA: ÓRDENES */}
@@ -376,7 +376,7 @@ export default function BackOffice() {
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-6"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center lg:sticky lg:top-0 lg:z-10 lg:-mx-1 lg:px-1 lg:py-2 lg:bg-background/80 lg:backdrop-blur-xl">
                   <h2 className="text-title">Registro de Órdenes</h2>
                   <span className="text-xs text-muted-foreground font-mono">Actualizado en tiempo real</span>
                 </div>
@@ -436,8 +436,8 @@ export default function BackOffice() {
                       No se han registrado órdenes aún. Completa un checkout en el chat de Lumi para generar una.
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-sm">
+                    <div className="overflow-x-auto overscroll-x-contain">
+                      <table className="w-full min-w-[820px] text-left text-sm">
                         <thead className="bg-secondary/45 border-b border-border/40 text-[11px] font-bold tracking-wider text-muted-foreground uppercase font-mono">
                           <tr>
                             <th className="py-4 px-6">Ticket ID</th>
@@ -518,7 +518,7 @@ export default function BackOffice() {
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-6"
               >
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center lg:sticky lg:top-0 lg:z-10 lg:-mx-1 lg:px-1 lg:py-2 lg:bg-background/80 lg:backdrop-blur-xl">
                   <h2 className="text-title">Catálogo de Productos Activos</h2>
                   <button
                     onClick={loadData}
@@ -545,7 +545,7 @@ export default function BackOffice() {
                           src={getProductImage(p)}
                           alt={p.name}
                           onError={(e) => {
-                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=600&q=80";
+                            (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
                           }}
                           className="size-16 rounded-xl object-cover shrink-0"
                         />
@@ -553,7 +553,7 @@ export default function BackOffice() {
                           <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground font-mono">
                             {p.brand}
                           </span>
-                          <h4 className="font-bold text-sm truncate text-foreground leading-tight mt-0.5">{p.name}</h4>
+                          <h3 className="font-bold text-sm truncate text-foreground leading-tight mt-0.5">{p.name}</h3>
                           <div className="flex gap-2 items-center mt-1.5">
                             <span className="text-xs font-mono font-bold text-foreground">{formatCLP(p.price)}</span>
                             <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-md text-muted-foreground">
@@ -623,8 +623,9 @@ export default function BackOffice() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Nombre */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Nombre del Producto *</label>
+                    <label htmlFor="new-product-name" className="text-xs font-bold text-muted-foreground uppercase">Nombre del Producto *</label>
                     <input
+                      id="new-product-name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -635,8 +636,9 @@ export default function BackOffice() {
 
                   {/* Marca */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Marca *</label>
+                    <label htmlFor="new-product-brand" className="text-xs font-bold text-muted-foreground uppercase">Marca *</label>
                     <input
+                      id="new-product-brand"
                       type="text"
                       value={brand}
                       onChange={(e) => setBrand(e.target.value)}
@@ -647,8 +649,9 @@ export default function BackOffice() {
 
                   {/* Categoría */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Categoría *</label>
+                    <label htmlFor="new-product-category" className="text-xs font-bold text-muted-foreground uppercase">Categoría *</label>
                     <select
+                      id="new-product-category"
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       className="w-full bg-secondary border-none rounded-2xl py-3 px-4 text-sm text-foreground focus:ring-1 focus:ring-foreground transition"
@@ -664,8 +667,9 @@ export default function BackOffice() {
 
                   {/* Precio */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Precio CLP (Pesos) *</label>
+                    <label htmlFor="new-product-price" className="text-xs font-bold text-muted-foreground uppercase">Precio CLP (Pesos) *</label>
                     <input
+                      id="new-product-price"
                       type="number"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
@@ -676,8 +680,9 @@ export default function BackOffice() {
 
                   {/* Stock */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Stock Inicial</label>
+                    <label htmlFor="new-product-stock" className="text-xs font-bold text-muted-foreground uppercase">Stock Inicial</label>
                     <input
+                      id="new-product-stock"
                       type="number"
                       value={stock}
                       onChange={(e) => setStock(e.target.value)}
@@ -688,8 +693,9 @@ export default function BackOffice() {
 
                   {/* Tipo Piel */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Tipos de Piel (Separadas por comas)</label>
+                    <label htmlFor="new-product-skin-types" className="text-xs font-bold text-muted-foreground uppercase">Tipos de Piel (Separadas por comas)</label>
                     <input
+                      id="new-product-skin-types"
                       type="text"
                       value={skinTypes}
                       onChange={(e) => setSkinTypes(e.target.value)}
@@ -700,8 +706,9 @@ export default function BackOffice() {
 
                   {/* Image URL */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">URL de la Imagen (Opcional)</label>
+                    <label htmlFor="new-product-image-url" className="text-xs font-bold text-muted-foreground uppercase">URL de la Imagen (Opcional)</label>
                     <input
+                      id="new-product-image-url"
                       type="text"
                       value={imageUrl}
                       onChange={(e) => setImageUrl(e.target.value)}
@@ -712,8 +719,9 @@ export default function BackOffice() {
 
                   {/* Tags */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Tags del Buscador (Separadas por comas)</label>
+                    <label htmlFor="new-product-tags" className="text-xs font-bold text-muted-foreground uppercase">Tags del Buscador (Separadas por comas)</label>
                     <input
+                      id="new-product-tags"
                       type="text"
                       value={tags}
                       onChange={(e) => setTags(e.target.value)}
@@ -724,8 +732,9 @@ export default function BackOffice() {
 
                   {/* Descripción */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Descripción del Producto *</label>
+                    <label htmlFor="new-product-description" className="text-xs font-bold text-muted-foreground uppercase">Descripción del Producto *</label>
                     <textarea
+                      id="new-product-description"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       rows={3}
@@ -736,8 +745,9 @@ export default function BackOffice() {
 
                   {/* Ingredientes */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Ingredientes Claves (Separados por comas)</label>
+                    <label htmlFor="new-product-ingredients" className="text-xs font-bold text-muted-foreground uppercase">Ingredientes Claves (Separados por comas)</label>
                     <input
+                      id="new-product-ingredients"
                       type="text"
                       value={ingredients}
                       onChange={(e) => setIngredients(e.target.value)}
@@ -748,8 +758,9 @@ export default function BackOffice() {
 
                   {/* Beneficios */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <label className="text-xs font-bold text-muted-foreground uppercase">Beneficios Claves (Separados por comas)</label>
+                    <label htmlFor="new-product-benefits" className="text-xs font-bold text-muted-foreground uppercase">Beneficios Claves (Separados por comas)</label>
                     <input
+                      id="new-product-benefits"
                       type="text"
                       value={benefits}
                       onChange={(e) => setBenefits(e.target.value)}
@@ -815,8 +826,9 @@ export default function BackOffice() {
 
                 {/* Editor Textarea */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-muted-foreground uppercase">Editor Raw CSV (Texto delimitado por comas)</label>
+                  <label htmlFor="csv-editor" className="text-xs font-bold text-muted-foreground uppercase">Editor Raw CSV (Texto delimitado por comas)</label>
                   <textarea
+                    id="csv-editor"
                     value={csvContent}
                     onChange={(e) => setCsvContent(e.target.value)}
                     rows={6}
@@ -950,7 +962,7 @@ export default function BackOffice() {
               initial={{ y: 60, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 60, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 340, damping: 30 }}
+              transition={{ type: "tween", ease: [0.16, 1, 0.3, 1], duration: 0.24 }}
               className="relative z-10 w-full sm:max-w-2xl bg-secondary/95 border border-border/40 glass-card rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl max-h-[90dvh] overflow-y-auto scrollbar-hide"
             >
               {/* Header */}
@@ -964,6 +976,7 @@ export default function BackOffice() {
                 </div>
                 <button
                   onClick={() => !editLoading && setEditProduct(null)}
+                  aria-label="Cerrar editor de producto"
                   className="size-9 rounded-full bg-background/60 border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground transition"
                 >
                   <X className="size-4" />
@@ -974,8 +987,9 @@ export default function BackOffice() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Nombre */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nombre del Producto *</label>
+                  <label htmlFor="edit-product-name" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nombre del Producto *</label>
                   <input
+                    id="edit-product-name"
                     value={editProduct.name}
                     onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -985,8 +999,9 @@ export default function BackOffice() {
 
                 {/* Marca */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Marca *</label>
+                  <label htmlFor="edit-product-brand" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Marca *</label>
                   <input
+                    id="edit-product-brand"
                     value={editProduct.brand}
                     onChange={(e) => setEditProduct({ ...editProduct, brand: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -996,8 +1011,9 @@ export default function BackOffice() {
 
                 {/* Categoría */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Categoría *</label>
+                  <label htmlFor="edit-product-category" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Categoría *</label>
                   <select
+                    id="edit-product-category"
                     value={editProduct.category}
                     onChange={(e) => setEditProduct({ ...editProduct, category: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -1013,8 +1029,9 @@ export default function BackOffice() {
 
                 {/* Tipos de piel */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo de Piel</label>
+                  <label htmlFor="edit-product-skin-types" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo de Piel</label>
                   <input
+                    id="edit-product-skin-types"
                     value={editProduct.skin_types}
                     onChange={(e) => setEditProduct({ ...editProduct, skin_types: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -1024,8 +1041,9 @@ export default function BackOffice() {
 
                 {/* Precio */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio (CLP) *</label>
+                  <label htmlFor="edit-product-price" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio (CLP) *</label>
                   <input
+                    id="edit-product-price"
                     type="number"
                     value={editProduct.price}
                     onChange={(e) => setEditProduct({ ...editProduct, price: Number(e.target.value) })}
@@ -1037,8 +1055,9 @@ export default function BackOffice() {
 
                 {/* Stock */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Stock</label>
+                  <label htmlFor="edit-product-stock" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Stock</label>
                   <input
+                    id="edit-product-stock"
                     type="number"
                     value={editProduct.stock}
                     onChange={(e) => setEditProduct({ ...editProduct, stock: Number(e.target.value) })}
@@ -1050,8 +1069,9 @@ export default function BackOffice() {
 
                 {/* URL Imagen */}
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">URL de Imagen</label>
+                  <label htmlFor="edit-product-image-url" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">URL de Imagen</label>
                   <input
+                    id="edit-product-image-url"
                     value={editProduct.image_url}
                     onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -1061,8 +1081,9 @@ export default function BackOffice() {
 
                 {/* Descripción */}
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descripción *</label>
+                  <label htmlFor="edit-product-description" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descripción *</label>
                   <textarea
+                    id="edit-product-description"
                     value={editProduct.description}
                     onChange={(e) => setEditProduct({ ...editProduct, description: e.target.value })}
                     rows={2}
@@ -1073,8 +1094,9 @@ export default function BackOffice() {
 
                 {/* Ingredientes */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ingredientes</label>
+                  <label htmlFor="edit-product-ingredients" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ingredientes</label>
                   <input
+                    id="edit-product-ingredients"
                     value={editProduct.ingredients}
                     onChange={(e) => setEditProduct({ ...editProduct, ingredients: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -1084,8 +1106,9 @@ export default function BackOffice() {
 
                 {/* Beneficios */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Beneficios</label>
+                  <label htmlFor="edit-product-benefits" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Beneficios</label>
                   <input
+                    id="edit-product-benefits"
                     value={editProduct.benefits}
                     onChange={(e) => setEditProduct({ ...editProduct, benefits: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
@@ -1095,8 +1118,9 @@ export default function BackOffice() {
 
                 {/* Tags */}
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tags RAG</label>
+                  <label htmlFor="edit-product-tags" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tags RAG</label>
                   <input
+                    id="edit-product-tags"
                     value={editProduct.tags}
                     onChange={(e) => setEditProduct({ ...editProduct, tags: e.target.value })}
                     className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"

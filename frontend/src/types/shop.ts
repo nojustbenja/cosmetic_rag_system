@@ -17,6 +17,7 @@ export type Product = {
 };
 
 export type ChatMessage = {
+  id: string;
   role: "user" | "assistant";
   content: string;
   recIds?: string[];

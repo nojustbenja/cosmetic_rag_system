@@ -715,12 +715,10 @@ git push origin feature/tu-nombre-feature
 
 ## 🎓 Contexto Educativo
 
-### Asignatura
+### Equipo
 
-- **Universidad**: Universidad San Sebastián
-- **Carrera**: Ingeniería (3er año)
-- **Asignatura**: Taller de Innovación
-- **Semestre**: 2026-1
+- **Autor**: Benjamín (@nojustbenja)
+- **Contacto**: nojustbenja@gmail.com
 
 ### Objetivos Pedagógicos
 
@@ -825,7 +823,7 @@ R: Asegúrate que `FRONTEND_ORIGIN` en `.env` coincide con tu puerto frontend (d
 
 - **Issues**: Usa GitHub Issues para reportar bugs
 - **Discussions**: Para preguntas y discusiones
-- **Email**: Contacta al profesor del taller
+- **Email**: nojustbenja@gmail.com
 
 ---
 
@@ -877,7 +875,7 @@ Para comercializar, adaptar a otro sector, o negociar términos especiales:
 
 <div align="center">
 
-### 🚀 Hecho con ❤️ por estudiantes del Taller de Innovación
+### 🚀 Hecho con ❤️ por el equipo y Benjamín (@nojustbenja)
 
 Última actualización: 2026-05-22
 

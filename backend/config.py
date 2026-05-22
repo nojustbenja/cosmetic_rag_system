@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     llm_provider: str = ""
     llm_model: str = "kilo-auto/balanced"
     llm_base_url: str = "https://api.kilo.ai/api/gateway"
+    kilo_fallback_model: str = "kilo-auto/free"
+    kilo_fallback_mode: str = "free"
     
     kilo_api_key: str = ""
     openai_api_key: str = ""
@@ -18,7 +20,7 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     litellm_api_key: str = ""
     
-    kilo_mode: str = "general"
+    kilo_mode: str = "free"
     embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
     chroma_persist_dir: str = "../chroma_db"
     frontend_origin: str = "http://localhost:5173"
@@ -37,7 +39,13 @@ class Settings(BaseSettings):
     @property
     def resolved_provider(self) -> str:
         if self.llm_provider:
-            return self.llm_provider.lower().strip()
+            provider = self.llm_provider.lower().strip()
+            aliases = {
+                "klo": "kilo",
+                "kilogateway": "kilo",
+                "kilo_gateway": "kilo",
+            }
+            return aliases.get(provider, provider)
         
         # Auto-infer provider based on populated API keys
         if self.gemini_api_key:
