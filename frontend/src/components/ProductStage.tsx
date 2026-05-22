@@ -8,11 +8,12 @@ type Props = {
 };
 
 export function ProductStage({ products, recIds }: Props) {
-  // If recommendations exist, show them first; otherwise show all
+  // If recommendations exist, show them first ordered by product_index; otherwise show all
   const visible = recIds.length
     ? recIds
         .map((id) => products.find((p) => p.id === id))
         .filter((p): p is Product => Boolean(p))
+        .sort((a, b) => (a.product_index ?? 99) - (b.product_index ?? 99))
     : products;
 
   const isRecMode = recIds.length > 0;

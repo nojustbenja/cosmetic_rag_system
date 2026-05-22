@@ -100,8 +100,8 @@ def build_retrieval_context(message: str, retrieved_items: list[dict]) -> dict:
     return {"products": products[:6], "guides": guides[:4]}
 
 
-def retrieve_context(message: str) -> tuple[dict, list[dict]]:
-    retrieved_items = retrieve_all(message)
+async def retrieve_context(message: str) -> tuple[dict, list[dict]]:
+    retrieved_items = await retrieve_all(message)
     return build_retrieval_context(message, retrieved_items), retrieved_items
 
 
@@ -136,7 +136,7 @@ async def generate_response(
     retrieved_items: list[dict] | None = None,
 ) -> AsyncGenerator[str, None]:
     if retrieved_items is None:
-        retrieved_items = retrieve_all(message)
+        retrieved_items = await retrieve_all(message)
     if not settings.llm_api_key:
         async for token in _fallback_response(message, retrieved_items):
             yield token
@@ -146,4 +146,3 @@ async def generate_response(
     messages = _build_messages(message, session_history, build_context(retrieved_items))
     async for token in client.stream_completion(messages):
         yield token
-

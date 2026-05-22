@@ -5,7 +5,7 @@
 [![Estado del Proyecto](https://img.shields.io/badge/Estado-En%20Desarrollo%20Educativo-blue)](#)
 [![Universidad](https://img.shields.io/badge/Universidad-San%20Sebastián-red)](#)
 [![Taller](https://img.shields.io/badge/Taller-Innovación%20--%203er%20año-green)](#)
-[![Licencia](https://img.shields.io/badge/Licencia-MIT-orange)](#)
+[![Licencia](https://img.shields.io/badge/Licencia-Custom%20Source--Available%20%2B%20Commons%20Clause-red)](#)
 
 ---
 
@@ -151,12 +151,7 @@ El sistema soporta múltiples proveedores de LLM:
 
 ### Características Avanzadas
 
-- [X] Streaming en tiempo real del chat
-- [X] Análisis de razones de recomendación (skin type, category, benefits)
-- [X] Integración con Supabase (para futuro almacenamiento de órdenes)
 - [X] Múltiples LLM providers configurables
-- [X] Soporte multilingüe (enfoque en español)
-- [X] Historial de sesiones
 - [X] Renderizado de markdown en respuestas
 
 ## 🛠️ Stack Tecnológico
@@ -227,7 +222,7 @@ Environment Variables- Configuración flexible
 
 - Python 3.10+
 - Node.js 18+
-- Bun (recomendado para frontend) o npm
+- pnpm (recomendado para frontend) o bun
 - Git
 
 ### Opción 1: Instalación Rápida
@@ -269,13 +264,13 @@ python -m api.main
 ```bash
 cd frontend
 
-# Con Bun (recomendado)
+# Con pnpm (recomendado)
+pnpm install
+pnpm run dev
+
+# O con bun
 bun install
 bun run dev
-
-# O con npm
-npm install
-npm run dev
 ```
 
 El frontend estará disponible en `http://localhost:5173`
@@ -713,69 +708,7 @@ git push origin feature/tu-nombre-feature
 
 ---
 
-## 🎓 Contexto Educativo
-
-### Equipo
-
-- **Autor**: Benjamín (@nojustbenja)
-- **Contacto**: nojustbenja@gmail.com
-
-### Objetivos Pedagógicos
-
-Este proyecto enseña:
-
-1. **Arquitectura de Sistemas**
-
-   - Diseño de aplicaciones multi-capas
-   - Separación de concerns (frontend, backend, RAG)
-   - Comunicación entre servicios
-2. **IA/ML**
-
-   - Retrieval-Augmented Generation (RAG)
-   - Embeddings y búsqueda semántica
-   - Prompt Engineering
-   - Integración con múltiples LLMs
-3. **Desarrollo Full-Stack**
-
-   - Backend: FastAPI, Python moderno
-   - Frontend: React, TypeScript, componentes modernos
-   - API REST + Streaming (SSE)
-   - State management
-4. **DevOps & Deployment**
-
-   - Containerización (Docker)
-   - Variables de entorno y configuración
-   - Scripts de automatización
-   - Gestión de dependencias
-5. **Trabajo Colaborativo**
-
-   - Git y control de versiones
-   - Code review y comunicación
-   - Documentación clara
-   - Testing y validación
-
-### Recursos para Aprender
-
-```
-📚 Recomendado leer antes de contribuir:
-├── FastAPI Docs: https://fastapi.tiangolo.com/
-├── React Docs: https://react.dev/
-├── RAG Concepts: https://python.langchain.com/docs/use_cases/question_answering/
-├── ChromaDB: https://docs.trychroma.com/
-├── OpenAI API: https://platform.openai.com/docs/
-└── TypeScript: https://www.typescriptlang.org/docs/
-```
-
-### Evaluación y Rúbrica
-
-- **Funcionalidad** (40%): ¿Funciona correctamente?
-- **Código** (30%): ¿Es limpio, mantenible y documentado?
-- **Innovación** (20%): ¿Agrega valor o mejora el sistema?
-- **Documentación** (10%): ¿Se entiende cómo usar?
-
----
-
-## ❓ FAQ
+❓ FAQ
 
 ### General
 
@@ -836,6 +769,7 @@ Este proyecto está bajo una **Licencia Source-Available Personalizada + Commons
 ### Resumen Ejecutivo
 
 #### ✅ Permitido
+
 - Ver y estudiar el código fuente
 - Usar localmente para educación/aprendizaje
 - Modificar para uso personal
@@ -843,12 +777,13 @@ Este proyecto está bajo una **Licencia Source-Available Personalizada + Commons
 - Contribuir mejoras (pull requests)
 
 #### ❌ No Permitido
+
 - Vender el sistema como es (sin modificación significativa)
-- Comercializar un recomendador RAG de cosméticos
 - Usar sin acreditación a autores originales
 - Redistribuir sin licencia
 
 #### ⚠️ Obligaciones
+
 - **Atribución obligatoria**: Debes dar crédito a la fuente original
 - **Disclaimer**: Incluir notificación sobre responsabilidad
 - **Mantener licencia**: Copias deben incluir LICENSE.md
@@ -856,6 +791,7 @@ Este proyecto está bajo una **Licencia Source-Available Personalizada + Commons
 ### Disclaimer de Responsabilidad Completo
 
 **Los autores originales NO son responsables por:**
+
 - Errores en recomendaciones de productos
 - Pérdidas económicas o de ventas
 - Daño reputacional o de marca
@@ -867,6 +803,7 @@ Este proyecto está bajo una **Licencia Source-Available Personalizada + Commons
 ### Solicitar Autorización
 
 Para comercializar, adaptar a otro sector, o negociar términos especiales:
+
 - Contacta a los autores del proyecto
 - Explica tu caso de uso
 - Negocia licencia comercial si es necesario
@@ -875,7 +812,7 @@ Para comercializar, adaptar a otro sector, o negociar términos especiales:
 
 <div align="center">
 
-### 🚀 Hecho con ❤️ por el equipo y Benjamín (@nojustbenja)
+### 🚀 Hecho con ❤️ por el team tilin Guillermo(@GuillermoSerrano132), Simon(@Simon-Aspee), Peña(@Chubiiii) y Benjamín(@nojustbenja)
 
 Última actualización: 2026-05-22
 

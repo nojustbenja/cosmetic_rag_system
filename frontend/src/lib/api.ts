@@ -21,6 +21,8 @@ function parseSseFrame(frame: string) {
 
 export type StreamHandlers = {
   onContext?: (context: any) => void;
+  onProduct?: (product: any) => void;
+  onContextDone?: (data: { guides: any[]; total: number }) => void;
   onToken?: (token: string) => void;
 };
 
@@ -44,6 +46,8 @@ export async function streamChat(message: string, sessionId: string, handlers: S
     if (!parsed) return;
 
     if (parsed.event === 'context') handlers.onContext?.(parsed.data);
+    if (parsed.event === 'product') handlers.onProduct?.(parsed.data);
+    if (parsed.event === 'context_done') handlers.onContextDone?.(parsed.data);
     if (parsed.event === 'token' && parsed.data.token) handlers.onToken?.(parsed.data.token);
     if (parsed.event === 'error') throw new Error(parsed.data.error ?? 'Error inesperado.');
   };
@@ -167,6 +171,20 @@ export async function updateProduct(originalName: string, product: any): Promise
     throw new Error('No se pudo actualizar el producto.');
   }
   return response.json();
+}
+
+export async function checkHealth(): Promise<boolean> {
+  const url = API_URL.replace('/chat', '/health');
+  try {
+    const response = await fetch(url, { 
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.ok;
+  } catch (err) {
+    console.error("Lumi Health Check Failed:", err);
+    return false;
+  }
 }
 
 

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { streamChat } from "@/lib/api";
 import { Markdown } from "./Markdown";
+import { LumiStatus } from "./LumiStatus";
 
 type Props = {
   onRecommendations: (products: Product[], guides: any[]) => void;
@@ -50,6 +51,8 @@ export function ChatPanel({ onRecommendations }: Props) {
     let assistantText = "";
     let hasToken = false;
     const assistantMessageId = crypto.randomUUID();
+    let streamedProducts: Product[] = [];
+
     setMessages((prev) => [
       ...prev,
       {
@@ -61,16 +64,30 @@ export function ChatPanel({ onRecommendations }: Props) {
 
     try {
       await streamChat(text, sessionId, {
-        onContext: (context) => {
-          const products = context.products ?? [];
-          const guides = context.guides ?? [];
-          onRecommendations(products, guides);
+        onProduct: (product) => {
+          streamedProducts = [...streamedProducts, product];
+          onRecommendations(streamedProducts, []);
+
+          const num = product.product_index as number;
+          const line = `**Producto ${num}** · ${product.name}${product.reason ? `\n> ${product.reason}` : ""}`;
 
           if (!hasToken) {
-            const count = products.length;
-            assistantText = count > 0 
-              ? `He encontrado ${count} producto${count > 1 ? 's' : ''} excelente${count > 1 ? 's' : ''} en nuestro catálogo:\n\n`
-              : "No encontré productos específicos en nuestro catálogo actual que coincidan directamente, pero permíteme asesorarte con algunas pautas generales:\n\n";
+            assistantText = `Encontré estos productos para ti:\n\n${line}\n`;
+            hasToken = true;
+          } else {
+            assistantText += `\n${line}\n`;
+          }
+          setMessages((prev) =>
+            prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
+          );
+        },
+        onContextDone: ({ guides, total }) => {
+          onRecommendations(streamedProducts, guides);
+          if (!hasToken) {
+            assistantText =
+              total > 0
+                ? `He encontrado ${total} producto${total > 1 ? "s" : ""} en el catálogo:\n\n`
+                : "No encontré productos específicos en nuestro catálogo actual que coincidan directamente, pero permíteme asesorarte con algunas pautas generales:\n\n";
             setMessages((prev) =>
               prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
             );
@@ -82,7 +99,7 @@ export function ChatPanel({ onRecommendations }: Props) {
           setMessages((prev) =>
             prev.map((m) => (m.id === assistantMessageId ? { ...m, content: assistantText } : m))
           );
-        }
+        },
       });
     } catch (e: any) {
       console.error(e);
@@ -114,10 +131,7 @@ export function ChatPanel({ onRecommendations }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 rounded-full bg-background/60 text-badge text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-500 inline-block mr-1.5 align-middle" />
-            Activo
-          </div>
+          <LumiStatus />
           <Link
             to="/admin"
             title="Panel de Control (Back Office)"

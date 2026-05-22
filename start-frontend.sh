@@ -17,12 +17,12 @@ port_in_use() {
 }
 
 
-require_command npm
+require_command pnpm
 require_command lsof
 
 if [[ ! -d "$FRONTEND_DIR/node_modules" ]]; then
   echo "Installing frontend dependencies..."
-  npm --prefix "$FRONTEND_DIR" install
+  pnpm --dir "$FRONTEND_DIR" install
 fi
 
 if port_in_use "$FRONTEND_PORT"; then
@@ -33,4 +33,4 @@ fi
 
 echo "Starting frontend on http://127.0.0.1:$FRONTEND_PORT"
 cd "$FRONTEND_DIR"
-exec npm run dev -- --host 127.0.0.1 --port "$FRONTEND_PORT"
+exec pnpm run dev -- --host 127.0.0.1 --port "$FRONTEND_PORT"

@@ -14,6 +14,7 @@ export type Product = {
   skin_types?: string[];
   benefits?: string[];
   source?: string;
+  product_index?: number;
 };
 
 export type ChatMessage = {

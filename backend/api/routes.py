@@ -41,8 +41,21 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
     async def event_generator():
         response = ""
         try:
-            context_payload, retrieved_items = retrieve_context(request.message)
-            yield {"event": "context", "data": json.dumps(context_payload)}
+            context_payload, retrieved_items = await retrieve_context(request.message)
+
+            # Emit each product individually so the frontend can show them progressively
+            products = context_payload.get("products", [])
+            guides = context_payload.get("guides", [])
+            for idx, product in enumerate(products):
+                product_with_index = {**product, "product_index": idx + 1}
+                yield {"event": "product", "data": json.dumps(product_with_index)}
+
+            # Emit guides + total count as a summary event
+            yield {
+                "event": "context_done",
+                "data": json.dumps({"guides": guides, "total": len(products)}),
+            }
+
             async for token in generate_response(request.message, history, retrieved_items):
                 response += token
                 yield {"event": "token", "data": json.dumps({"token": token})}
@@ -222,5 +235,3 @@ async def update_order_status(ticket_number: str, payload: dict) -> dict[str, ob
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
-
-

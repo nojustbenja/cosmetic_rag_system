@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import chromadb
 
 from config import settings
@@ -62,43 +63,49 @@ def _matches_contains_filters(result: dict, contains_filters: dict[str, str]) ->
     return True
 
 
-def retrieve_products(
+async def retrieve_products(
     query_embedding: list[float],
     filters: dict | None = None,
     top_k: int = 6,
 ) -> list[dict]:
-    collection = _client().get_or_create_collection(
-        name="productos",
-        metadata={"hnsw:space": "cosine"},
-    )
-    if collection.count() == 0:
-        return []
-    exact_filters, contains_filters = _split_filters(filters)
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=min(max(top_k * 3, top_k), collection.count()),
-        where=exact_filters,
-        include=["documents", "metadatas", "distances"],
-    )
-    formatted = _format_results(results)
-    if contains_filters:
-        formatted = [item for item in formatted if _matches_contains_filters(item, contains_filters)]
-    return formatted[:top_k]
+    def _sync_query():
+        collection = _client().get_or_create_collection(
+            name="productos",
+            metadata={"hnsw:space": "cosine"},
+        )
+        if collection.count() == 0:
+            return []
+        exact_filters, contains_filters = _split_filters(filters)
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=min(max(top_k * 3, top_k), collection.count()),
+            where=exact_filters,
+            include=["documents", "metadatas", "distances"],
+        )
+        formatted = _format_results(results)
+        if contains_filters:
+            formatted = [item for item in formatted if _matches_contains_filters(item, contains_filters)]
+        return formatted[:top_k]
+
+    return await asyncio.to_thread(_sync_query)
 
 
-def retrieve_guides(query_embedding: list[float], top_k: int = 4) -> list[dict]:
-    collection = _client().get_or_create_collection(
-        name="guias",
-        metadata={"hnsw:space": "cosine"},
-    )
-    if collection.count() == 0:
-        return []
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=min(top_k, collection.count()),
-        include=["documents", "metadatas", "distances"],
-    )
-    return _format_results(results)
+async def retrieve_guides(query_embedding: list[float], top_k: int = 4) -> list[dict]:
+    def _sync_query():
+        collection = _client().get_or_create_collection(
+            name="guias",
+            metadata={"hnsw:space": "cosine"},
+        )
+        if collection.count() == 0:
+            return []
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=min(top_k, collection.count()),
+            include=["documents", "metadatas", "distances"],
+        )
+        return _format_results(results)
+
+    return await asyncio.to_thread(_sync_query)
 
 
 def infer_filters(query: str) -> dict | None:
@@ -136,10 +143,18 @@ def infer_filters(query: str) -> dict | None:
     return {"$and": filters}
 
 
-def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
-    query_embedding = embed_text(query)
+async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
+    # Generar embedding en un hilo separado para no bloquear el loop
+    query_embedding = await asyncio.to_thread(embed_text, query)
     active_filters = filters if filters is not None else infer_filters(query)
-    results = retrieve_products(query_embedding, active_filters) + retrieve_guides(query_embedding)
+    
+    # Ejecutar búsquedas en paralelo
+    products_task = retrieve_products(query_embedding, active_filters)
+    guides_task = retrieve_guides(query_embedding)
+    
+    products, guides = await asyncio.gather(products_task, guides_task)
+    
+    results = products + guides
     return sorted(results, key=lambda item: item["score"], reverse=True)[:10]
 
 

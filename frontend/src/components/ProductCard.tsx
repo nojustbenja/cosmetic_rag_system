@@ -91,6 +91,12 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
             </div>
           )}
 
+          {isRecommended && product.product_index != null && (
+            <div className="absolute top-6 left-6 size-9 bg-foreground/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-sm">
+              <span className="text-background text-[13px] font-bold tabular-nums">{product.product_index}</span>
+            </div>
+          )}
+
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -158,6 +164,11 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
                   <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-emerald-500/90 text-white backdrop-blur-xl rounded-full text-[10px] uppercase tracking-wider font-bold shadow-lg flex items-center gap-1.5 animate-fade-in border border-white/20">
                     <Sparkles className="size-3.5" />
                     Match: {getCalibratedScore(Number(product.score))}%
+                  </div>
+                )}
+                {isRecommended && product.product_index != null && (
+                  <div className="absolute top-4 right-4 size-8 bg-background/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-sm border border-white/20">
+                    <span className="text-foreground text-[12px] font-bold tabular-nums">{product.product_index}</span>
                   </div>
                 )}
               </div>

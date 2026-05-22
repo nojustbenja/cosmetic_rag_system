@@ -34,6 +34,7 @@ import { formatCLP } from "@/lib/format";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { LumiStatus } from "@/components/LumiStatus";
 
 export default function BackOffice() {
   const [activeTab, setActiveTab] = useState<"orders" | "products" | "add" | "csv">("orders");
@@ -310,7 +311,10 @@ export default function BackOffice() {
           <ArrowLeft className="size-4 mr-2" />
           Volver a Lumi
         </Link>
-        <span className="text-eyebrow text-white tracking-widest drop-shadow-md">ADMIN CONTROL PANEL</span>
+        <div className="flex items-center gap-4">
+          <LumiStatus />
+          <span className="text-eyebrow text-white tracking-widest drop-shadow-md">ADMIN CONTROL PANEL</span>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto glass-panel rounded-[2.5rem] p-6 lg:p-10 relative z-10 shadow-2xl flex flex-col lg:flex-row gap-8">
