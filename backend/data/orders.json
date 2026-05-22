@@ -1,0 +1,70 @@
+[
+  {
+    "ticket_number": "LM-255255",
+    "timestamp": "22-05-2026, 11:54:44 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 48000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-255255",
+    "timestamp": "22-05-2026, 11:54:44 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 48000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-389692",
+    "timestamp": "22-05-2026, 11:54:56 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 48000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-989269",
+    "timestamp": "22-05-2026, 11:55:36 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-4-mascarilla-arcilla-detox",
+        "name": "Mascarilla Arcilla Detox",
+        "qty": 1,
+        "price": 24000,
+        "brand": "Verde"
+      }
+    ],
+    "total": 24000.0,
+    "status": "pendiente"
+  }
+]

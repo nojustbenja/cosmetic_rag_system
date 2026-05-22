@@ -70,6 +70,11 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
 
   const handlePrint = () => {
     window.print();
+    // Limpiar carrito y cerrar el modal después de imprimir
+    setTimeout(() => {
+      clear();
+      onClose();
+    }, 300);
   };
 
   const handleNewConsultation = () => {

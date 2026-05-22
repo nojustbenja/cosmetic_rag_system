@@ -156,3 +156,18 @@ export async function updateOrderStatus(ticketNumber: string, status: string): P
 }
 
 
+export async function updateProduct(originalName: string, product: any): Promise<any> {
+  const url = API_URL.replace('/chat', '/products');
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ original_name: originalName, ...product }),
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo actualizar el producto.');
+  }
+  return response.json();
+}
+
+
+

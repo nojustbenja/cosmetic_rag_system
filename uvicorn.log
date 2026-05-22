@@ -1,8 +1,33 @@
 Starting backend on http://127.0.0.1:8000
 /Users/benja/Proyects/Learning/Taller de inovacion/Sistema Rag/backend/.venv-run/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
   warnings.warn(
-INFO:     Started server process [38148]
+INFO:     Started server process [38794]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:61751 - "GET /health HTTP/1.1" 200 OK
+ERROR:    [Errno 48] error while attempting to bind on address ('127.0.0.1', 8000): address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+00 OK
+INFO:     127.0.0.1:61790 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61791 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61792 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61794 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61792 - "POST /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61795 - "POST /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61796 - "POST /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61803 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61804 - "POST /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61851 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61851 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61872 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61872 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61872 - "GET /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61872 - "OPTIONS /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61872 - "GET /orders HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61874 - "OPTIONS /products HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61874 - "GET /products HTTP/1.1" 200 OK

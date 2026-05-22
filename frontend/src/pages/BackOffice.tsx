@@ -17,6 +17,8 @@ import {
   HelpCircle,
   CreditCard,
   TrendingUp,
+  Pencil,
+  X,
 } from "lucide-react";
 import {
   fetchProducts,
@@ -25,6 +27,7 @@ import {
   importProductsCsv,
   getAiAssistedProduct,
   updateOrderStatus,
+  updateProduct,
 } from "@/lib/api";
 import { Product } from "@/types/shop";
 import { formatCLP } from "@/lib/format";
@@ -60,6 +63,10 @@ export default function BackOffice() {
   const [warningModalOpen, setWarningModalOpen] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
+  // Edit Product Modal State
+  const [editProduct, setEditProduct] = useState<any | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+
   // CSV State
   const [csvContent, setCsvContent] = useState("");
   const [importMode, setImportMode] = useState<"merge" | "replace">("merge");
@@ -92,6 +99,37 @@ export default function BackOffice() {
     } finally {
       setLoadingOrders(false);
     }
+  };
+
+  // Edit Product
+  const handleEditSave = async () => {
+    if (!editProduct) return;
+    const { _originalName, ...rest } = editProduct;
+    setEditLoading(true);
+    toast.promise(
+      updateProduct(_originalName, {
+        nombre: rest.name,
+        marca: rest.brand,
+        categoria: rest.category,
+        tipo_piel: Array.isArray(rest.skin_types) ? rest.skin_types.join(",") : rest.skin_types || "todas",
+        ingredientes: rest.ingredients || "",
+        beneficios: Array.isArray(rest.benefits) ? rest.benefits.join(",") : rest.benefits || "",
+        precio: rest.price,
+        descripcion: rest.description || "",
+        image_url: rest.image_url || "",
+        stock: rest.stock,
+        tags: Array.isArray(rest.tags) ? rest.tags.join(",") : rest.tags || "",
+      }),
+      {
+        loading: "Guardando cambios en el catálogo RAG...",
+        success: () => {
+          setEditProduct(null);
+          loadData();
+          return "Producto actualizado y re-indexado en el RAG ✅";
+        },
+        error: (err: any) => err?.message || "No se pudo guardar el producto.",
+      }
+    ).finally(() => setEditLoading(false));
   };
 
   const handleConfirmPayment = async (ticketNumber: string) => {
@@ -502,7 +540,7 @@ export default function BackOffice() {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {products.map((p) => (
-                      <div key={p.id} className="glass-card p-4 rounded-3xl flex gap-3 items-start relative hover:shadow-lg transition">
+                      <div key={p.id} className="glass-card p-4 rounded-3xl flex gap-3 items-start relative hover:shadow-lg transition group">
                         <img
                           src={getProductImage(p)}
                           alt={p.name}
@@ -530,6 +568,23 @@ export default function BackOffice() {
                             ))}
                           </div>
                         </div>
+                        {/* Edit button */}
+                        <button
+                          onClick={() =>
+                            setEditProduct({
+                              ...p,
+                              _originalName: p.name,
+                              skin_types: Array.isArray(p.skin_types) ? p.skin_types.join(",") : p.skin_types || "",
+                              tags: Array.isArray(p.tags) ? p.tags.join(",") : p.tags || "",
+                              benefits: Array.isArray((p as any).benefits) ? (p as any).benefits.join(",") : (p as any).benefits || "",
+                              ingredients: (p as any).ingredients || "",
+                            })
+                          }
+                          className="absolute top-3 right-3 size-8 rounded-full bg-background/60 border border-border/40 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition opacity-0 group-hover:opacity-100"
+                          aria-label="Editar producto"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -871,6 +926,201 @@ export default function BackOffice() {
                 >
                   {saveLoading && <Loader2 className="size-3.5 animate-spin" />}
                   <span>Guardar de todas formas</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* MODAL: EDITAR PRODUCTO */}
+      <AnimatePresence>
+        {editProduct && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-background/60 backdrop-blur-md"
+              onClick={() => !editLoading && setEditProduct(null)}
+            />
+
+            {/* Sheet panel */}
+            <motion.div
+              initial={{ y: 60, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 60, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 340, damping: 30 }}
+              className="relative z-10 w-full sm:max-w-2xl bg-secondary/95 border border-border/40 glass-card rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl max-h-[90dvh] overflow-y-auto scrollbar-hide"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                    <Pencil className="size-4 text-muted-foreground" />
+                    Editar Producto
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">{editProduct._originalName}</p>
+                </div>
+                <button
+                  onClick={() => !editLoading && setEditProduct(null)}
+                  className="size-9 rounded-full bg-background/60 border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground transition"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {/* Form grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Nombre */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nombre del Producto *</label>
+                  <input
+                    value={editProduct.name}
+                    onChange={(e) => setEditProduct({ ...editProduct, name: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="Nombre del producto"
+                  />
+                </div>
+
+                {/* Marca */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Marca *</label>
+                  <input
+                    value={editProduct.brand}
+                    onChange={(e) => setEditProduct({ ...editProduct, brand: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="Marca"
+                  />
+                </div>
+
+                {/* Categoría */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Categoría *</label>
+                  <select
+                    value={editProduct.category}
+                    onChange={(e) => setEditProduct({ ...editProduct, category: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                  >
+                    <option value="cuidado_facial">Cuidado Facial</option>
+                    <option value="proteccion_solar">Protección Solar</option>
+                    <option value="maquillaje">Maquillaje</option>
+                    <option value="limpieza">Limpieza</option>
+                    <option value="fragancias">Fragancias</option>
+                    <option value="cabello">Cabello</option>
+                  </select>
+                </div>
+
+                {/* Tipos de piel */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tipo de Piel</label>
+                  <input
+                    value={editProduct.skin_types}
+                    onChange={(e) => setEditProduct({ ...editProduct, skin_types: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="seca,grasa,mixta,sensible"
+                  />
+                </div>
+
+                {/* Precio */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Precio (CLP) *</label>
+                  <input
+                    type="number"
+                    value={editProduct.price}
+                    onChange={(e) => setEditProduct({ ...editProduct, price: Number(e.target.value) })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="35000"
+                    min={1}
+                  />
+                </div>
+
+                {/* Stock */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Stock</label>
+                  <input
+                    type="number"
+                    value={editProduct.stock}
+                    onChange={(e) => setEditProduct({ ...editProduct, stock: Number(e.target.value) })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="50"
+                    min={0}
+                  />
+                </div>
+
+                {/* URL Imagen */}
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">URL de Imagen</label>
+                  <input
+                    value={editProduct.image_url}
+                    onChange={(e) => setEditProduct({ ...editProduct, image_url: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {/* Descripción */}
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Descripción *</label>
+                  <textarea
+                    value={editProduct.description}
+                    onChange={(e) => setEditProduct({ ...editProduct, description: e.target.value })}
+                    rows={2}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20 resize-none"
+                    placeholder="Descripción del producto..."
+                  />
+                </div>
+
+                {/* Ingredientes */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Ingredientes</label>
+                  <input
+                    value={editProduct.ingredients}
+                    onChange={(e) => setEditProduct({ ...editProduct, ingredients: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="ácido hialurónico, vitamina C"
+                  />
+                </div>
+
+                {/* Beneficios */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Beneficios</label>
+                  <input
+                    value={editProduct.benefits}
+                    onChange={(e) => setEditProduct({ ...editProduct, benefits: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="hidratación, luminosidad"
+                  />
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-col gap-1.5 sm:col-span-2">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tags RAG</label>
+                  <input
+                    value={editProduct.tags}
+                    onChange={(e) => setEditProduct({ ...editProduct, tags: e.target.value })}
+                    className="bg-background/50 border border-border/40 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                    placeholder="hidratación,glow,piel-seca"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-6 pt-4 border-t border-border/20">
+                <button
+                  onClick={() => setEditProduct(null)}
+                  disabled={editLoading}
+                  className="flex-1 py-3 rounded-full bg-background/50 border border-border/30 text-sm font-semibold text-muted-foreground hover:text-foreground hover:border-foreground/20 transition disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleEditSave}
+                  disabled={editLoading || !editProduct.name || !editProduct.brand || !editProduct.description || !editProduct.price}
+                  className="flex-1 py-3 rounded-full bg-foreground text-background text-sm font-bold hover:opacity-90 active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:scale-100"
+                >
+                  {editLoading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                  <span>Guardar Cambios</span>
                 </button>
               </div>
             </motion.div>

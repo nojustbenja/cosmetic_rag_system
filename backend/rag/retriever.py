@@ -166,10 +166,12 @@ def get_all_products_from_db() -> list[dict]:
             "price": float(meta.get("price") or 0),
             "category": meta.get("category", ""),
             "skin_types": [item.strip() for item in str(meta.get("skin_types", "")).split(",") if item.strip()],
-            "description": doc,
+            "description": meta.get("description") or doc,
             "source": "catalog",
             "image_url": meta.get("image_url", ""),
             "stock": int(meta.get("stock") or 0),
             "tags": [item.strip() for item in str(meta.get("tags", "")).split(",") if item.strip()],
+            "ingredients": meta.get("ingredients") or "",
+            "benefits": [item.strip() for item in str(meta.get("benefits", "")).split(",") if item.strip()],
         })
     return formatted

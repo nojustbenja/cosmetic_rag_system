@@ -64,6 +64,9 @@ def ingest_products(csv_path: Path = DATA_PATH) -> int:
             "image_url": product.get("image_url", ""),
             "stock": int(product.get("stock") or 0),
             "tags": product.get("tags", ""),
+            "description": product.get("descripcion", ""),
+            "ingredients": product.get("ingredientes", ""),
+            "benefits": product.get("beneficios", ""),
         }
         for product in products
     ]
