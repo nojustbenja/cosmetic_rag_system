@@ -22,7 +22,7 @@ export function CartDrawer() {
       <button
         onClick={() => setOpen(true)}
         aria-label={`Carrito (${count} productos)`}
-        className="fixed bottom-5 right-5 z-50 glass-panel rounded-full p-1.5 pl-4 flex items-center gap-3 shadow-glass-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
+        className="fixed top-5 right-5 z-50 glass-panel rounded-full p-1.5 pl-4 flex items-center gap-3 shadow-glass-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 group"
       >
         <span className="flex flex-col items-start leading-none">
           <span className="text-[10px] font-bold text-muted-foreground tracking-[0.12em] uppercase">Carrito</span>
