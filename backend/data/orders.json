@@ -1,0 +1,60 @@
+[
+  {
+    "ticket_number": "LM-458494",
+    "timestamp": "25-05-2026, 09:51:26 p. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 48000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-458494",
+    "timestamp": "25-05-2026, 09:51:26 p. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-3-protector-solar-invisible-spf50",
+        "name": "Protector Solar Invisible SPF50",
+        "qty": 1,
+        "price": 38000,
+        "brand": "Solare"
+      },
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 86000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-591713",
+    "timestamp": "25-05-2026, 10:19:32 p. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-10-eau-de-parfum-bois-sauvage",
+        "name": "Eau de Parfum Bois Sauvage",
+        "qty": 1,
+        "price": 120000,
+        "brand": "Maison Auré"
+      }
+    ],
+    "total": 120000.0,
+    "status": "pendiente"
+  }
+]

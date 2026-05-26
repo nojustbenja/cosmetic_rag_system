@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ChatMessage, ClientProfile, Product, QuestionSuggestion } from "@/types/shop";
-import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch, Fire, TrendUp } from "@phosphor-icons/react";
+import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch, Fire, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { streamChat, fetchProductReason, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent } from "@/lib/api";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
@@ -23,17 +23,66 @@ const INITIAL_MESSAGE: ChatMessage = {
     "Hola. Describe el perfil del cliente y te ayudo a recomendar productos del catalogo cargado.",
 };
 
+const FALLBACK_QUESTION_SUGGESTIONS: QuestionSuggestion[] = [
+  {
+    id: "fallback-trending-perfume",
+    text: "Busco un perfume amaderado para la noche",
+    group: "trending",
+    label: "Trending",
+    score: 0,
+    is_trending: true,
+  },
+  {
+    id: "fallback-trending-glow",
+    text: "Qué producto da efecto glow para un evento",
+    group: "trending",
+    label: "Trending",
+    score: 0,
+    is_trending: true,
+  },
+  {
+    id: "fallback-frequent-piel-mixta",
+    text: "Tengo piel mixta y quiero más luminosidad",
+    group: "frequent",
+    label: "Frecuentes",
+    score: 0,
+    is_trending: false,
+  },
+  {
+    id: "fallback-frequent-antiedad",
+    text: "Necesito una rutina antiedad básica",
+    group: "frequent",
+    label: "Frecuentes",
+    score: 0,
+    is_trending: false,
+  },
+  {
+    id: "fallback-random-sensible",
+    text: "Tengo piel sensible con brotes y no quiero irritarme",
+    group: "specific",
+    label: "Casos específicos",
+    score: 0,
+    is_trending: false,
+  },
+  {
+    id: "fallback-random-presupuesto",
+    text: "Arma una rutina simple con presupuesto bajo",
+    group: "specific",
+    label: "Casos específicos",
+    score: 0,
+    is_trending: false,
+  },
+];
+
 export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientProfile }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(() => getQuestionSessionId());
   const [suggestions, setSuggestions] = useState<QuestionSuggestion[]>([]);
-  const [rotation, setRotation] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const activeQuestionRef = useRef("");
-  const impressedSuggestionIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -54,30 +103,12 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
 
   useEffect(() => {
     fetchQuestionSuggestions()
-      .then((items) => {
-        setSuggestions(items);
-        items.forEach((item) => {
-          if (impressedSuggestionIds.current.has(item.id)) return;
-          impressedSuggestionIds.current.add(item.id);
-          trackQuestionEvent({
-            event_type: "impression",
-            session_id: sessionId,
-            question: item.text,
-            suggestion_id: item.id,
-            source: "chip",
-          });
-        });
-      })
+      .then((items) => setSuggestions(items))
       .catch((err) => {
         console.warn("No se pudieron cargar sugerencias de Lumi.", err);
+        setSuggestions(FALLBACK_QUESTION_SUGGESTIONS);
       });
   }, [sessionId]);
-
-  useEffect(() => {
-    if (suggestions.length === 0) return;
-    const timer = window.setInterval(() => setRotation((value) => value + 1), 12000);
-    return () => window.clearInterval(timer);
-  }, [suggestions.length]);
 
   /** Reset everything — new session, empty history, clear parent catalog state */
   const handleClear = useCallback(() => {
@@ -315,7 +346,7 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
 
       <QuestionSuggestionRail
         suggestions={suggestions}
-        rotation={rotation}
+        sessionId={sessionId}
         disabled={loading}
         onPick={(suggestion) => {
           trackQuestionEvent({
@@ -374,58 +405,220 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
 
 function QuestionSuggestionRail({
   suggestions,
-  rotation,
+  sessionId,
   disabled,
   onPick,
 }: {
   suggestions: QuestionSuggestion[];
-  rotation: number;
+  sessionId: string;
   disabled: boolean;
   onPick: (suggestion: QuestionSuggestion) => void;
 }) {
-  if (suggestions.length === 0) return null;
+  const [activeSection, setActiveSection] = useState<"mixed" | "trending" | "frequent">("mixed");
+  const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(1);
+  const [direction, setDirection] = useState(1);
+  const railRef = useRef<HTMLDivElement>(null);
+  const impressedSuggestionIds = useRef<Set<string>>(new Set());
+  const reduceMotion = useReducedMotion();
 
-  const groups = [
-    { id: "frequent", label: "Frecuentes" },
-    { id: "trending", label: "Trending" },
-    { id: "specific", label: "Casos específicos" },
-  ].map((group) => {
-    const items = suggestions.filter((item) => item.group === group.id);
-    if (items.length <= 1) return { ...group, items };
-    const offset = rotation % items.length;
-    return { ...group, items: [...items.slice(offset), ...items.slice(0, offset)] };
-  });
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const updateVisibleCount = () => {
+      const width = rail.getBoundingClientRect().width;
+      if (width >= 900) setVisibleCount(5);
+      else if (width >= 720) setVisibleCount(4);
+      else if (width >= 620) setVisibleCount(3);
+      else if (width >= 520) setVisibleCount(2);
+      else setVisibleCount(1);
+    };
+
+    updateVisibleCount();
+    const observer = new ResizeObserver(updateVisibleCount);
+    observer.observe(rail);
+    return () => observer.disconnect();
+  }, []);
+
+  const { frequent, trending, specific } = useMemo(() => ({
+    frequent: suggestions.filter((item) => item.group === "frequent"),
+    trending: suggestions.filter((item) => item.group === "trending"),
+    specific: suggestions.filter((item) => item.group === "specific"),
+  }), [suggestions]);
+
+  const safePool = useMemo(() => {
+    if (activeSection === "trending") return trending.length > 0 ? trending : suggestions;
+    if (activeSection === "frequent") return frequent.length > 0 ? frequent : suggestions;
+
+    const mixed = [
+      ...specific,
+      ...trending.slice(0, 2),
+      ...frequent.slice(0, 2),
+      ...trending.slice(2),
+      ...frequent.slice(2),
+    ];
+    return mixed.length > 0 ? mixed : suggestions;
+  }, [activeSection, frequent, specific, suggestions, trending]);
+
+  const pageSize = Math.max(1, Math.min(visibleCount, safePool.length || 1));
+  const canNavigate = safePool.length > 1;
+
+  const visibleSuggestions = useMemo(() => {
+    if (safePool.length === 0) return [];
+    return Array.from({ length: pageSize }, (_, index) => safePool[(startIndex + index) % safePool.length]);
+  }, [pageSize, safePool, startIndex]);
+
+  useEffect(() => {
+    if (startIndex >= safePool.length) setStartIndex(0);
+  }, [safePool.length, startIndex]);
+
+  useEffect(() => {
+    visibleSuggestions.forEach((suggestion) => {
+      const impressionKey = `${activeSection}:${suggestion.id}`;
+      if (impressedSuggestionIds.current.has(impressionKey)) return;
+      impressedSuggestionIds.current.add(impressionKey);
+      trackQuestionEvent({
+        event_type: "impression",
+        session_id: sessionId,
+        question: suggestion.text,
+        suggestion_id: suggestion.id,
+        source: `chip_${activeSection}`,
+      });
+    });
+  }, [activeSection, sessionId, visibleSuggestions]);
+
+  if (suggestions.length === 0 || safePool.length === 0) return null;
+
+  const selectSection = (section: "trending" | "frequent") => {
+    setDirection(1);
+    setActiveSection((current) => (current === section ? "mixed" : section));
+    setStartIndex(0);
+  };
+
+  const movePage = (direction: -1 | 1) => {
+    if (!canNavigate) return;
+    setDirection(direction);
+    const step = safePool.length <= pageSize ? 1 : pageSize;
+    setStartIndex((current) => (current + direction * step + safePool.length) % safePool.length);
+  };
+
+  const slideVariants = {
+    enter: (incomingDirection: number) => ({
+      opacity: reduceMotion ? 1 : 0,
+      x: reduceMotion ? 0 : incomingDirection * 18,
+      scale: reduceMotion ? 1 : 0.98,
+    }),
+    center: {
+      opacity: 1,
+      x: 0,
+      scale: 1,
+    },
+    exit: (incomingDirection: number) => ({
+      opacity: reduceMotion ? 1 : 0,
+      x: reduceMotion ? 0 : incomingDirection * -18,
+      scale: reduceMotion ? 1 : 0.98,
+    }),
+  };
 
   return (
-    <div className="mb-3 pt-2 shrink-0 animate-fade-in">
-      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap scrollbar-hide pb-1">
-        {groups.map((group) =>
-          group.items.length > 0 ? (
-            <div key={group.id} className="inline-flex shrink-0 items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-foreground/8 bg-background/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                {group.id === "trending" ? <TrendUp weight="bold" className="size-3" /> : null}
-                {group.label}
-              </span>
-              {group.items.map((suggestion) => (
-                <button
-                  key={suggestion.id}
+    <div ref={railRef} className="mb-3 pt-2 shrink-0 animate-fade-in">
+      <div className="min-w-0 overflow-hidden rounded-[1.45rem] bg-background/25 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+        <div className="flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap">
+          <motion.button
+            type="button"
+            onClick={() => movePage(-1)}
+            disabled={disabled || !canNavigate}
+            aria-label="Ver preguntas anteriores"
+            whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/10 bg-background/48 text-foreground transition hover:bg-background/75 disabled:opacity-25"
+          >
+            <CaretLeft weight="bold" className="size-4" />
+          </motion.button>
+
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-1.5 overflow-hidden">
+            {(activeSection === "mixed" || activeSection === "trending") && (
+              <motion.button
+                layout
+                type="button"
+                onClick={() => selectSection("trending")}
+                disabled={disabled || trending.length === 0}
+                aria-pressed={activeSection === "trending"}
+                whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                className={`inline-flex h-8 min-w-[5.9rem] shrink-0 items-center justify-center rounded-full px-3 text-[12px] font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-40 ${
+                  activeSection === "trending"
+                    ? "bg-foreground text-background shadow-sm ring-2 ring-foreground/12"
+                    : "bg-foreground text-background shadow-sm opacity-85 hover:opacity-100"
+                }`}
+              >
+                Trending
+              </motion.button>
+            )}
+
+            {(activeSection === "mixed" || activeSection === "frequent") && (
+              <motion.button
+                layout
+                type="button"
+                onClick={() => selectSection("frequent")}
+                disabled={disabled || frequent.length === 0}
+                aria-pressed={activeSection === "frequent"}
+                whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 360, damping: 30 }}
+                className={`inline-flex h-8 min-w-[6.6rem] shrink-0 items-center justify-center rounded-full px-3 text-[12px] font-bold transition-all duration-200 active:scale-[0.98] disabled:opacity-40 ${
+                  activeSection === "frequent"
+                    ? "bg-foreground text-background shadow-sm ring-2 ring-foreground/12"
+                    : "bg-foreground text-background shadow-sm opacity-85 hover:opacity-100"
+                }`}
+              >
+                Frecuentes
+              </motion.button>
+            )}
+          </div>
+
+          <motion.button
+            type="button"
+            onClick={() => movePage(1)}
+            disabled={disabled || !canNavigate}
+            aria-label="Ver más preguntas"
+            whileTap={reduceMotion ? undefined : { scale: 0.92 }}
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-foreground/10 bg-background/48 text-foreground transition hover:bg-background/75 disabled:opacity-25"
+          >
+            <CaretRight weight="bold" className="size-4" />
+          </motion.button>
+        </div>
+
+        <motion.div layout className="relative mt-1.5 flex min-w-0 items-center overflow-hidden">
+          <AnimatePresence initial={false} mode="popLayout" custom={direction}>
+            <motion.div
+              key={`${activeSection}-${startIndex}-${pageSize}`}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: reduceMotion ? 0 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="flex min-w-0 flex-1 items-center gap-1.5"
+            >
+              {visibleSuggestions.map((suggestion, index) => (
+                <motion.button
+                  layout
+                  key={`${suggestion.id}-${index}`}
                   type="button"
                   onClick={() => onPick(suggestion)}
                   disabled={disabled}
-                  className="inline-flex max-w-[76vw] items-center gap-1.5 truncate rounded-full border border-border/45 bg-background/45 px-3.5 py-2 text-[12px] font-bold text-muted-foreground/85 transition-all duration-300 hover:border-foreground/20 hover:bg-background/85 hover:text-foreground hover:shadow-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-none"
+                  whileHover={reduceMotion ? undefined : { y: -1 }}
+                  whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                  className="inline-flex h-8 min-w-0 flex-1 basis-0 items-center justify-center gap-1.5 truncate rounded-full border border-foreground/18 bg-background/64 px-3 text-[11px] font-bold text-foreground/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.58)] transition-colors duration-200 hover:border-foreground/35 hover:bg-background/90 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {suggestion.is_trending ? <Fire weight="fill" className="size-3.5 text-orange-500" /> : null}
-                  <span className="truncate">{suggestion.text}</span>
-                  {suggestion.is_trending ? (
-                    <span className="hidden rounded-full bg-orange-500/8 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-orange-600 sm:inline">
-                      Trending
-                    </span>
-                  ) : null}
-                </button>
+                  {suggestion.is_trending ? <Fire weight="fill" className="size-3 shrink-0 text-orange-500" /> : null}
+                  <span className="min-w-0 truncate">{suggestion.text}</span>
+                </motion.button>
               ))}
-            </div>
-          ) : null
-        )}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );

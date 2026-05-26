@@ -507,6 +507,21 @@ export default function BackOffice() {
           </button>
 
           <button
+            onClick={() => {
+              setActiveTab("questions");
+              loadQuestionStats(questionPeriod);
+            }}
+            className={`w-full text-left py-3.5 px-5 rounded-2xl flex items-center gap-3 transition ${
+              activeTab === "questions" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
+            }`}
+          >
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "questions" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <TrendUp weight="light" className="size-4" />
+            </span>
+            <span>Preguntas</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("products")}
             className={`w-full text-left py-3.5 px-5 rounded-2xl flex items-center gap-3 transition ${
               activeTab === "products" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
@@ -540,21 +555,6 @@ export default function BackOffice() {
               <UploadSimple weight="light" className="size-4" />
             </span>
             <span>Importar CSV</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setActiveTab("questions");
-              loadQuestionStats(questionPeriod);
-            }}
-            className={`w-full text-left py-3.5 px-5 rounded-2xl flex items-center gap-3 transition ${
-              activeTab === "questions" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
-            }`}
-          >
-            <span className={`icon-orb size-8 rounded-xl ${activeTab === "questions" ? "bg-background/20 text-background border-background/20" : ""}`}>
-              <TrendUp weight="light" className="size-4" />
-            </span>
-            <span>Preguntas</span>
           </button>
 
           <button
