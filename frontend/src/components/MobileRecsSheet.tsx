@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { Product } from "@/types/shop";
+import { ClientProfile, Product } from "@/types/shop";
 import { ProductStage } from "./ProductStage";
 import { X } from "@phosphor-icons/react";
 
 type Props = {
   products: Product[];
   recIds: string[];
+  clientProfile?: ClientProfile | null;
 };
 
-export function MobileRecsSheet({ products, recIds }: Props) {
+export function MobileRecsSheet({ products, recIds, clientProfile }: Props) {
   const [open, setOpen] = useState(false);
   const [pulse, setPulse] = useState(false);
 
@@ -76,7 +77,7 @@ export function MobileRecsSheet({ products, recIds }: Props) {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <ProductStage products={products} recIds={recIds} layoutScope="mobile-sheet" />
+              <ProductStage products={products} recIds={recIds} layoutScope="mobile-sheet" clientProfile={clientProfile} />
             </div>
           </div>
         </div>

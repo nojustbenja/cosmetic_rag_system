@@ -55,6 +55,150 @@ def _profile_signals(message: str) -> list[str]:
             signals.append(label)
     return signals or ["necesidad descrita por el cliente"]
 
+def extract_client_profile(message: str, session_history: list[dict] | None = None) -> dict:
+    history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:])
+    text = f"{history_text} {message}".lower()
+
+    def pick(label_map: dict[str, list[str]]) -> str:
+        for label, needles in label_map.items():
+            if any(needle in text for needle in needles):
+                return label
+        return ""
+
+    skin_type = pick({
+        "seca": ["piel seca", "reseca", "tirantez", "descam"],
+        "sensible": ["piel sensible", "sensible", "irrita", "rojec", "rosacea"],
+        "grasa": ["piel grasa", "brillo", "sebo", "oil control"],
+        "mixta": ["piel mixta", "zona t"],
+        "normal": ["piel normal"],
+    })
+    category = pick({
+        "fragancias": ["perfume", "fragancia", "aroma", "amaderado", "floral"],
+        "proteccion_solar": ["protector", "solar", "spf", "bloqueador"],
+        "limpieza": ["limpiador", "limpieza", "agua micelar", "desmaquillante"],
+        "maquillaje": ["maquillaje", "base", "labial", "pestañas", "sombras"],
+        "cabello": ["cabello", "pelo", "champú", "shampoo", "capilar"],
+        "cuidado_facial": ["crema", "serum", "sérum", "rutina", "rostro", "facial"],
+    })
+    usage_moment = pick({
+        "dia": ["día", "dia", "mañana", "am", "spf", "solar"],
+        "noche": ["noche", "nocturna", "pm"],
+    })
+    concern = pick({
+        "hidratacion": ["hidrata", "hidrat", "acido hialuronico", "ácido hialurónico", "reseca"],
+        "luminosidad": ["luminosidad", "glow", "brillo sano"],
+        "antiedad": ["antiedad", "arrugas", "lineas", "líneas", "edad"],
+        "acne": ["acne", "acné", "granitos", "poros", "imperfecciones"],
+        "aroma amaderado": ["amaderado", "madera", "cedro", "oud"],
+    })
+    fragrance_family = pick({
+        "amaderado": ["amaderado", "madera", "cedro", "oud"],
+        "floral": ["floral", "flores", "jazmin", "rosa"],
+        "fresco": ["fresco", "cítrico", "citrico", "limpio"],
+    })
+
+    budget_max = 0
+    for marker in ["menos de", "hasta", "presupuesto", "máximo", "maximo"]:
+        if marker in text:
+            tail = text.split(marker, 1)[1]
+            digits = "".join(ch for ch in tail[:18] if ch.isdigit())
+            if digits:
+                budget_max = int(digits)
+                if budget_max < 1000:
+                    budget_max *= 1000
+                break
+
+    missing_fields = []
+    if not skin_type and category != "fragancias":
+        missing_fields.append("tipo de piel")
+    if not concern and category != "fragancias":
+        missing_fields.append("objetivo")
+    if not usage_moment and category in {"cuidado_facial", "proteccion_solar"}:
+        missing_fields.append("día o noche")
+
+    filled = sum(bool(value) for value in [skin_type, category, usage_moment, concern, fragrance_family, budget_max])
+    return {
+        "skin_type": skin_type,
+        "concern": concern,
+        "category": category,
+        "budget_max": budget_max,
+        "usage_moment": usage_moment,
+        "sensitivity": skin_type == "sensible" or "sensible" in text,
+        "fragrance_family": fragrance_family,
+        "confidence": min(0.95, 0.35 + filled * 0.1),
+        "missing_fields": missing_fields,
+    }
+
+def _normalize_product(product: dict) -> dict:
+    return {
+        **product,
+        "price": float(product.get("price") or 0),
+        "skin_types": _split_csv(product.get("skin_types") or product.get("tipo_piel") or []),
+        "benefits": _split_csv(product.get("benefits") or product.get("beneficios") or []),
+        "tags": _split_csv(product.get("tags") or []),
+        "category": product.get("category") or product.get("categoria") or "",
+    }
+
+def _product_matches_profile(candidate: dict, product: dict, profile: dict) -> bool:
+    if candidate.get("id") == product.get("id"):
+        return False
+    product_category = product.get("category") or ""
+    if product_category and candidate.get("category") != product_category:
+        return False
+    skin_type = (profile.get("skin_type") or "").lower()
+    candidate_skins = [skin.lower() for skin in _split_csv(candidate.get("skin_types"))]
+    if skin_type and candidate_skins and "todas" not in candidate_skins and skin_type not in candidate_skins:
+        return False
+    return True
+
+def generate_product_action(message: str, product: dict, action: str, profile: dict, catalog: list[dict]) -> dict:
+    normalized_product = _normalize_product(product)
+    normalized_catalog = [_normalize_product(item) for item in catalog]
+    current_price = float(normalized_product.get("price") or 0)
+    candidates = [
+        item for item in normalized_catalog
+        if _product_matches_profile(item, normalized_product, profile)
+    ]
+
+    selected: dict | None = None
+    title = "Por qué este"
+    if action == "cheaper":
+        title = "Alternativa más barata"
+        cheaper = [item for item in candidates if float(item.get("price") or 0) < current_price]
+        selected = sorted(cheaper, key=lambda item: float(item.get("price") or 0), reverse=True)[:1]
+        selected = selected[0] if selected else None
+    elif action == "premium":
+        title = "Alternativa premium"
+        premium = [item for item in candidates if float(item.get("price") or 0) > current_price]
+        selected = sorted(premium, key=lambda item: float(item.get("price") or 0))[:1]
+        selected = selected[0] if selected else None
+
+    target = selected or normalized_product
+    benefits = ", ".join(_split_csv(target.get("benefits"))) or "sus beneficios principales"
+    skin = profile.get("skin_type") or "el perfil detectado"
+    concern = profile.get("concern") or "la necesidad declarada"
+    usage = profile.get("usage_moment") or "la rutina"
+
+    if action == "cheaper" and not selected:
+        seller_note = "No hay una alternativa más barata clara con la misma categoría y perfil de piel."
+    elif action == "premium" and not selected:
+        seller_note = "No hay una alternativa premium clara con la misma categoría y perfil de piel."
+    elif action == "cheaper":
+        seller_note = f"Si el cliente quiere bajar presupuesto, ofrece {target.get('name')} porque mantiene el foco en {concern} con menor precio."
+    elif action == "premium":
+        seller_note = f"Si el cliente busca una opción más aspiracional, ofrece {target.get('name')} como upgrade dentro de la misma necesidad."
+    else:
+        seller_note = f"Calza con {skin} y {concern}; apóyate en {benefits} para dar seguridad al cliente."
+
+    return {
+        "action": action,
+        "title": title,
+        "product": target if selected else None,
+        "seller_note": seller_note,
+        "customer_phrase": f"Te lo propongo porque encaja con lo que me contaste y funciona bien para {usage}.",
+        "usage_tip": "Confirma tolerancia y frecuencia de uso; si hay sensibilidad, partir gradual.",
+    }
+
 async def generate_product_reason(message: str, product: dict) -> str:
     # `product` here is the structured product item (not the raw item with `metadata`)
     # We reconstruct a simple text for the prompt

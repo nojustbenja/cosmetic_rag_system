@@ -18,6 +18,13 @@ class ReasonRequest(BaseModel):
     product: dict
 
 
+class ProductActionRequest(BaseModel):
+    message: str = Field(default="")
+    product: dict
+    action: str = Field(pattern="^(why_this|cheaper|premium)$")
+    profile: dict = Field(default_factory=dict)
+
+
 class ProductCreateRequest(BaseModel):
     nombre: str = Field(min_length=1)
     marca: str = Field(min_length=1)
@@ -74,4 +81,3 @@ class ProviderConfigRequest(BaseModel):
     base_url: str = Field(default="")
     api_key: str = Field(default="")
     kilo_mode: str = Field(default="free")
-

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChatMessage, Product } from "@/types/shop";
+import { ChatMessage, ClientProfile, Product } from "@/types/shop";
 import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,8 @@ import { LumiStatus } from "./LumiStatus";
 type Props = {
   onRecommendations: (products: Product[], guides: unknown[]) => void;
   onClearChat: () => void;
+  onProfile: (profile: ClientProfile) => void;
+  clientProfile?: ClientProfile | null;
 };
 
 const SUGGESTIONS = [
@@ -27,7 +29,7 @@ const INITIAL_MESSAGE: ChatMessage = {
     "Hola. Describe el perfil del cliente y te ayudo a recomendar productos del catalogo cargado.",
 };
 
-export function ChatPanel({ onRecommendations, onClearChat }: Props) {
+export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientProfile }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,6 +91,9 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
 
     try {
       await streamChat(text, sessionId, {
+        onProfile: (profile) => {
+          onProfile(profile);
+        },
         onProduct: (product) => {
           streamedProducts = [...streamedProducts, product];
           productCount = streamedProducts.length;
@@ -182,7 +187,7 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <LumiStatus />
+        <LumiStatus />
 
           {/* Nueva consulta — resets chat + catalog */}
           {messages.length > 1 && (
@@ -209,6 +214,10 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
           </Link>
         </div>
       </div>
+
+      {clientProfile && (
+        <ClientProfileCard profile={clientProfile} />
+      )}
 
       {/* Messages */}
       <div
@@ -305,6 +314,51 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
           )}
         </div>
       </form>
+    </div>
+  );
+}
+
+function labelize(value: string) {
+  return value.replace(/_/g, " ");
+}
+
+function ClientProfileCard({ profile }: { profile: ClientProfile }) {
+  const chips = [
+    profile.skin_type && `Piel ${profile.skin_type}`,
+    profile.concern && labelize(profile.concern),
+    profile.category && labelize(profile.category),
+    profile.usage_moment && `Uso ${profile.usage_moment}`,
+    profile.budget_max ? `Hasta $${profile.budget_max.toLocaleString("es-CL")}` : "",
+    profile.sensitivity ? "Sensible" : "",
+    profile.fragrance_family && labelize(profile.fragrance_family),
+  ].filter(Boolean) as string[];
+
+  return (
+    <div className="mb-5 shrink-0 rounded-[1.75rem] border border-foreground/8 bg-background/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]">
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Ficha cliente</p>
+        {profile.confidence != null && (
+          <span className="text-[10px] font-bold text-foreground/60 tabular-nums">
+            {Math.round(profile.confidence * 100)}%
+          </span>
+        )}
+      </div>
+      {chips.length > 0 ? (
+        <div className="flex flex-wrap gap-1.5">
+          {chips.map((chip) => (
+            <span key={chip} className="rounded-full border border-foreground/10 bg-background/65 px-2.5 py-1 text-[11px] font-bold text-foreground/75 capitalize">
+              {chip}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-[12px] font-medium text-muted-foreground">Lumi todavía está reuniendo señales del cliente.</p>
+      )}
+      {profile.missing_fields && profile.missing_fields.length > 0 && (
+        <p className="mt-2 text-[11px] font-medium text-muted-foreground">
+          Falta preguntar: {profile.missing_fields.join(", ")}.
+        </p>
+      )}
     </div>
   );
 }

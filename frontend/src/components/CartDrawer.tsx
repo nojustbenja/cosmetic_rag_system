@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useCart } from "@/hooks/useCart";
-import { ArrowRight, ShoppingBag, X, Trash, Plus, Minus, Receipt, Sparkle } from "@phosphor-icons/react";
+import { ArrowRight, ShoppingBag, X, Trash, Plus, Minus, Receipt, Sparkle, WarningCircle, CheckCircle } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReceiptModal } from "./ReceiptModal";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 
 export function CartDrawer() {
-  const { items, add, decrement, remove, clear, total, count } = useCart();
+  const { items, add, decrement, remove, clear, total, count, summary } = useCart();
   const [open, setOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
 
@@ -156,11 +156,42 @@ export function CartDrawer() {
                       <span>Productos</span>
                       <span className="tabular-nums">{count}</span>
                     </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {summary.categories.slice(0, 3).map((category) => (
+                        <span key={category} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-tight text-muted-foreground">
+                          {category.replace("_", " ")}
+                        </span>
+                      ))}
+                      {summary.brands.slice(0, 2).map((brand) => (
+                        <span key={brand} className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-bold text-foreground/65">
+                          {brand}
+                        </span>
+                      ))}
+                    </div>
                     <div className="flex justify-between items-end mt-3">
                       <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Total</span>
                       <span className="text-2xl font-bold tracking-tight tabular-nums text-foreground">{formatCLP(total)}</span>
                     </div>
                   </div>
+                  {summary.insights.length > 0 && (
+                    <div className="mb-4 space-y-2">
+                      {summary.insights.map((insight) => (
+                        <div key={insight.title} className="rounded-[1.15rem] border border-foreground/8 bg-background/45 px-3 py-2.5 flex gap-2.5">
+                          {insight.tone === "warning" ? (
+                            <WarningCircle weight="light" className="mt-0.5 size-4 shrink-0 text-amber-600" />
+                          ) : insight.tone === "success" ? (
+                            <CheckCircle weight="light" className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                          ) : (
+                            <Sparkle weight="light" className="mt-0.5 size-4 shrink-0 text-foreground/60" />
+                          )}
+                          <div>
+                            <p className="text-[12px] font-bold text-foreground">{insight.title}</p>
+                            <p className="text-[11px] leading-relaxed text-muted-foreground">{insight.body}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={checkout}

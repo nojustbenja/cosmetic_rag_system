@@ -1,4 +1,4 @@
-import { Product, Order } from "@/types/shop";
+import { ClientProfile, Product, ProductAction, ProductActionResult, Order } from "@/types/shop";
 
 const API_URL = 'http://localhost:8000/chat';
 
@@ -58,6 +58,7 @@ function parseSseFrame(frame: string) {
 
 export type StreamHandlers = {
   onContext?: (context: Record<string, unknown> | unknown[]) => void;
+  onProfile?: (profile: ClientProfile) => void;
   onProduct?: (product: Product) => void;
   onContextDone?: (data: { guides: unknown[]; total: number }) => void;
   onToken?: (token: string) => void;
@@ -84,6 +85,7 @@ export async function streamChat(message: string, sessionId: string, handlers: S
     if (!parsed) return;
 
     if (parsed.event === 'context') handlers.onContext?.(parsed.data);
+    if (parsed.event === 'profile') handlers.onProfile?.(parsed.data);
     if (parsed.event === 'product') handlers.onProduct?.(parsed.data);
     if (parsed.event === 'context_done') handlers.onContextDone?.(parsed.data);
     if (parsed.event === 'token' && parsed.data.token) handlers.onToken?.(parsed.data.token);
@@ -284,4 +286,22 @@ export async function fetchProductReason(message: string, product: Product): Pro
   }
   const data = await response.json();
   return data.reason;
+}
+
+export async function fetchProductAction(
+  message: string,
+  product: Product,
+  action: ProductAction,
+  profile: ClientProfile,
+): Promise<ProductActionResult> {
+  const url = `${API_URL}/product-action`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, product, action, profile }),
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo obtener la acción de venta.');
+  }
+  return response.json();
 }

@@ -20,6 +20,29 @@ export type Product = {
   product_index?: number;
 };
 
+export type ClientProfile = {
+  skin_type?: string;
+  concern?: string;
+  category?: string;
+  budget_max?: number;
+  usage_moment?: string;
+  sensitivity?: boolean;
+  fragrance_family?: string;
+  confidence?: number;
+  missing_fields?: string[];
+};
+
+export type ProductAction = "why_this" | "cheaper" | "premium";
+
+export type ProductActionResult = {
+  action: ProductAction;
+  title: string;
+  product?: Product | null;
+  seller_note: string;
+  customer_phrase: string;
+  usage_tip: string;
+};
+
 export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -29,6 +52,19 @@ export type ChatMessage = {
 };
 
 export type CartItem = { product: Product; qty: number };
+
+export type CartInsight = {
+  tone: "info" | "warning" | "success";
+  title: string;
+  body: string;
+};
+
+export type CartSummary = {
+  categories: string[];
+  brands: string[];
+  recommendedCount: number;
+  insights: CartInsight[];
+};
 
 export interface OrderItem {
   id: string;
@@ -47,4 +83,3 @@ export interface Order {
   total: number;
   status: "pendiente" | "pagado";
 }
-

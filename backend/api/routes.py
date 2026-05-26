@@ -8,6 +8,7 @@ from sse_starlette.sse import EventSourceResponse
 from api.models import (
     ChatRequest,
     ReasonRequest,
+    ProductActionRequest,
     ProductCreateRequest,
     AiAssistRequest,
     OrderCreateRequest,
@@ -15,7 +16,12 @@ from api.models import (
     ProductUpdateRequest,
     ProviderConfigRequest,
 )
-from rag.pipeline import retrieve_context, generate_product_reason
+from rag.pipeline import (
+    extract_client_profile,
+    generate_product_action,
+    retrieve_context,
+    generate_product_reason,
+)
 from rag.retriever import get_all_products_from_db
 from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_products, update_product_in_csv
 from rag.llm_client import LLMClient
@@ -67,6 +73,8 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
         try:
             from rag.pipeline import analyze_intent, generate_profiler_response, generate_recommender_response
             has_profile = await analyze_intent(request.message, history)
+            profile = extract_client_profile(request.message, history)
+            yield {"event": "profile", "data": json.dumps(profile)}
 
             if not has_profile:
                 # Emit empty context_done first to prevent UI waiting for products
@@ -113,6 +121,21 @@ async def get_product_reason(request: ReasonRequest) -> dict[str, str]:
     try:
         reason = await generate_product_reason(request.message, request.product)
         return {"reason": reason}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/chat/product-action")
+async def product_action(request: ProductActionRequest) -> dict[str, object]:
+    try:
+        catalog = get_all_products_from_db()
+        return generate_product_action(
+            request.message,
+            request.product,
+            request.action,
+            request.profile,
+            catalog,
+        )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
 

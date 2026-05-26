@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Product } from "@/types/shop";
+import { ClientProfile, Product } from "@/types/shop";
 import { ChatPanel } from "@/components/ChatPanel";
 import { ProductStage } from "@/components/ProductStage";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -23,6 +23,7 @@ const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [recIds, setRecIds] = useState<string[]>([]);
   const [guides, setGuides] = useState<unknown[]>([]);
+  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const mainRef = useRef<HTMLElement | null>(null);
   const { profile } = useProfile();
 
@@ -86,6 +87,7 @@ const Index = () => {
     // Remove recommendation overlays and restore the full clean catalog
     setRecIds([]);
     setGuides([]);
+    setClientProfile(null);
     // Strip RAG-specific overlaid fields so cards render as catalog items.
     setProducts(allProducts.map(stripRagFields));
   }, [allProducts]);
@@ -101,11 +103,13 @@ const Index = () => {
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
           }}
         />
-        <MobileRecsSheet products={products} recIds={recIds} />
+        <MobileRecsSheet products={products} recIds={recIds} clientProfile={clientProfile} />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[420px_1fr] min-h-[100dvh] w-full max-w-[1600px] mx-auto p-4 pt-8 sm:pt-10 lg:p-6 gap-6">
           <ChatPanel
             onClearChat={handleClearChat}
+            clientProfile={clientProfile}
+            onProfile={setClientProfile}
             onRecommendations={(recProducts, newGuides) => {
               // Merge recommended products (with scores/reasons) into current catalog state
               setProducts((prev) => {
@@ -128,7 +132,7 @@ const Index = () => {
           {/* Desktop & Mobile: product panel now adapts beautifully, showing below on mobile */}
           <section className="w-full lg:flex-1 min-h-[50dvh] lg:min-h-[100dvh] rounded-[2.5rem] glass-panel catalog-shell mt-6 lg:mt-0">
             <h2 className="sr-only">Productos recomendados por Lumi</h2>
-            <ProductStage products={products} recIds={recIds} />
+            <ProductStage products={products} recIds={recIds} clientProfile={clientProfile} />
           </section>
         </div>
       </main>

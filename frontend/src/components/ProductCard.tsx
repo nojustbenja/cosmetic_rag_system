@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { Product } from "@/types/shop";
+import { ClientProfile, Product, ProductAction, ProductActionResult } from "@/types/shop";
 import { useCart } from "@/hooks/useCart";
 import { Plus, Sparkle, BookOpen, CircleNotch } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion } from "framer-motion";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
-import { fetchProductReason } from "@/lib/api";
+import { fetchProductAction, fetchProductReason } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -21,6 +21,7 @@ type Props = {
   isRecommended?: boolean;
   index: number;
   layoutScope?: string;
+  clientProfile?: ClientProfile | null;
 };
 
 // Bento Grid sizes based on index
@@ -43,11 +44,13 @@ const getCalibratedScore = (score: number) => {
   return Math.round(minResult + ratio * (maxResult - minResult));
 };
 
-export function ProductCard({ product, highlighted, isRecommended, index, layoutScope = "main" }: Props) {
+export function ProductCard({ product, highlighted, isRecommended, index, layoutScope = "main", clientProfile }: Props) {
   const { add } = useCart();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
+  const [actionResult, setActionResult] = useState<ProductActionResult | null>(null);
+  const [loadingAction, setLoadingAction] = useState<ProductAction | null>(null);
   const spanClasses = getSpanClasses(index);
   const isOutOfStock = Number(product.stock ?? 1) <= 0;
 
@@ -58,6 +61,32 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
     }
     add(product);
     toast.success(`${product.name} agregado al carrito.`);
+  };
+
+  const handleProductAction = async (action: ProductAction) => {
+    if (!product.query && action !== "why_this") return;
+    setLoadingAction(action);
+    try {
+      if (action === "why_this") {
+        const reason = localReason || await fetchProductReason(product.query || "", product);
+        setLocalReason(reason);
+        setActionResult({
+          action,
+          title: "Por qué este",
+          seller_note: reason,
+          customer_phrase: "Te lo propongo porque encaja con lo que me contaste.",
+          usage_tip: "Confirma tolerancia y momento de uso antes de cerrar la venta.",
+        });
+      } else {
+        const result = await fetchProductAction(product.query || "", product, action, clientProfile || {});
+        setActionResult(result);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo preparar esa acción de venta.");
+    } finally {
+      setLoadingAction(null);
+    }
   };
 
   // Update localReason if product.reason changes (e.g., from parent)
@@ -323,6 +352,50 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
                           </div>
                         )}
                       </>
+                    )}
+                  </div>
+                )}
+
+                {isRecommended && (
+                  <div className="rounded-[1.25rem] bg-foreground/[0.025] border border-foreground/8 p-3.5 flex flex-col gap-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[10px] uppercase tracking-[0.15em] font-bold text-muted-foreground">Acciones de venta</p>
+                      {loadingAction && <CircleNotch weight="light" className="size-4 animate-spin text-muted-foreground" />}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        ["why_this", "Por qué este"],
+                        ["cheaper", "Más barato"],
+                        ["premium", "Premium"],
+                      ].map(([action, label]) => (
+                        <button
+                          key={action}
+                          type="button"
+                          onClick={() => handleProductAction(action as ProductAction)}
+                          disabled={Boolean(loadingAction)}
+                          className="rounded-full border border-foreground/10 bg-background/70 px-3 py-1.5 text-[11px] font-bold text-foreground/75 hover:text-foreground hover:bg-background transition disabled:opacity-50"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    {actionResult && (
+                      <div className="rounded-[1rem] bg-background/70 border border-foreground/8 p-3 text-[12px] leading-relaxed">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-bold text-foreground">{actionResult.title}</p>
+                          {actionResult.product && (
+                            <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold text-muted-foreground">
+                              {formatCLP(actionResult.product.price)}
+                            </span>
+                          )}
+                        </div>
+                        {actionResult.product && (
+                          <p className="mt-1 font-semibold text-foreground/80">{actionResult.product.name}</p>
+                        )}
+                        <p className="mt-2 text-foreground/75">{actionResult.seller_note}</p>
+                        <p className="mt-2 text-muted-foreground">{actionResult.customer_phrase}</p>
+                        <p className="mt-1 text-muted-foreground">{actionResult.usage_tip}</p>
+                      </div>
                     )}
                   </div>
                 )}

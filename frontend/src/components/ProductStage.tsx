@@ -1,4 +1,4 @@
-import { Product } from "@/types/shop";
+import { ClientProfile, Product } from "@/types/shop";
 import { ProductCard } from "./ProductCard";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -6,9 +6,10 @@ type Props = {
   products: Product[];
   recIds: string[];
   layoutScope?: string;
+  clientProfile?: ClientProfile | null;
 };
 
-export function ProductStage({ products, recIds, layoutScope = "main" }: Props) {
+export function ProductStage({ products, recIds, layoutScope = "main", clientProfile }: Props) {
   // If recommendations exist, show them first ordered by product_index; otherwise show all
   const visible = recIds.length
     ? recIds
@@ -66,6 +67,7 @@ export function ProductStage({ products, recIds, layoutScope = "main" }: Props) 
               isRecommended={recIds.includes(p.id)}
               index={i}
               layoutScope={layoutScope}
+              clientProfile={clientProfile}
             />
           ))}
         </AnimatePresence>
