@@ -8,5 +8,730 @@
     "suggestion_id": "case-acne-sensible",
     "source": "chip_mixed",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:32.978532+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:36.789800+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "impression",
+    "question": "Arma una rutina simple con presupuesto bajo",
+    "normalized_question": "arma rutina simple presupuesto bajo",
+    "suggestion_id": "case-presupuesto-bajo",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:37.598099+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "impression",
+    "question": "Necesito maquillaje de larga duración para piel grasa",
+    "normalized_question": "necesito maquillaje larga duracion piel grasa",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:38.581214+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "impression",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:39.783400+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "click",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:56:39.787187+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "sent",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T02:57:03.756816+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "answered",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip",
+    "product_ids": [
+      "producto-11-eau-de-toilette-fleur-blanche",
+      "producto-10-eau-de-parfum-bois-sauvage"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T02:57:09.819948+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "product_view",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-11-eau-de-toilette-fleur-blanche"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T02:58:04.320341+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "product_view",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-10-eau-de-parfum-bois-sauvage"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:02:16.757432+00:00",
+    "session_id": "8959f13b-96a8-472d-a067-24872ade713f",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:02:16.760617+00:00",
+    "session_id": "7673be96-3c98-4e03-b2f0-57cbcf989fca",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:03:55.378575+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "faq-piel-mixta-glow",
+    "source": "chip_frequent",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:04:00.726993+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "click",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "faq-piel-mixta-glow",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:04:00.731236+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "sent",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "faq-piel-mixta-glow",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:04:27.108619+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "answered",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "faq-piel-mixta-glow",
+    "source": "chip",
+    "product_ids": [
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-5-base-lquida-second-skin",
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-7-paleta-de-sombras-earth-tones",
+      "producto-3-protector-solar-invisible-spf50",
+      "producto-9-iluminador-lquido-aura-glow"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:04:41.670567+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "product_view",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-5-base-lquida-second-skin"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:04:46.253191+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "product_view",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-0-srum-hidratante-glow-drops"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:07:37.377079+00:00",
+    "session_id": "8959f13b-96a8-472d-a067-24872ade713f",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:07:37.382561+00:00",
+    "session_id": "7673be96-3c98-4e03-b2f0-57cbcf989fca",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:07:37.687243+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:34.072066+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:36.205488+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Tengo piel mixta y quiero más luminosidad",
+    "normalized_question": "piel mixta luminosidad",
+    "suggestion_id": "faq-piel-mixta-glow",
+    "source": "chip_frequent",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:37.408116+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Necesito una rutina antiedad básica",
+    "normalized_question": "necesito rutina antiedad basica",
+    "suggestion_id": "faq-rutina-antiedad",
+    "source": "chip_frequent",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:37.869008+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Qué protector solar sirve para piel sensible",
+    "normalized_question": "protector solar sirve piel sensible",
+    "suggestion_id": "faq-protector-sensible",
+    "source": "chip_frequent",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:39.776307+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:40.980952+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "trend-glow-evento",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:08:41.473684+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "impression",
+    "question": "Qué regalo de skincare premium recomiendas",
+    "normalized_question": "regalo skincare premium recomiendas",
+    "suggestion_id": "trend-regalo-lujo",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:09:06.184449+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "click",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "trend-glow-evento",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:09:06.192512+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "sent",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "trend-glow-evento",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:09:29.938232+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "product_view",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-9-iluminador-lquido-aura-glow"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:09:40.844913+00:00",
+    "session_id": "35235628-65a3-4fe8-b1b8-8fd85ad1d93b",
+    "event_type": "answered",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "trend-glow-evento",
+    "source": "chip",
+    "product_ids": [
+      "producto-9-iluminador-lquido-aura-glow",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-3-protector-solar-invisible-spf50",
+      "producto-7-paleta-de-sombras-earth-tones",
+      "producto-10-eau-de-parfum-bois-sauvage",
+      "producto-6-labial-mate-velvet-kiss"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:11:27.309341+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:11:41.136139+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Necesito maquillaje de larga duración para piel grasa",
+    "normalized_question": "necesito maquillaje larga duracion piel grasa",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:11:41.364189+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Arma una rutina simple con presupuesto bajo",
+    "normalized_question": "arma rutina simple presupuesto bajo",
+    "suggestion_id": "case-presupuesto-bajo",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:11:50.032219+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Busco un perfume amaderado para la noche",
+    "normalized_question": "busco perfume amaderado noche",
+    "suggestion_id": "trend-perfume-noche",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:11:51.111677+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Qué producto da efecto glow para un evento",
+    "normalized_question": "producto da efecto glow evento",
+    "suggestion_id": "trend-glow-evento",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:11:51.365676+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Qué regalo de skincare premium recomiendas",
+    "normalized_question": "regalo skincare premium recomiendas",
+    "suggestion_id": "trend-regalo-lujo",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:12:00.619414+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "product_view",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-0-srum-hidratante-glow-drops"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:12:03.107449+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "product_view",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:12:09.730606+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "click",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:12:09.734409+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "sent",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:12:37.606671+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "answered",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-5-base-lquida-second-skin",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-8-mscara-de-pestaas-volumen-xl",
+      "producto-12-champ-reparador-keratina"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:13:41.183753+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "product_view",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:14:36.609448+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "cart_add",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "",
+    "source": "product_card",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:14:58.438733+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "checkout",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "",
+    "source": "cart_drawer",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:15:22.650726+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:16:15.737572+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:19:22.270296+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:20:05.134288+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:20:07.281917+00:00",
+    "session_id": "8959f13b-96a8-472d-a067-24872ade713f",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:20:07.526372+00:00",
+    "session_id": "7673be96-3c98-4e03-b2f0-57cbcf989fca",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:20:37.084259+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:20:44.316877+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:21:10.100652+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:21:14.706722+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "cart_add",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_card",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:21:30.557505+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "checkout",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "cart_drawer",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:22:02.679841+00:00",
+    "session_id": "8959f13b-96a8-472d-a067-24872ade713f",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:22:02.685220+00:00",
+    "session_id": "7673be96-3c98-4e03-b2f0-57cbcf989fca",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:22:21.174769+00:00",
+    "session_id": "7673be96-3c98-4e03-b2f0-57cbcf989fca",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:22:21.187514+00:00",
+    "session_id": "8959f13b-96a8-472d-a067-24872ade713f",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:23:27.722320+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:23:35.819588+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "click",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:23:35.824824+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "sent",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:24:11.148449+00:00",
+    "session_id": "e79f5ae1-2168-4d2c-8d42-16470497fdf5",
+    "event_type": "answered",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-5-base-lquida-second-skin",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-8-mscara-de-pestaas-volumen-xl",
+      "producto-12-champ-reparador-keratina"
+    ]
+  },
+  {
+    "timestamp": "2026-05-26T03:25:29.851864+00:00",
+    "session_id": "26723f01-89b4-45d7-b948-c6bba91cb3e5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:25:44.963813+00:00",
+    "session_id": "26723f01-89b4-45d7-b948-c6bba91cb3e5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-05-26T03:38:03.661413+00:00",
+    "session_id": "26723f01-89b4-45d7-b948-c6bba91cb3e5",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
   }
 ]

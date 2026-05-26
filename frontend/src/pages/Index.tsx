@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { ClientProfile, Product } from "@/types/shop";
+import { ClientProfile, Product, ChatSession } from "@/types/shop";
 import { ChatPanel } from "@/components/ChatPanel";
 import { ProductStage } from "@/components/ProductStage";
 import { CartDrawer } from "@/components/CartDrawer";
@@ -98,6 +98,33 @@ const Index = () => {
     setProducts(allProducts.map(stripRagFields));
   }, [allProducts]);
 
+  /** Called by ChatPanel when user restores a previous session from history. */
+  const handleRestoreSession = useCallback(
+    (session: ChatSession) => {
+      // Restore client profile
+      setClientProfile(session.clientProfile ?? null);
+
+      // Merge recProducts (with RAG metadata) into the catalog
+      setProducts((prev) => {
+        const merged = [...prev];
+        session.recProducts.forEach((rp) => {
+          const idx = merged.findIndex((p) => p.id === rp.id);
+          if (idx === -1) {
+            merged.push(rp);
+          } else {
+            merged[idx] = { ...merged[idx], ...rp };
+          }
+        });
+        return merged;
+      });
+
+      // Restore recommended IDs so the product stage highlights them
+      setRecIds(session.recProductIds);
+      setGuides([]);
+    },
+    []
+  );
+
   return (
     <CartProvider>
       <CartDrawer />
@@ -117,6 +144,7 @@ const Index = () => {
             clientProfile={clientProfile}
             onProfile={setClientProfile}
             onUpdateProductReason={handleUpdateProductReason}
+            onRestoreSession={handleRestoreSession}
             onRecommendations={(recProducts, newGuides) => {
               // Merge recommended products (with scores/reasons) into current catalog state
               setProducts((prev) => {

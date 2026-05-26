@@ -124,3 +124,13 @@ export type QuestionStats = {
 export type QuestionSearchResponse = {
   results: QuestionMetric[];
 };
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  timestamp: number;
+  messages: ChatMessage[];
+  clientProfile?: ClientProfile | null;
+  recProductIds: string[];
+  recProducts: Product[];
+};

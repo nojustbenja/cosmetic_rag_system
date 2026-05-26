@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { ChatMessage, ClientProfile, Product, QuestionSuggestion } from "@/types/shop";
-import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, BookOpen, CircleNotch, Fire, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { ChatMessage, ClientProfile, Product, QuestionSuggestion, ChatSession } from "@/types/shop";
+import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, BookOpen, CircleNotch, Fire, CaretLeft, CaretRight, ClockCounterClockwise } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { streamChat, fetchProductReason, fetchQuestionSuggestions, getQuestionSe
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { Markdown } from "./Markdown";
 import { LumiStatus } from "./LumiStatus";
+import { ChatHistoryDrawer, loadSessions, saveSession } from "./ChatHistoryDrawer";
 
 type Props = {
   onRecommendations: (products: Product[], guides: unknown[]) => void;
@@ -15,6 +16,7 @@ type Props = {
   onProfile: (profile: ClientProfile) => void;
   clientProfile?: ClientProfile | null;
   onUpdateProductReason?: (productId: string, reason: string) => void;
+  onRestoreSession?: (session: ChatSession) => void;
 };
 
 const INITIAL_MESSAGE: ChatMessage = {
@@ -81,12 +83,18 @@ export function ChatPanel({
   onProfile,
   clientProfile,
   onUpdateProductReason,
+  onRestoreSession,
 }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(() => getQuestionSessionId());
   const [suggestions, setSuggestions] = useState<QuestionSuggestion[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historySessions, setHistorySessions] = useState<ChatSession[]>(() => loadSessions());
+  // Track the recommended products for the current session so we can persist them
+  const currentRecProductsRef = useRef<Product[]>([]);
+  const currentRecIdsRef = useRef<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const activeQuestionRef = useRef("");
@@ -117,17 +125,66 @@ export function ChatPanel({
       });
   }, [sessionId]);
 
+  /** Derive a title from the first user message */
+  function deriveTitle(msgs: ChatMessage[]): string {
+    const firstUser = msgs.find((m) => m.role === "user");
+    if (!firstUser) return "Consulta sin título";
+    const text = firstUser.content.trim();
+    return text.length > 72 ? text.slice(0, 69) + "…" : text;
+  }
+
+  /** Persist current session to localStorage if it has content */
+  const persistCurrentSession = useCallback(
+    (msgs: ChatMessage[]) => {
+      const userCount = msgs.filter((m) => m.role === "user").length;
+      if (userCount < 1) return;
+      const session: ChatSession = {
+        id: sessionId,
+        title: deriveTitle(msgs),
+        timestamp: Date.now(),
+        messages: msgs,
+        clientProfile: clientProfile ?? null,
+        recProductIds: currentRecIdsRef.current,
+        recProducts: currentRecProductsRef.current,
+      };
+      saveSession(session);
+      setHistorySessions(loadSessions());
+    },
+    [sessionId, clientProfile]
+  );
+
   /** Reset everything — new session, empty history, clear parent catalog state */
   const handleClear = useCallback(() => {
+    // Save current session before clearing, if it has real content
+    setMessages((prev) => {
+      const userCount = prev.filter((m) => m.role === "user").length;
+      if (userCount >= 1) {
+        const session: ChatSession = {
+          id: sessionId,
+          title: deriveTitle(prev),
+          timestamp: Date.now(),
+          messages: prev,
+          clientProfile: clientProfile ?? null,
+          recProductIds: currentRecIdsRef.current,
+          recProducts: currentRecProductsRef.current,
+        };
+        saveSession(session);
+        setHistorySessions(loadSessions());
+      }
+      return prev;
+    });
+
     setMessages([{ ...INITIAL_MESSAGE, id: crypto.randomUUID() }]);
     const nextSessionId = crypto.randomUUID();
     window.sessionStorage.setItem("lumi_question_session_id", nextSessionId);
     setSessionId(nextSessionId);
     setInput("");
+    currentRecProductsRef.current = [];
+    currentRecIdsRef.current = [];
     activeQuestionRef.current = "";
     onClearChat();
     toast.success("Nueva conversación iniciada.");
-  }, [onClearChat]);
+  }, [onClearChat, sessionId, clientProfile]);
 
   async function send(text: string, meta: { suggestionId?: string; source?: string } = {}) {
     if (!text.trim() || loading) return;
@@ -172,6 +229,9 @@ export function ChatPanel({
         onProduct: (product) => {
           streamedProducts = [...streamedProducts, product];
           productCount = streamedProducts.length;
+          // keep refs in sync for persistence
+          currentRecProductsRef.current = streamedProducts;
+          currentRecIdsRef.current = streamedProducts.map((p) => p.id);
           onRecommendations(streamedProducts, []);
 
           // Keep chat message minimal — the cards are the visual focus
@@ -217,6 +277,11 @@ export function ChatPanel({
         },
       }, abortControllerRef.current.signal);
       completed = true;
+      // Auto-save after each completed exchange (≥2 messages means at least 1 Q&A)
+      setMessages((prev) => {
+        persistCurrentSession(prev);
+        return prev;
+      });
       trackQuestionEvent({
         event_type: "answered",
         session_id: sessionId,
@@ -262,13 +327,30 @@ export function ChatPanel({
   }
 
   return (
+    <>
+    <ChatHistoryDrawer
+      open={historyOpen}
+      onOpenChange={setHistoryOpen}
+      sessions={historySessions}
+      onSessionsChange={setHistorySessions}
+      onRestore={(session) => {
+        // restore local chat state
+        setMessages(session.messages);
+        setSessionId(session.id);
+        window.sessionStorage.setItem("lumi_question_session_id", session.id);
+        currentRecProductsRef.current = session.recProducts;
+        currentRecIdsRef.current = session.recProductIds;
+        // let parent restore catalog state
+        onRestoreSession?.(session);
+      }}
+    />
     <div className="w-full min-h-[calc(100dvh-4rem)] lg:min-h-0 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] flex flex-col glass-panel rounded-[2.5rem] p-6 lg:p-8 overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="icon-orb size-10 rounded-[1.15rem] bg-foreground text-background border-foreground/10">
             <svg viewBox="0 0 24 24" fill="currentColor" className="size-5">
-              <path d="M12 3 Q12 12 21 12 Q12 12 12 21 Q12 12 3 12 Q12 12 12 3 Z" />
+              <path d="M12 3 Q12 12 21 12 Q12 12 12 21 Q12 12 3 12 Q12 12 3 12 Q12 12 12 3 Z" />
               <path d="M19 3 Q19 6 22 6 Q19 6 19 9 Q19 6 16 6 Q19 6 19 3 Z" className="opacity-70" />
             </svg>
           </div>
@@ -279,6 +361,20 @@ export function ChatPanel({
         </div>
         <div className="flex items-center gap-2">
         <LumiStatus />
+
+          {/* Historial */}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setHistoryOpen(true)}
+            title="Historial de conversaciones"
+            aria-label="Abrir historial de conversaciones"
+            className="icon-orb size-9 rounded-full hover:bg-muted text-foreground transition-all duration-200 hover:scale-105 relative"
+          >
+            <ClockCounterClockwise weight="light" className="size-4" />
+            {historySessions.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 size-2 rounded-full bg-emerald-500/80 border border-background" />
+            )}
+          </motion.button>
 
           {/* Nueva consulta — resets chat + catalog */}
           {messages.length > 1 && (
@@ -407,6 +503,7 @@ export function ChatPanel({
         </div>
       </form>
     </div>
+    </>
   );
 }
 
