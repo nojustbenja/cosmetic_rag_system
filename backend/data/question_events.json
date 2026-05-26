@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "timestamp": "2026-05-26T02:52:55.038990+00:00",
+    "session_id": "9e542976-45f4-4839-93bb-c443a55a8ac1",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  }
+]

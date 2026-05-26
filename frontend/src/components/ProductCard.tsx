@@ -55,6 +55,11 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
   const spanClasses = getSpanClasses(index);
   const isOutOfStock = Number(product.stock ?? 1) <= 0;
 
+  const sources = (product.rag_source || product.source || "")
+    .split(/[,\n;]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   const handleAddToCart = () => {
     if (isOutOfStock) {
       toast.error("Este producto está sin stock.");
@@ -96,20 +101,10 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
     }
   };
 
-  // Update localReason if product.reason changes (e.g., from parent)
-  // Actually, we just need to fetch on demand if it's open
+  // Sync localReason if product.reason changes from parent (e.g., loaded by chat or cleared)
   useEffect(() => {
-    if (detailsOpen && isRecommended && !localReason && product.query) {
-      setLoadingReason(true);
-      fetchProductReason(product.query, product)
-        .then(reason => setLocalReason(reason))
-        .catch(err => {
-          console.error(err);
-          setLocalReason("No se pudo obtener la recomendación.");
-        })
-        .finally(() => setLoadingReason(false));
-    }
-  }, [detailsOpen, isRecommended, localReason, product]);
+    setLocalReason(product.reason || "");
+  }, [product.reason]);
 
   useEffect(() => {
     if (!detailsOpen || trackedView.current) return;
@@ -358,15 +353,23 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
                         </p>
 
                         {/* Source provenance row */}
-                        {product.rag_source && (
-                          <div className="flex items-center gap-2 pt-1 border-t border-emerald-500/10">
-                            <BookOpen weight="light" className="size-3.5 text-emerald-600 shrink-0" />
-                            <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
-                              Fuente:
-                            </span>
-                            <span className="text-[12px] text-foreground/70 font-medium capitalize">
-                              {product.rag_source}
-                            </span>
+                        {sources.length > 0 && (
+                          <div className="flex flex-col gap-1.5 pt-1.5 border-t border-emerald-500/10">
+                            <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-500 font-semibold uppercase tracking-wider">
+                              <BookOpen weight="light" className="size-3.5 text-emerald-600 shrink-0" />
+                              <span>Fuente{sources.length > 1 ? "s" : ""}:</span>
+                            </div>
+                            <div className="flex flex-nowrap gap-1.5 overflow-x-auto scrollbar-hide py-0.5 mt-0.5 -mx-1 px-1 max-w-full">
+                              {sources.map((src, i) => (
+                                <span
+                                  key={i}
+                                  className="inline-flex shrink-0 items-center rounded-md border border-emerald-500/15 bg-emerald-500/[0.05] px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 capitalize max-w-[150px] truncate"
+                                  title={src}
+                                >
+                                  {src}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </>

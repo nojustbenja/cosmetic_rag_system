@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { ChatMessage, ClientProfile, Product, QuestionSuggestion } from "@/types/shop";
-import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch, Fire, CaretLeft, CaretRight } from "@phosphor-icons/react";
+import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, BookOpen, CircleNotch, Fire, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -14,6 +14,7 @@ type Props = {
   onClearChat: () => void;
   onProfile: (profile: ClientProfile) => void;
   clientProfile?: ClientProfile | null;
+  onUpdateProductReason?: (productId: string, reason: string) => void;
 };
 
 const INITIAL_MESSAGE: ChatMessage = {
@@ -74,7 +75,13 @@ const FALLBACK_QUESTION_SUGGESTIONS: QuestionSuggestion[] = [
   },
 ];
 
-export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientProfile }: Props) {
+export function ChatPanel({
+  onRecommendations,
+  onClearChat,
+  onProfile,
+  clientProfile,
+  onUpdateProductReason,
+}: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -330,7 +337,7 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
                       {m.products && m.products.length > 0 && (
                         <div className="mt-4 flex flex-col gap-2 border-t border-foreground/5 pt-3">
                           <p className="text-eyebrow text-muted-foreground/80 mb-1">Productos recomendados por Lumi:</p>
-                          <ProductMentionGroup products={m.products} />
+                          <ProductMentionGroup products={m.products} onUpdateProductReason={onUpdateProductReason} />
                         </div>
                       )}
                     </>
@@ -682,7 +689,13 @@ function TypingDots() {
   );
 }
 
-function ProductMentionGroup({ products }: { products: Product[] }) {
+function ProductMentionGroup({
+  products,
+  onUpdateProductReason,
+}: {
+  products: Product[];
+  onUpdateProductReason?: (productId: string, reason: string) => void;
+}) {
   // Solo analizamos/renderizamos en profundidad los 3 primeros, pero listamos el resto sin analizar
   return (
     <div className="flex flex-col gap-3">
@@ -691,13 +704,22 @@ function ProductMentionGroup({ products }: { products: Product[] }) {
           key={p.id} 
           product={p} 
           index={idx + 1} 
+          onUpdateProductReason={onUpdateProductReason}
         />
       ))}
     </div>
   );
 }
 
-function ProductMention({ product, index }: { product: Product; index: number }) {
+function ProductMention({
+  product,
+  index,
+  onUpdateProductReason,
+}: {
+  product: Product;
+  index: number;
+  onUpdateProductReason?: (productId: string, reason: string) => void;
+}) {
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
 
@@ -705,13 +727,18 @@ function ProductMention({ product, index }: { product: Product; index: number })
     if (!product.query || loadingReason) return;
     setLoadingReason(true);
     fetchProductReason(product.query, product)
-      .then(reason => setLocalReason(reason))
-      .catch(err => {
+      .then((reason) => {
+        setLocalReason(reason);
+        if (onUpdateProductReason) {
+          onUpdateProductReason(product.id, reason);
+        }
+      })
+      .catch((err) => {
         console.error(err);
         setLocalReason("No se pudo obtener la recomendación.");
       })
       .finally(() => setLoadingReason(false));
-  }, [loadingReason, product]);
+  }, [loadingReason, product, onUpdateProductReason]);
 
   useEffect(() => {
     // Si no tenemos la razón local, pedirla automáticamente al montar (solo para los 3 primeros)
@@ -719,6 +746,11 @@ function ProductMention({ product, index }: { product: Product; index: number })
       loadReason();
     }
   }, [localReason, product.query, index, loadReason]);
+
+  const sources = (product.rag_source || product.source || "")
+    .split(/[,\n;]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   return (
     <div className="relative flex flex-col gap-2 p-2.5 rounded-[1.25rem] bg-background/75 border border-border/30 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.7),_0_2px_8px_-1px_rgba(0,0,0,0.02)]">
@@ -747,8 +779,29 @@ function ProductMention({ product, index }: { product: Product; index: number })
               <span className="italic">El especialista está analizando</span>
             </div>
           ) : localReason ? (
-            <div className="text-[12.5px] text-muted-foreground leading-relaxed">
-              <Markdown content={localReason} />
+            <div className="flex flex-col gap-2">
+              <div className="text-[12.5px] text-muted-foreground leading-relaxed">
+                <Markdown content={localReason} />
+              </div>
+              {sources.length > 0 && (
+                <div className="flex flex-col gap-1 pt-1.5 border-t border-foreground/5">
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground/60 font-bold uppercase tracking-wider">
+                    <BookOpen weight="light" className="size-3.5 text-emerald-600 dark:text-emerald-500 shrink-0" />
+                    <span>Fuente{sources.length > 1 ? "s" : ""}:</span>
+                  </div>
+                  <div className="flex flex-nowrap gap-1.5 overflow-x-auto scrollbar-hide py-0.5 mt-0.5 -mx-1 px-1 max-w-full">
+                    {sources.map((src, i) => (
+                      <span
+                        key={i}
+                        className="inline-flex shrink-0 items-center rounded-md border border-emerald-500/10 bg-emerald-500/[0.04] px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 capitalize max-w-[150px] truncate"
+                        title={src}
+                      >
+                        {src}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

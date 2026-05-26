@@ -82,6 +82,12 @@ const Index = () => {
     };
   }, []);
 
+  const handleUpdateProductReason = useCallback((productId: string, reason: string) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, reason } : p))
+    );
+  }, []);
+
   /** Called by ChatPanel when user clicks "Nueva consulta". */
   const handleClearChat = useCallback(() => {
     // Remove recommendation overlays and restore the full clean catalog
@@ -110,6 +116,7 @@ const Index = () => {
             onClearChat={handleClearChat}
             clientProfile={clientProfile}
             onProfile={setClientProfile}
+            onUpdateProductReason={handleUpdateProductReason}
             onRecommendations={(recProducts, newGuides) => {
               // Merge recommended products (with scores/reasons) into current catalog state
               setProducts((prev) => {
