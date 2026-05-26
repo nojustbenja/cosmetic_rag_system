@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -35,8 +35,10 @@ import {
   saveProviderConfig,
   validateProviderConfig,
   ProviderConfig,
+  fetchQuestionStats,
+  searchQuestions,
 } from "@/lib/api";
-import { Product, Order, OrderItem } from "@/types/shop";
+import { Product, Order, OrderItem, QuestionMetric, QuestionStats } from "@/types/shop";
 import { formatCLP } from "@/lib/format";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { toast } from "sonner";
@@ -60,7 +62,7 @@ interface EditProductState {
 }
 
 export default function BackOffice() {
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add" | "csv" | "providers">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add" | "csv" | "questions" | "providers">("orders");
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -109,12 +111,52 @@ export default function BackOffice() {
   const [providerLoading, setProviderLoading] = useState(false);
   const [providerChecking, setProviderChecking] = useState(false);
   const [providerValidation, setProviderValidation] = useState<{ ok: boolean; message: string } | null>(null);
+  const [questionPeriod, setQuestionPeriod] = useState<"week" | "month">("week");
+  const [questionStats, setQuestionStats] = useState<QuestionStats | null>(null);
+  const [questionSearch, setQuestionSearch] = useState("");
+  const [questionSearchResults, setQuestionSearchResults] = useState<QuestionMetric[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   // Cargar datos al montar
   useEffect(() => {
     loadData();
     loadProviderConfig();
   }, []);
+
+  const loadQuestionStats = async (period: "week" | "month" = questionPeriod) => {
+    setLoadingQuestions(true);
+    try {
+      const stats = await fetchQuestionStats(period);
+      setQuestionStats(stats);
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudieron cargar las métricas de preguntas.");
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  const handleQuestionPeriodChange = (period: "week" | "month") => {
+    setQuestionPeriod(period);
+    loadQuestionStats(period);
+  };
+
+  const handleQuestionSearch = async () => {
+    if (!questionSearch.trim()) {
+      setQuestionSearchResults([]);
+      return;
+    }
+    setLoadingQuestions(true);
+    try {
+      const response = await searchQuestions(questionSearch);
+      setQuestionSearchResults(response.results);
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo buscar preguntas.");
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
 
   const loadProviderConfig = async () => {
     setProviderLoading(true);
@@ -498,6 +540,21 @@ export default function BackOffice() {
               <UploadSimple weight="light" className="size-4" />
             </span>
             <span>Importar CSV</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTab("questions");
+              loadQuestionStats(questionPeriod);
+            }}
+            className={`w-full text-left py-3.5 px-5 rounded-2xl flex items-center gap-3 transition ${
+              activeTab === "questions" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
+            }`}
+          >
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "questions" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <TrendUp weight="light" className="size-4" />
+            </span>
+            <span>Preguntas</span>
           </button>
 
           <button
@@ -1040,6 +1097,21 @@ export default function BackOffice() {
               </motion.div>
             )}
 
+            {/* PESTAÑA: PREGUNTAS */}
+            {activeTab === "questions" && (
+              <QuestionsPanel
+                stats={questionStats}
+                period={questionPeriod}
+                loading={loadingQuestions}
+                search={questionSearch}
+                searchResults={questionSearchResults}
+                onPeriodChange={handleQuestionPeriodChange}
+                onRefresh={() => loadQuestionStats(questionPeriod)}
+                onSearchChange={setQuestionSearch}
+                onSearch={handleQuestionSearch}
+              />
+            )}
+
             {/* PESTAÑA: PROVEEDOR IA */}
             {activeTab === "providers" && (
               <motion.div
@@ -1470,5 +1542,212 @@ export default function BackOffice() {
         )}
       </AnimatePresence>
     </main>
+  );
+}
+
+function QuestionsPanel({
+  stats,
+  period,
+  loading,
+  search,
+  searchResults,
+  onPeriodChange,
+  onRefresh,
+  onSearchChange,
+  onSearch,
+}: {
+  stats: QuestionStats | null;
+  period: "week" | "month";
+  loading: boolean;
+  search: string;
+  searchResults: QuestionMetric[];
+  onPeriodChange: (period: "week" | "month") => void;
+  onRefresh: () => void;
+  onSearchChange: (value: string) => void;
+  onSearch: () => void;
+}) {
+  const kpis = stats?.kpis;
+
+  return (
+    <motion.div
+      key="questions"
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      className="space-y-6"
+    >
+      <div className="flex flex-col gap-4 border-b border-border/30 pb-5 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-title">Preguntas Lumi</h2>
+          <p className="text-xs text-muted-foreground mt-1 max-w-[62ch] leading-relaxed">
+            Señales agregadas de chips, preguntas enviadas y respuestas completadas.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {(["week", "month"] as const).map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onPeriodChange(option)}
+              className={`rounded-full px-3 py-2 text-[11px] font-bold transition ${
+                period === option
+                  ? "bg-foreground text-background"
+                  : "border border-foreground/10 bg-background/45 text-foreground/70 hover:bg-background"
+              }`}
+            >
+              {option === "week" ? "Semana" : "Mes"}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={loading}
+            className="rounded-full border border-foreground/10 bg-background/45 px-3 py-2 text-[11px] font-bold text-foreground/70 hover:bg-background disabled:opacity-50"
+          >
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <QuestionKpi label="Preguntas esta semana" value={kpis?.questions_week ?? 0} />
+        <QuestionKpi label="Preguntas este mes" value={kpis?.questions_month ?? 0} />
+        <QuestionKpi label="CTR chips" value={`${Math.round((kpis?.chip_ctr ?? 0) * 100)}%`} />
+        <QuestionKpi label="Respondidas" value={kpis?.answered ?? 0} />
+      </div>
+
+      <div className="glass-card rounded-[2rem] border border-foreground/5 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-sm font-bold text-foreground">Búsqueda de preguntas/casos</h3>
+            <p className="text-[11px] text-muted-foreground">Busca por texto normalizado, sin depender de tildes o puntuación.</p>
+          </div>
+          <form
+            className="flex w-full gap-2 sm:max-w-md"
+            onSubmit={(e) => {
+              e.preventDefault();
+              onSearch();
+            }}
+          >
+            <input
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Ej: piel sensible, perfume noche..."
+              className="min-w-0 flex-1 rounded-full border border-border/40 bg-background/55 px-4 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-foreground/20"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-full bg-foreground px-4 py-2.5 text-xs font-bold text-background transition active:scale-95 disabled:opacity-50"
+            >
+              {loading ? <CircleNotch weight="light" className="size-4 animate-spin" /> : "Buscar"}
+            </button>
+          </form>
+        </div>
+        {searchResults.length > 0 && (
+          <div className="mt-4 flex flex-col gap-2">
+            {searchResults.slice(0, 8).map((item) => (
+              <div key={`${item.normalized}-${item.question}`} className="rounded-2xl border border-foreground/8 bg-background/45 px-4 py-3">
+                <p className="text-sm font-bold text-foreground">{item.question}</p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {item.sent_count ?? 0} enviadas · {item.click_count ?? 0} clicks · score {Math.round(item.score ?? 0)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {loading && !stats ? (
+        <div className="p-12 text-center text-muted-foreground">
+          <CircleNotch weight="light" className="size-6 animate-spin mx-auto mb-2 text-foreground" />
+          Cargando inteligencia de preguntas...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <QuestionTable
+            title="Trending ahora"
+            icon={<TrendUp weight="light" className="size-4" />}
+            rows={stats?.trending ?? []}
+            empty="Aún no hay señales trending."
+          />
+          <QuestionTable
+            title="FAQ frecuentes"
+            icon={<Question weight="light" className="size-4" />}
+            rows={stats?.faq ?? []}
+            empty="Aún no hay preguntas frecuentes."
+          />
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+function QuestionKpi({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-foreground/5">
+      <div className="size-11 rounded-2xl bg-foreground/5 text-foreground flex items-center justify-center">
+        <TrendUp weight="light" className="size-6" />
+      </div>
+      <div>
+        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</p>
+        <h3 className="text-lg font-bold tracking-tight mt-0.5 text-foreground">{value}</h3>
+      </div>
+    </div>
+  );
+}
+
+function QuestionTable({
+  title,
+  icon,
+  rows,
+  empty,
+}: {
+  title: string;
+  icon: ReactNode;
+  rows: QuestionMetric[];
+  empty: string;
+}) {
+  return (
+    <div className="glass-card rounded-[2rem] overflow-hidden border border-foreground/5">
+      <div className="flex items-center justify-between gap-3 border-b border-border/30 bg-secondary/35 px-5 py-4">
+        <h3 className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
+          {icon}
+          {title}
+        </h3>
+        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{rows.length} filas</span>
+      </div>
+      {rows.length === 0 ? (
+        <div className="p-8 text-center text-sm text-muted-foreground">{empty}</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left text-sm">
+            <thead className="bg-secondary/25 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              <tr>
+                <th className="px-5 py-3">Pregunta</th>
+                <th className="px-4 py-3 text-right">Enviadas</th>
+                <th className="px-4 py-3 text-right">Clicks</th>
+                <th className="px-4 py-3 text-right">Resp.</th>
+                <th className="px-5 py-3 text-right">Score</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/20">
+              {rows.slice(0, 10).map((row) => (
+                <tr key={row.normalized || row.question} className="hover:bg-secondary/20 transition-colors">
+                  <td className="px-5 py-4">
+                    <p className="max-w-[280px] truncate font-bold text-foreground">{row.question}</p>
+                    <p className="mt-0.5 max-w-[280px] truncate text-[10px] text-muted-foreground">{row.normalized}</p>
+                  </td>
+                  <td className="px-4 py-4 text-right font-mono font-bold">{row.sent_count}</td>
+                  <td className="px-4 py-4 text-right font-mono">{row.click_count}</td>
+                  <td className="px-4 py-4 text-right font-mono">{row.answered_count}</td>
+                  <td className="px-5 py-4 text-right font-mono font-bold">{Math.round(row.score)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 }

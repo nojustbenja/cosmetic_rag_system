@@ -5,6 +5,7 @@ import { formatCLP } from "@/lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 import { ReceiptModal } from "./ReceiptModal";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
+import { trackQuestionEvent } from "@/lib/api";
 
 export function CartDrawer() {
   const { items, add, decrement, remove, clear, total, count, summary } = useCart();
@@ -12,6 +13,12 @@ export function CartDrawer() {
   const [receiptOpen, setReceiptOpen] = useState(false);
 
   const checkout = () => {
+    trackQuestionEvent({
+      event_type: "checkout",
+      question: items.find((item) => item.product.query)?.product.query || "",
+      source: "cart_drawer",
+      product_ids: items.map((item) => item.product.id),
+    });
     setReceiptOpen(true);
     setOpen(false);
   };

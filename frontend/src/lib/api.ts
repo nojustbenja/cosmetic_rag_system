@@ -1,4 +1,13 @@
-import { ClientProfile, Product, ProductAction, ProductActionResult, Order } from "@/types/shop";
+import {
+  ClientProfile,
+  Product,
+  ProductAction,
+  ProductActionResult,
+  Order,
+  QuestionSearchResponse,
+  QuestionStats,
+  QuestionSuggestion,
+} from "@/types/shop";
 
 const API_URL = 'http://localhost:8000/chat';
 
@@ -38,6 +47,24 @@ export type ProviderValidation = {
   provider?: string;
   message: string;
 };
+
+export type QuestionEventPayload = {
+  event_type: "impression" | "click" | "sent" | "answered" | "stop" | "product_view" | "cart_add" | "checkout";
+  session_id?: string;
+  question?: string;
+  suggestion_id?: string;
+  source?: string;
+  product_ids?: string[];
+};
+
+export function getQuestionSessionId() {
+  const key = "lumi_question_session_id";
+  const existing = window.sessionStorage.getItem(key);
+  if (existing) return existing;
+  const sessionId = crypto.randomUUID();
+  window.sessionStorage.setItem(key, sessionId);
+  return sessionId;
+}
 
 function parseSseFrame(frame: string) {
   let event = 'message';
@@ -118,6 +145,54 @@ export async function fetchProducts(): Promise<Product[]> {
 
   if (!response.ok) {
     throw new Error('No se pudo obtener el catálogo de productos.');
+  }
+  return response.json();
+}
+
+export async function fetchQuestionSuggestions(): Promise<QuestionSuggestion[]> {
+  const response = await fetch(endpoint('/questions/suggestions'), {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudieron cargar preguntas sugeridas.');
+  }
+  return response.json();
+}
+
+export async function trackQuestionEvent(payload: QuestionEventPayload): Promise<void> {
+  try {
+    await fetch(endpoint('/questions/events'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...payload,
+        session_id: payload.session_id || getQuestionSessionId(),
+      }),
+    });
+  } catch (err) {
+    console.warn("No se pudo registrar analítica de preguntas.", err);
+  }
+}
+
+export async function fetchQuestionStats(period: "week" | "month" = "week"): Promise<QuestionStats> {
+  const response = await fetch(endpoint(`/questions/stats?period=${period}`), {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudieron obtener métricas de preguntas.');
+  }
+  return response.json();
+}
+
+export async function searchQuestions(q: string): Promise<QuestionSearchResponse> {
+  const response = await fetch(endpoint(`/questions/search?q=${encodeURIComponent(q)}`), {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo buscar preguntas.');
   }
   return response.json();
 }

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { ChatMessage, ClientProfile, Product } from "@/types/shop";
-import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch } from "@phosphor-icons/react";
+import { ChatMessage, ClientProfile, Product, QuestionSuggestion } from "@/types/shop";
+import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch, Fire, TrendUp } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { streamChat, fetchProductReason } from "@/lib/api";
+import { streamChat, fetchProductReason, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent } from "@/lib/api";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { Markdown } from "./Markdown";
 import { LumiStatus } from "./LumiStatus";
@@ -15,12 +15,6 @@ type Props = {
   onProfile: (profile: ClientProfile) => void;
   clientProfile?: ClientProfile | null;
 };
-
-const SUGGESTIONS = [
-  "Tengo piel mixta y quiero más luminosidad",
-  "Busco un perfume amaderado para la noche",
-  "Necesito una rutina antiedad básica",
-];
 
 const INITIAL_MESSAGE: ChatMessage = {
   id: "welcome",
@@ -33,9 +27,13 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
+  const [sessionId, setSessionId] = useState(() => getQuestionSessionId());
+  const [suggestions, setSuggestions] = useState<QuestionSuggestion[]>([]);
+  const [rotation, setRotation] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const activeQuestionRef = useRef("");
+  const impressedSuggestionIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -54,16 +52,46 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
     return () => cancelAnimationFrame(frameId);
   }, [messages, loading]);
 
+  useEffect(() => {
+    fetchQuestionSuggestions()
+      .then((items) => {
+        setSuggestions(items);
+        items.forEach((item) => {
+          if (impressedSuggestionIds.current.has(item.id)) return;
+          impressedSuggestionIds.current.add(item.id);
+          trackQuestionEvent({
+            event_type: "impression",
+            session_id: sessionId,
+            question: item.text,
+            suggestion_id: item.id,
+            source: "chip",
+          });
+        });
+      })
+      .catch((err) => {
+        console.warn("No se pudieron cargar sugerencias de Lumi.", err);
+      });
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (suggestions.length === 0) return;
+    const timer = window.setInterval(() => setRotation((value) => value + 1), 12000);
+    return () => window.clearInterval(timer);
+  }, [suggestions.length]);
+
   /** Reset everything — new session, empty history, clear parent catalog state */
   const handleClear = useCallback(() => {
     setMessages([{ ...INITIAL_MESSAGE, id: crypto.randomUUID() }]);
-    setSessionId(crypto.randomUUID());
+    const nextSessionId = crypto.randomUUID();
+    window.sessionStorage.setItem("lumi_question_session_id", nextSessionId);
+    setSessionId(nextSessionId);
     setInput("");
+    activeQuestionRef.current = "";
     onClearChat();
     toast.success("Nueva conversación iniciada.");
   }, [onClearChat]);
 
-  async function send(text: string) {
+  async function send(text: string, meta: { suggestionId?: string; source?: string } = {}) {
     if (!text.trim() || loading) return;
     setInput("");
     const userMsg: ChatMessage = { id: crypto.randomUUID(), role: "user", content: text };
@@ -74,8 +102,10 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
     let assistantText = "";
     let productCount = 0;
     let hasToken = false;
+    let completed = false;
     const assistantMessageId = crypto.randomUUID();
     let streamedProducts: Product[] = [];
+    activeQuestionRef.current = text;
 
     // Show a lightweight "thinking" placeholder immediately
     setMessages((prev) => [
@@ -88,6 +118,13 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
     ]);
 
     abortControllerRef.current = new AbortController();
+    trackQuestionEvent({
+      event_type: "sent",
+      session_id: sessionId,
+      question: text,
+      suggestion_id: meta.suggestionId || "",
+      source: meta.source || "typed",
+    });
 
     try {
       await streamChat(text, sessionId, {
@@ -141,6 +178,15 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
           );
         },
       }, abortControllerRef.current.signal);
+      completed = true;
+      trackQuestionEvent({
+        event_type: "answered",
+        session_id: sessionId,
+        question: text,
+        suggestion_id: meta.suggestionId || "",
+        source: meta.source || "chat",
+        product_ids: streamedProducts.map((product) => product.id),
+      });
     } catch (e: unknown) {
       if (e instanceof DOMException && e.name === 'AbortError') {
         // Ignorar si fue detenido por el usuario
@@ -159,11 +205,18 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
     } finally {
       setLoading(false);
       abortControllerRef.current = null;
+      if (completed) activeQuestionRef.current = "";
     }
   }
 
   function handleStop() {
     if (abortControllerRef.current) {
+      trackQuestionEvent({
+        event_type: "stop",
+        session_id: sessionId,
+        question: activeQuestionRef.current,
+        source: "chat",
+      });
       abortControllerRef.current.abort();
       setLoading(false);
       abortControllerRef.current = null;
@@ -260,26 +313,27 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
         </AnimatePresence>
       </div>
 
-      {/* Suggestions — only on fresh start */}
-      {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-2 mb-4 pt-2 shrink-0 animate-fade-in">
-          {SUGGESTIONS.map((s) => (
-            <button
-              key={s}
-              onClick={() => send(s)}
-              className="px-4 py-2 rounded-full bg-background/40 hover:bg-background/80 text-[12px] font-bold text-muted-foreground/80 hover:text-foreground border border-border/40 hover:border-foreground/20 hover:shadow-soft active:scale-[0.98] transition-all duration-300"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+      <QuestionSuggestionRail
+        suggestions={suggestions}
+        rotation={rotation}
+        disabled={loading}
+        onPick={(suggestion) => {
+          trackQuestionEvent({
+            event_type: "click",
+            session_id: sessionId,
+            question: suggestion.text,
+            suggestion_id: suggestion.id,
+            source: "chip",
+          });
+          send(suggestion.text, { suggestionId: suggestion.id, source: "chip" });
+        }}
+      />
 
       {/* Input */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          send(input);
+          send(input, { source: "typed" });
         }}
         className="pt-2 shrink-0"
       >
@@ -314,6 +368,65 @@ export function ChatPanel({ onRecommendations, onClearChat, onProfile, clientPro
           )}
         </div>
       </form>
+    </div>
+  );
+}
+
+function QuestionSuggestionRail({
+  suggestions,
+  rotation,
+  disabled,
+  onPick,
+}: {
+  suggestions: QuestionSuggestion[];
+  rotation: number;
+  disabled: boolean;
+  onPick: (suggestion: QuestionSuggestion) => void;
+}) {
+  if (suggestions.length === 0) return null;
+
+  const groups = [
+    { id: "frequent", label: "Frecuentes" },
+    { id: "trending", label: "Trending" },
+    { id: "specific", label: "Casos específicos" },
+  ].map((group) => {
+    const items = suggestions.filter((item) => item.group === group.id);
+    if (items.length <= 1) return { ...group, items };
+    const offset = rotation % items.length;
+    return { ...group, items: [...items.slice(offset), ...items.slice(0, offset)] };
+  });
+
+  return (
+    <div className="mb-3 pt-2 shrink-0 animate-fade-in">
+      <div className="flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap scrollbar-hide pb-1">
+        {groups.map((group) =>
+          group.items.length > 0 ? (
+            <div key={group.id} className="inline-flex shrink-0 items-center gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full border border-foreground/8 bg-background/35 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                {group.id === "trending" ? <TrendUp weight="bold" className="size-3" /> : null}
+                {group.label}
+              </span>
+              {group.items.map((suggestion) => (
+                <button
+                  key={suggestion.id}
+                  type="button"
+                  onClick={() => onPick(suggestion)}
+                  disabled={disabled}
+                  className="inline-flex max-w-[76vw] items-center gap-1.5 truncate rounded-full border border-border/45 bg-background/45 px-3.5 py-2 text-[12px] font-bold text-muted-foreground/85 transition-all duration-300 hover:border-foreground/20 hover:bg-background/85 hover:text-foreground hover:shadow-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:max-w-none"
+                >
+                  {suggestion.is_trending ? <Fire weight="fill" className="size-3.5 text-orange-500" /> : null}
+                  <span className="truncate">{suggestion.text}</span>
+                  {suggestion.is_trending ? (
+                    <span className="hidden rounded-full bg-orange-500/8 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-orange-600 sm:inline">
+                      Trending
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          ) : null
+        )}
+      </div>
     </div>
   );
 }

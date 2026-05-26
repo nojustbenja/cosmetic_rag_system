@@ -83,3 +83,44 @@ export interface Order {
   total: number;
   status: "pendiente" | "pagado";
 }
+
+export type QuestionSuggestion = {
+  id: string;
+  text: string;
+  group: "frequent" | "trending" | "specific" | string;
+  label: string;
+  score: number;
+  is_trending: boolean;
+};
+
+export type QuestionMetric = {
+  question: string;
+  normalized: string;
+  total: number;
+  sent_count: number;
+  click_count: number;
+  answered_count: number;
+  impression_count: number;
+  stop_count: number;
+  score: number;
+  last_seen: string;
+};
+
+export type QuestionStats = {
+  period: "week" | "month";
+  kpis: {
+    questions_week: number;
+    questions_month: number;
+    chip_ctr: number;
+    answered: number;
+    impressions: number;
+    clicks: number;
+    stops: number;
+  };
+  trending: QuestionMetric[];
+  faq: QuestionMetric[];
+};
+
+export type QuestionSearchResponse = {
+  results: QuestionMetric[];
+};

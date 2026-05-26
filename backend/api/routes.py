@@ -7,6 +7,9 @@ from sse_starlette.sse import EventSourceResponse
 
 from api.models import (
     ChatRequest,
+    QuestionEventRequest,
+    QuestionStatsResponse,
+    QuestionSuggestion,
     ReasonRequest,
     ProductActionRequest,
     ProductCreateRequest,
@@ -27,6 +30,7 @@ from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_
 from rag.llm_client import LLMClient
 from rag.provider_config import public_provider_config, save_provider_config, validate_provider_payload
 from config import settings
+from analytics.questions import get_suggestions, get_stats, record_event, search_questions
 
 
 router = APIRouter()
@@ -62,6 +66,33 @@ async def validate_provider_config(request: ProviderConfigRequest) -> dict:
 @router.get("/products")
 async def products() -> list[dict]:
     return get_all_products_from_db()
+
+
+@router.get("/questions/suggestions", response_model=list[QuestionSuggestion])
+async def question_suggestions() -> list[dict]:
+    return get_suggestions()
+
+
+@router.post("/questions/events")
+async def question_events(request: QuestionEventRequest) -> dict:
+    try:
+        return record_event(request.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.get("/questions/stats", response_model=QuestionStatsResponse)
+async def question_stats(period: str = "week") -> dict:
+    if period not in {"week", "month"}:
+        raise HTTPException(status_code=400, detail="period must be week or month.")
+    return get_stats(period)
+
+
+@router.get("/questions/search")
+async def question_search(q: str = "") -> dict[str, list[dict]]:
+    return {"results": search_questions(q)}
 
 
 @router.post("/chat")

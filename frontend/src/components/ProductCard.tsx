@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ClientProfile, Product, ProductAction, ProductActionResult } from "@/types/shop";
 import { useCart } from "@/hooks/useCart";
 import { Plus, Sparkle, BookOpen, CircleNotch } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion } from "framer-motion";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
-import { fetchProductAction, fetchProductReason } from "@/lib/api";
+import { fetchProductAction, fetchProductReason, trackQuestionEvent } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -51,6 +51,7 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
   const [loadingReason, setLoadingReason] = useState(false);
   const [actionResult, setActionResult] = useState<ProductActionResult | null>(null);
   const [loadingAction, setLoadingAction] = useState<ProductAction | null>(null);
+  const trackedView = useRef(false);
   const spanClasses = getSpanClasses(index);
   const isOutOfStock = Number(product.stock ?? 1) <= 0;
 
@@ -60,6 +61,12 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
       return;
     }
     add(product);
+    trackQuestionEvent({
+      event_type: "cart_add",
+      question: product.query || "",
+      source: "product_card",
+      product_ids: [product.id],
+    });
     toast.success(`${product.name} agregado al carrito.`);
   };
 
@@ -103,6 +110,17 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
         .finally(() => setLoadingReason(false));
     }
   }, [detailsOpen, isRecommended, localReason, product]);
+
+  useEffect(() => {
+    if (!detailsOpen || trackedView.current) return;
+    trackedView.current = true;
+    trackQuestionEvent({
+      event_type: "product_view",
+      question: product.query || "",
+      source: "product_detail",
+      product_ids: [product.id],
+    });
+  }, [detailsOpen, product.id, product.query]);
 
   return (
     <>

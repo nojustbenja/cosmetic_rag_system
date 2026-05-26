@@ -1,0 +1,47 @@
+[
+  {
+    "id": "faq-piel-mixta-glow",
+    "group": "frequent",
+    "text": "Tengo piel mixta y quiero más luminosidad"
+  },
+  {
+    "id": "faq-rutina-antiedad",
+    "group": "frequent",
+    "text": "Necesito una rutina antiedad básica"
+  },
+  {
+    "id": "faq-protector-sensible",
+    "group": "frequent",
+    "text": "Qué protector solar sirve para piel sensible"
+  },
+  {
+    "id": "trend-perfume-noche",
+    "group": "trending",
+    "text": "Busco un perfume amaderado para la noche"
+  },
+  {
+    "id": "trend-glow-evento",
+    "group": "trending",
+    "text": "Qué producto da efecto glow para un evento"
+  },
+  {
+    "id": "trend-regalo-lujo",
+    "group": "trending",
+    "text": "Qué regalo de skincare premium recomiendas"
+  },
+  {
+    "id": "case-acne-sensible",
+    "group": "specific",
+    "text": "Tengo piel sensible con brotes y no quiero irritarme"
+  },
+  {
+    "id": "case-presupuesto-bajo",
+    "group": "specific",
+    "text": "Arma una rutina simple con presupuesto bajo"
+  },
+  {
+    "id": "case-maquillaje-larga-duracion",
+    "group": "specific",
+    "text": "Necesito maquillaje de larga duración para piel grasa"
+  }
+]
