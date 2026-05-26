@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { checkHealth } from "@/lib/api";
-import { RefreshCw, Power } from "lucide-react";
 import { toast } from "sonner";
 
 export function LumiStatus() {
@@ -35,36 +34,39 @@ export function LumiStatus() {
     return (
       <button
         onClick={() => verifyStatus(true)}
-        className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-600 border border-red-200 dark:border-red-900/30 hover:bg-red-500/20 transition-all duration-300 shadow-sm"
+        className="group flex size-9 items-center justify-center rounded-full bg-background/80 text-red-600 border border-red-200/50 hover:bg-red-500/15 active:scale-[0.98] transition-all duration-300 shadow-sm backdrop-blur-md"
         title="Intentar despertar a Lumi"
+        aria-label="Lumi sin conexión. Intentar reconectar"
       >
-        <div className="relative">
-          <span className="size-1.5 rounded-full bg-red-500 block" />
-          <span className="absolute inset-0 size-1.5 rounded-full bg-red-500 animate-ping opacity-75" />
+        <div className="relative flex items-center justify-center">
+          <span className="size-2 rounded-full bg-red-500 block relative z-10 shadow-[0_0_8px_rgba(239,68,68,0.7)] animate-pulse" />
+          <span className="absolute size-4 rounded-full bg-red-500/35 animate-ping opacity-60 pointer-events-none" />
         </div>
-        <span className="text-[11px] font-bold uppercase tracking-wider">Desconectada</span>
-        <Power className="size-3 ml-1 group-hover:rotate-12 transition-transform" />
       </button>
     );
   }
 
   return (
-    <div className="px-3 py-1.5 rounded-full bg-background/60 text-badge text-muted-foreground border border-border/40 flex items-center gap-1.5">
-      <div className="relative">
+    <div
+      className="flex size-9 items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/40 shadow-sm"
+      title={status === "checking" ? "Lumi sincronizando" : "Lumi conectada"}
+      aria-label={status === "checking" ? "Lumi sincronizando" : "Lumi conectada"}
+    >
+      <div className="relative flex items-center justify-center">
         <span 
-          className={`size-1.5 rounded-full block transition-all duration-500 ${
+          className={`size-2 rounded-full block transition-all duration-500 relative z-10 ${
             status === "online" 
-              ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
-              : "bg-muted-foreground/30"
+              ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)]" 
+              : "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
           }`} 
         />
         {status === "online" && (
-           <span className="absolute inset-0 size-1.5 rounded-full bg-emerald-500 animate-pulse opacity-40" />
+          <span className="absolute size-4 rounded-full bg-emerald-400/35 animate-ping opacity-60 pointer-events-none" />
+        )}
+        {status === "checking" && (
+          <span className="absolute size-4 rounded-full bg-amber-400/35 animate-ping opacity-60 pointer-events-none" />
         )}
       </div>
-      <span className="text-[11px] font-medium">
-        {status === "checking" ? "Sincronizando..." : "Activa"}
-      </span>
     </div>
   );
 }

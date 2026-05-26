@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { Product } from "@/types/shop";
 import { useCart } from "@/hooks/useCart";
-import { Plus } from "@phosphor-icons/react";
+import { Plus, Sparkle, BookOpen, CircleNotch } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion } from "framer-motion";
-import { Sparkles, BookOpen, Loader2 } from "lucide-react";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { fetchProductReason } from "@/lib/api";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -20,11 +20,12 @@ type Props = {
   highlighted?: boolean;
   isRecommended?: boolean;
   index: number;
+  layoutScope?: string;
 };
 
 // Bento Grid sizes based on index
 const getSpanClasses = (index: number) => {
-  if (index === 0) return "col-span-1 md:col-span-2 row-span-2"; // Hero card
+  if (index === 0) return "col-span-1 md:col-span-2 row-span-1 md:row-span-2"; // Hero card
   if (index % 4 === 0) return "col-span-1 md:col-span-2 row-span-1"; // Wide card
   return "col-span-1 row-span-1"; // Standard card
 };
@@ -42,12 +43,22 @@ const getCalibratedScore = (score: number) => {
   return Math.round(minResult + ratio * (maxResult - minResult));
 };
 
-export function ProductCard({ product, highlighted, isRecommended, index }: Props) {
+export function ProductCard({ product, highlighted, isRecommended, index, layoutScope = "main" }: Props) {
   const { add } = useCart();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
   const spanClasses = getSpanClasses(index);
+  const isOutOfStock = Number(product.stock ?? 1) <= 0;
+
+  const handleAddToCart = () => {
+    if (isOutOfStock) {
+      toast.error("Este producto está sin stock.");
+      return;
+    }
+    add(product);
+    toast.success(`${product.name} agregado al carrito.`);
+  };
 
   // Update localReason if product.reason changes (e.g., from parent)
   // Actually, we just need to fetch on demand if it's open
@@ -68,27 +79,36 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
     <>
       <motion.div
         layout
-        layoutId={`product-${product.id}`}
+        layoutId={`product-${layoutScope}-${product.id}`}
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
+        tabIndex={0}
+        role="button"
+        aria-label={`Ver detalles de ${product.name} de ${product.brand}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setDetailsOpen(true);
+          }
+        }}
         transition={{
           type: "spring",
           stiffness: 100,
           damping: 20,
           delay: index * 0.05, // Staggered orchestration
         }}
-        className={`w-full flex flex-col group cursor-pointer ${spanClasses}`}
+        className={`w-full flex flex-col group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 rounded-[2.5rem] ${spanClasses}`}
         onClick={() => setDetailsOpen(true)}
       >
         <motion.div
           whileHover={{ scale: 0.98, y: -2 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className={`relative flex-1 p-2 rounded-[2.5rem] ${
+          className={`relative flex-1 flex flex-col p-2 rounded-[2.5rem] ${
             highlighted ? "glass-panel" : "glass-card"
           }`}
         >
-          <div className="bg-secondary rounded-[2rem] overflow-hidden w-full h-full min-h-[300px] relative">
+          <div className="bg-secondary rounded-[2rem] overflow-hidden w-full flex-1 min-h-[240px] relative">
             <img
               src={getProductImage(product)}
               alt={product.name}
@@ -126,39 +146,54 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
             </button>
           )}
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              add(product);
-            }}
-            aria-label={`Add ${product.name} to cart`}
-            className="absolute bottom-6 right-6 size-12 rounded-full bg-foreground text-background flex items-center justify-center shadow-glass-lg opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:scale-110"
-          >
-            <Plus weight="bold" className="size-5" />
-          </button>
         </motion.div>
 
         {/* Info rendered outside the card for clean gallery presentation */}
-        <div className="pt-4 px-2 flex flex-col gap-1">
+        <div className="pt-4 px-2 flex flex-col gap-1.5">
           <div className="flex justify-between items-start gap-4">
-            <h3 className="text-product-name line-clamp-2">{product.name}</h3>
-            <p className="text-price shrink-0">{formatCLP(product.price)}</p>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <h3 className="text-product-name line-clamp-2">{product.name}</h3>
+              <p className="text-[12px] font-medium text-muted-foreground/80">{product.brand}</p>
+            </div>
+            <div className="flex flex-col items-end gap-2 shrink-0">
+              <p className="text-price">{formatCLP(product.price)}</p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart();
+                }}
+                disabled={isOutOfStock}
+                className="icon-orb size-8 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/55 disabled:hover:text-foreground"
+                title={isOutOfStock ? "Sin stock" : "Añadir al carrito"}
+                aria-label={isOutOfStock ? `${product.name} sin stock` : `Añadir ${product.name} al carrito`}
+              >
+                <Plus weight="bold" className="size-4" />
+              </button>
+            </div>
           </div>
-          <p className="text-eyebrow mt-1">{product.brand}</p>
+          
           {localReason && (
-            <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed line-clamp-2">
-              {localReason}
+            <p className="text-[13px] text-muted-foreground/90 mt-1 leading-relaxed line-clamp-2 italic">
+              "{localReason}"
             </p>
           )}
-          {(product.skin_types || product.score) && (
-            <div className="flex flex-wrap gap-2 mt-2">
+
+          {(product.skin_types || product.score || product.category) && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
               {product.score != null && (
-                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[12px] font-semibold animate-fade-in">
-                  Match: {getCalibratedScore(Number(product.score))}%
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-tight animate-fade-in flex items-center gap-1">
+                  <Sparkle weight="fill" className="size-2.5" />
+                  {getCalibratedScore(Number(product.score))}% Match
                 </span>
               )}
-              {product.skin_types?.map((st) => (
-                <span key={st} className="px-2 py-0.5 rounded bg-secondary text-muted-foreground text-[12px] font-medium">
+              {product.category && (
+                <span className="px-2 py-0.5 rounded-full bg-foreground/5 text-foreground/70 border border-foreground/10 text-[10px] font-bold uppercase tracking-tight">
+                  {product.category.replace("_", " ")}
+                </span>
+              )}
+              {product.skin_types?.slice(0, 2).map((st) => (
+                <span key={st} className="px-2 py-0.5 rounded-full bg-secondary/80 text-muted-foreground text-[10px] font-bold uppercase tracking-tight">
                   {st}
                 </span>
               ))}
@@ -168,7 +203,7 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
       </motion.div>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="!fixed !bottom-0 !top-auto !left-0 !translate-x-0 !translate-y-0 md:!top-[50%] md:!left-[50%] md:!-translate-x-[50%] md:!-translate-y-[50%] max-w-2xl w-full md:w-[92vw] rounded-t-[2.5rem] sm:rounded-b-[2.5rem] md:rounded-[2.5rem] p-2 md:p-2.5 overflow-hidden border border-white/20 shadow-glass-lg glass-panel max-h-[85vh] overflow-y-auto scrollbar-hide m-0">
+        <DialogContent className="product-dialog-content p-2 md:p-2.5 overflow-hidden border border-white/20 shadow-glass-lg glass-panel bg-background/80 overflow-y-auto scrollbar-hide m-0 [&>button]:z-20 [&>button]:rounded-full [&>button]:bg-background/85 [&>button]:backdrop-blur-xl [&>button]:border [&>button]:border-foreground/10 [&>button]:size-9 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:opacity-100 [&>button]:shadow-sm">
           {/* Inner core for concentric Double-Bezel hardware look */}
           <div className="bg-background/95 rounded-[2rem] overflow-hidden w-full h-full border border-black/5 dark:border-white/5 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.15)] flex flex-col md:grid md:grid-cols-12">
             <DialogHeader className="sr-only">
@@ -191,7 +226,7 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
 
                 {isRecommended && product.score != null && (
                   <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-emerald-500/90 text-white backdrop-blur-xl rounded-full text-[10px] uppercase tracking-wider font-bold shadow-lg flex items-center gap-1.5 animate-fade-in border border-white/20">
-                    <Sparkles className="size-3.5" />
+                    <Sparkle weight="fill" className="size-3.5" />
                     Match: {getCalibratedScore(Number(product.score))}%
                   </div>
                 )}
@@ -259,14 +294,14 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
                   <div className="p-4 rounded-[1.25rem] bg-emerald-500/[0.03] border border-emerald-500/10 backdrop-blur-md flex flex-col gap-3 animate-fade-in mt-1">
                     {/* Header row */}
                     <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 text-[12px] font-bold">
-                      <Sparkles className="size-4 shrink-0" />
+                      <Sparkle weight="light" className="size-4 shrink-0" />
                       <span>¿Por qué Lumi lo recomendó?</span>
                     </div>
 
                     {/* Reason text or loading */}
                     {loadingReason ? (
                       <div className="flex items-center gap-2 text-[13px] text-muted-foreground font-medium py-2">
-                        <Loader2 className="size-4 animate-spin" />
+                        <CircleNotch weight="light" className="size-4 animate-spin" />
                         <span>Lumi está descubriendo por qué es ideal para ti...</span>
                       </div>
                     ) : (
@@ -278,7 +313,7 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
                         {/* Source provenance row */}
                         {product.rag_source && (
                           <div className="flex items-center gap-2 pt-1 border-t border-emerald-500/10">
-                            <BookOpen className="size-3.5 text-emerald-600 shrink-0" />
+                            <BookOpen weight="light" className="size-3.5 text-emerald-600 shrink-0" />
                             <span className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
                               Fuente:
                             </span>
@@ -300,21 +335,23 @@ export function ProductCard({ product, highlighted, isRecommended, index }: Prop
 
                   {isRecommended && (
                     <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold flex items-center gap-1 animate-fade-in">
-                      <Sparkles className="size-3" /> Recomendado por Lumi
+                      <Sparkle weight="light" className="size-3" /> Recomendado por Lumi
                     </span>
                   )}
                 </div>
                 <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    add(product);
+                    handleAddToCart();
                     setDetailsOpen(false);
                   }}
-                  className="group relative w-full bg-foreground text-background rounded-full py-2.5 pl-6 pr-2.5 text-cta hover:opacity-95 active:scale-[0.98] transition-all duration-300 flex items-center justify-between gap-4 font-bold border border-foreground/10"
+                  disabled={isOutOfStock}
+                  className="group relative w-full bg-foreground text-background rounded-full py-2.5 pl-6 pr-2.5 text-cta hover:opacity-95 active:scale-[0.98] transition-all duration-300 flex items-center justify-between gap-4 font-bold border border-foreground/10 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                 >
-                  <span>Añadir al carrito</span>
-                  <div className="w-9 h-9 rounded-full bg-background/25 flex items-center justify-center group-hover:scale-105 transition-transform shadow-md">
-                    <Plus weight="bold" className="size-4 text-foreground" />
+                  <span>{isOutOfStock ? "Sin stock disponible" : "Añadir al carrito"}</span>
+                  <div className="w-9 h-9 rounded-full bg-background/18 text-background flex items-center justify-center group-hover:scale-105 transition-transform shadow-md border border-background/15">
+                    <Plus weight="bold" className="size-5" />
                   </div>
                 </button>
               </div>

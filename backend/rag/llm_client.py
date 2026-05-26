@@ -8,6 +8,7 @@ from anthropic import AsyncAnthropic
 from openai import AsyncOpenAI
 
 from config import settings
+from rag.provider_config import resolve_provider_config
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +20,9 @@ class LLMClient:
     """
 
     def __init__(self) -> None:
-        self.provider = settings.resolved_provider
-        self.model = settings.llm_model
+        self.runtime_config = resolve_provider_config(settings)
+        self.provider = self.runtime_config.provider
+        self.model = self.runtime_config.model
         logger.info(f"Inicializado LLMClient con proveedor: {self.provider}, modelo: {self.model}")
 
     async def _stream_with_provider(
@@ -49,7 +51,7 @@ class LLMClient:
 
             client_kwargs = {"api_key": api_key}
             # Permitir sobreescritura de base URL si el usuario especificó una personalizada
-            if settings.llm_base_url and settings.llm_base_url != "https://api.kilo.ai/api/gateway":
+            if base_url and base_url != "https://api.anthropic.com":
                 client_kwargs["base_url"] = base_url
 
             client = AsyncAnthropic(**client_kwargs)
@@ -71,7 +73,7 @@ class LLMClient:
             # Configurar cabeceras adicionales si es Kilo
             default_headers = {}
             if provider == "kilo":
-                kilo_mode = (kilo_mode_override or settings.kilo_mode or "").strip()
+                kilo_mode = (kilo_mode_override or self.runtime_config.kilo_mode or settings.kilo_mode or "").strip()
                 if kilo_mode:
                     default_headers["x-kilocode-mode"] = kilo_mode
 
@@ -120,8 +122,8 @@ class LLMClient:
             yield token
 
     async def stream_completion(self, messages: list[dict[str, str]]) -> AsyncGenerator[str, None]:
-        api_key = settings.active_api_key
-        base_url = settings.active_base_url
+        api_key = self.runtime_config.api_key
+        base_url = self.runtime_config.base_url
 
         if not api_key:
             if self.provider != "kilo" and settings.kilo_api_key:

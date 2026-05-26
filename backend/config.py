@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     
     kilo_mode: str = "free"
     embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
+    allow_embedding_download: bool = False
+    embedding_fallback_dimensions: int = 384
     chroma_persist_dir: str = "../chroma_db"
     frontend_origin: str = "http://localhost:5173"
 
@@ -38,6 +40,13 @@ class Settings(BaseSettings):
 
     @property
     def resolved_provider(self) -> str:
+        try:
+            from rag.provider_config import resolve_provider_config
+
+            return resolve_provider_config(self).provider
+        except Exception:
+            pass
+
         if self.llm_provider:
             provider = self.llm_provider.lower().strip()
             aliases = {
@@ -65,6 +74,13 @@ class Settings(BaseSettings):
 
     @property
     def active_api_key(self) -> str:
+        try:
+            from rag.provider_config import resolve_provider_config
+
+            return resolve_provider_config(self).api_key
+        except Exception:
+            pass
+
         prov = self.resolved_provider
         if prov == "gemini":
             return self.gemini_api_key
@@ -82,6 +98,13 @@ class Settings(BaseSettings):
 
     @property
     def active_base_url(self) -> str:
+        try:
+            from rag.provider_config import resolve_provider_config
+
+            return resolve_provider_config(self).base_url
+        except Exception:
+            pass
+
         prov = self.resolved_provider
         is_custom_url = self.llm_base_url and self.llm_base_url != "https://api.kilo.ai/api/gateway"
         

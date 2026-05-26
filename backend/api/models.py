@@ -68,3 +68,10 @@ class ProductUpdateRequest(BaseModel):
     tags: str = Field(default="")
 
 
+class ProviderConfigRequest(BaseModel):
+    provider: str = Field(min_length=1)
+    model: str = Field(default="")
+    base_url: str = Field(default="")
+    api_key: str = Field(default="")
+    kilo_mode: str = Field(default="free")
+

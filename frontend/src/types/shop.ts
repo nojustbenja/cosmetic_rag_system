@@ -15,6 +15,7 @@ export type Product = {
   rag_source?: string;
   skin_types?: string[];
   benefits?: string[];
+  ingredients?: string;
   source?: string;
   product_index?: number;
 };
@@ -28,3 +29,22 @@ export type ChatMessage = {
 };
 
 export type CartItem = { product: Product; qty: number };
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  qty: number;
+  price: number;
+  brand: string;
+}
+
+export interface Order {
+  ticket_number: string;
+  timestamp: string;
+  client_name: string;
+  skin_type: string;
+  items: OrderItem[];
+  total: number;
+  status: "pendiente" | "pagado";
+}
+

@@ -12,12 +12,15 @@ from api.models import (
     AiAssistRequest,
     OrderCreateRequest,
     CsvImportRequest,
-    ProductUpdateRequest
+    ProductUpdateRequest,
+    ProviderConfigRequest,
 )
-from rag.pipeline import generate_response, retrieve_context, generate_product_reason
+from rag.pipeline import retrieve_context, generate_product_reason
 from rag.retriever import get_all_products_from_db
 from ingestion.ingest_csv import add_product_to_csv, import_csv_content, ingest_products, update_product_in_csv
 from rag.llm_client import LLMClient
+from rag.provider_config import public_provider_config, save_provider_config, validate_provider_payload
+from config import settings
 
 
 router = APIRouter()
@@ -28,6 +31,26 @@ ORDERS_PATH = Path(__file__).resolve().parents[1] / "data" / "orders.json"
 @router.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@router.get("/provider-config")
+async def get_provider_config() -> dict:
+    return public_provider_config(settings)
+
+
+@router.put("/provider-config")
+async def update_provider_config(request: ProviderConfigRequest) -> dict:
+    try:
+        return save_provider_config(settings, request.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/provider-config/validate")
+async def validate_provider_config(request: ProviderConfigRequest) -> dict:
+    return validate_provider_payload(settings, request.model_dump())
 
 
 @router.get("/products")
@@ -42,24 +65,38 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
     async def event_generator():
         response = ""
         try:
-            context_payload, retrieved_items = await retrieve_context(request.message)
+            from rag.pipeline import analyze_intent, generate_profiler_response, generate_recommender_response
+            has_profile = await analyze_intent(request.message, history)
 
-            # Emit each product individually so the frontend can show them progressively
-            products = context_payload.get("products", [])
-            guides = context_payload.get("guides", [])
-            for idx, product in enumerate(products):
-                product_with_index = {**product, "product_index": idx + 1}
-                yield {"event": "product", "data": json.dumps(product_with_index)}
+            if not has_profile:
+                # Emit empty context_done first to prevent UI waiting for products
+                yield {
+                    "event": "context_done",
+                    "data": json.dumps({"guides": [], "total": 0}),
+                }
+                async for token in generate_profiler_response(request.message, history):
+                    response += token
+                    yield {"event": "token", "data": json.dumps({"token": token})}
+            else:
+                context_payload, retrieved_items = await retrieve_context(request.message)
 
-            # Emit guides + total count as a summary event
-            yield {
-                "event": "context_done",
-                "data": json.dumps({"guides": guides, "total": len(products)}),
-            }
+                # Emit each product individually so the frontend can show them progressively
+                products = context_payload.get("products", [])
+                guides = context_payload.get("guides", [])
+                for idx, product in enumerate(products):
+                    product_with_index = {**product, "product_index": idx + 1}
+                    yield {"event": "product", "data": json.dumps(product_with_index)}
 
-            async for token in generate_response(request.message, history, retrieved_items):
-                response += token
-                yield {"event": "token", "data": json.dumps({"token": token})}
+                # Emit guides + total count as a summary event
+                yield {
+                    "event": "context_done",
+                    "data": json.dumps({"guides": guides, "total": len(products)}),
+                }
+
+                async for token in generate_recommender_response(request.message, history, retrieved_items):
+                    response += token
+                    yield {"event": "token", "data": json.dumps({"token": token})}
+
             sessions[request.session_id] = (history + [
                 {"role": "user", "content": request.message},
                 {"role": "assistant", "content": response},
@@ -182,7 +219,7 @@ async def ai_assist(request: AiAssistRequest) -> dict[str, object]:
 @router.get("/orders")
 async def get_orders() -> list[dict]:
     try:
-        if not ORDERS_PATH.exists():
+        if not ORDERS_PATH.exists() or ORDERS_PATH.stat().st_size == 0:
             return []
         with ORDERS_PATH.open("r", encoding="utf-8") as file:
             return json.load(file)
@@ -214,11 +251,40 @@ async def create_order(order: OrderCreateRequest) -> dict[str, object]:
         raise HTTPException(status_code=500, detail=str(exc))
 
 
+@router.delete("/orders/{ticket_number}")
+async def delete_order(ticket_number: str) -> dict[str, object]:
+    try:
+        if not ORDERS_PATH.exists() or ORDERS_PATH.stat().st_size == 0:
+            raise HTTPException(status_code=404, detail="No orders found.")
+
+        with ORDERS_PATH.open("r", encoding="utf-8") as file:
+            try:
+                orders = json.load(file)
+            except json.JSONDecodeError:
+                orders = []
+
+        order_to_delete = next((order for order in orders if order.get("ticket_number") == ticket_number), None)
+        if not order_to_delete:
+            raise HTTPException(status_code=404, detail="Order not found.")
+        if order_to_delete.get("status") != "pendiente":
+            raise HTTPException(status_code=409, detail="Only pending orders can be deleted.")
+
+        remaining_orders = [order for order in orders if order.get("ticket_number") != ticket_number]
+        with ORDERS_PATH.open("w", encoding="utf-8") as file:
+            json.dump(remaining_orders, file, indent=2, ensure_ascii=False)
+
+        return {"status": "ok", "ticket_number": ticket_number}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
 @router.put("/orders/{ticket_number}/status")
 async def update_order_status(ticket_number: str, payload: dict) -> dict[str, object]:
     try:
         new_status = payload.get("status", "pendiente")
-        if not ORDERS_PATH.exists():
+        if not ORDERS_PATH.exists() or ORDERS_PATH.stat().st_size == 0:
             raise HTTPException(status_code=404, detail="No orders found.")
         
         with ORDERS_PATH.open("r", encoding="utf-8") as file:

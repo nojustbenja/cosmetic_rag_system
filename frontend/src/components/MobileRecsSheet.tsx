@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Product } from "@/types/shop";
 import { ProductStage } from "./ProductStage";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react";
 
 type Props = {
   products: Product[];
@@ -32,7 +32,7 @@ export function MobileRecsSheet({ products, recIds }: Props) {
           setPulse(false);
         }}
         aria-label={`Ver ${recIds.length} productos recomendados por Lumi`}
-        className="lg:hidden fixed top-7 left-1/2 -translate-x-1/2 z-40 glass-panel rounded-full pl-2.5 pr-4 py-1.5 flex items-center gap-2 shadow-[0_12px_40px_hsl(220_25%_12%/0.18)] animate-float-up active:scale-95 transition-transform"
+        className="lg:hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 glass-panel rounded-full pl-2.5 pr-4 py-1.5 flex items-center gap-2 shadow-[0_12px_40px_hsl(220_25%_12%/0.18)] animate-float-up active:scale-95 transition-transform"
       >
         {/* Halo pulsante */}
         {pulse && (
@@ -57,7 +57,7 @@ export function MobileRecsSheet({ products, recIds }: Props) {
             className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
-          <div className="relative h-[85dvh] glass-panel rounded-t-[2.5rem] overflow-hidden flex flex-col animate-float-up">
+          <div className="relative h-[82dvh] glass-panel rounded-t-[2.5rem] overflow-hidden flex flex-col animate-float-up">
             <div className="flex items-center justify-between px-6 pt-5 pb-2">
               <div className="w-12 h-1.5 rounded-full bg-foreground/15 mx-auto absolute left-1/2 -translate-x-1/2 top-2" />
               <div className="flex items-center gap-2">
@@ -72,11 +72,11 @@ export function MobileRecsSheet({ products, recIds }: Props) {
                 aria-label="Cerrar"
                 className="size-9 rounded-full bg-secondary flex items-center justify-center hover:bg-muted"
               >
-                <X className="size-4" />
+                <X weight="light" className="size-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <ProductStage products={products} recIds={recIds} />
+              <ProductStage products={products} recIds={recIds} layoutScope="mobile-sheet" />
             </div>
           </div>
         </div>

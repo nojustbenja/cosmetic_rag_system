@@ -5,9 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 type Props = {
   products: Product[];
   recIds: string[];
+  layoutScope?: string;
 };
 
-export function ProductStage({ products, recIds }: Props) {
+export function ProductStage({ products, recIds, layoutScope = "main" }: Props) {
   // If recommendations exist, show them first ordered by product_index; otherwise show all
   const visible = recIds.length
     ? recIds
@@ -64,6 +65,7 @@ export function ProductStage({ products, recIds }: Props) {
               highlighted={isRecMode && i === 0}
               isRecommended={recIds.includes(p.id)}
               index={i}
+              layoutScope={layoutScope}
             />
           ))}
         </AnimatePresence>

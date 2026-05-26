@@ -5,11 +5,17 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 
-# Try to find a virtualenv
-if [[ -d "$BACKEND_DIR/.venv" ]]; then
-  BACKEND_VENV="$BACKEND_DIR/.venv"
-elif [[ -d "$BACKEND_DIR/.venv-run" ]]; then
+is_usable_venv() {
+  local venv_path="$1"
+  [[ -x "$venv_path/bin/python" ]] || [[ -x "$venv_path/bin/python3" ]]
+}
+
+# Prefer a working runtime venv. Some copied/moved checkouts keep a stale
+# .venv whose console scripts point at the old absolute path.
+if [[ -d "$BACKEND_DIR/.venv-run" ]] && is_usable_venv "$BACKEND_DIR/.venv-run"; then
   BACKEND_VENV="$BACKEND_DIR/.venv-run"
+elif [[ -d "$BACKEND_DIR/.venv" ]] && is_usable_venv "$BACKEND_DIR/.venv"; then
+  BACKEND_VENV="$BACKEND_DIR/.venv"
 else
   BACKEND_VENV="$BACKEND_DIR/.venv-run"
 fi
@@ -34,12 +40,12 @@ if [[ ! -f "$BACKEND_DIR/.env" ]] && [[ -f "$BACKEND_DIR/.env.example" ]]; then
   echo "💡 Please edit backend/.env with your API keys."
 fi
 
-if [[ ! -d "$BACKEND_VENV" ]]; then
+if ! is_usable_venv "$BACKEND_VENV"; then
   echo "📦 Creating backend virtualenv in $BACKEND_VENV..."
   python3 -m venv "$BACKEND_VENV"
 fi
 
-if [[ ! -x "$BACKEND_VENV/bin/uvicorn" ]]; then
+if [[ ! -x "$BACKEND_VENV/bin/uvicorn" ]] || ! "$BACKEND_VENV/bin/python" -c "import uvicorn" >/dev/null 2>&1; then
   echo "📥 Installing backend dependencies..."
   "$BACKEND_VENV/bin/pip" install --quiet -r "$BACKEND_DIR/requirements.txt"
 fi

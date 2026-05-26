@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChatMessage, Product } from "@/types/shop";
-import { ArrowUpRight, Cog, RotateCcw, Loader2 } from "lucide-react";
+import { ArrowUpRight, Gear, ArrowCounterClockwise, Sparkle, CircleNotch } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { streamChat, fetchProductReason } from "@/lib/api";
+import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { Markdown } from "./Markdown";
 import { LumiStatus } from "./LumiStatus";
 
 type Props = {
-  onRecommendations: (products: Product[], guides: any[]) => void;
+  onRecommendations: (products: Product[], guides: unknown[]) => void;
   onClearChat: () => void;
 };
 
@@ -32,10 +33,24 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const performScroll = () => {
+      // During active token streaming, use "auto" (instant) scroll to prevent animation queue buildup.
+      // Use premium "smooth" scroll only on full message completion.
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: loading ? "auto" : "smooth",
+      });
+    };
+
+    const frameId = requestAnimationFrame(performScroll);
+    return () => cancelAnimationFrame(frameId);
+  }, [messages, loading]);
 
   /** Reset everything — new session, empty history, clear parent catalog state */
   const handleClear = useCallback(() => {
@@ -69,6 +84,8 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
         content: "",
       },
     ]);
+
+    abortControllerRef.current = new AbortController();
 
     try {
       await streamChat(text, sessionId, {
@@ -118,10 +135,15 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
             )
           );
         },
-      });
-    } catch (e: any) {
+      }, abortControllerRef.current.signal);
+    } catch (e: unknown) {
+      if (e instanceof DOMException && e.name === 'AbortError') {
+        // Ignorar si fue detenido por el usuario
+        return;
+      }
       console.error(e);
-      toast.error(e.message || "Error de conexión con RAG.");
+      const message = e instanceof Error ? e.message : "Error de conexión con RAG.";
+      toast.error(message);
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessageId
@@ -131,15 +153,24 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
       );
     } finally {
       setLoading(false);
+      abortControllerRef.current = null;
+    }
+  }
+
+  function handleStop() {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      setLoading(false);
+      abortControllerRef.current = null;
     }
   }
 
   return (
-    <div className="w-full lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100dvh-3rem)] flex flex-col glass-panel rounded-[2.5rem] p-6 lg:p-8 overflow-hidden">
+    <div className="w-full min-h-[calc(100dvh-4rem)] lg:min-h-0 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100dvh-2rem)] flex flex-col glass-panel rounded-[2.5rem] p-6 lg:p-8 overflow-hidden">
       {/* Header */}
       <div className="flex justify-between items-center mb-6 shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="size-9 rounded-full bg-foreground text-background flex items-center justify-center">
+          <div className="icon-orb size-10 rounded-[1.15rem] bg-foreground text-background border-foreground/10">
             <svg viewBox="0 0 24 24" fill="currentColor" className="size-5">
               <path d="M12 3 Q12 12 21 12 Q12 12 12 21 Q12 12 3 12 Q12 12 12 3 Z" />
               <path d="M19 3 Q19 6 22 6 Q19 6 19 9 Q19 6 16 6 Q19 6 19 3 Z" className="opacity-70" />
@@ -163,18 +194,18 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
               disabled={loading}
               title="Nueva conversación"
               aria-label="Limpiar chat e iniciar nueva conversación"
-              className="size-9 rounded-full bg-secondary flex items-center justify-center hover:bg-muted text-foreground transition-all duration-200 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="icon-orb size-9 rounded-full hover:bg-muted text-foreground transition-all duration-200 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <RotateCcw className="size-4" />
+              <ArrowCounterClockwise weight="light" className="size-4" />
             </motion.button>
           )}
 
           <Link
             to="/admin"
             title="Panel de Control (Back Office)"
-            className="size-9 rounded-full bg-secondary flex items-center justify-center hover:bg-muted text-foreground transition-all duration-200 hover:scale-105"
+            className="hidden sm:flex icon-orb size-9 rounded-full hover:bg-muted text-foreground transition-all duration-200 hover:scale-105"
           >
-            <Cog className="size-4" />
+            <Gear weight="light" className="size-4" />
           </Link>
         </div>
       </div>
@@ -182,7 +213,7 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
       {/* Messages */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-6 pb-4 pr-1"
+        className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-6 pb-4 pr-1 ${messages.length <= 1 ? "justify-center" : ""}`}
       >
         <AnimatePresence mode="popLayout">
           {messages.map((m) => (
@@ -192,20 +223,20 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
               layout
-              className={`max-w-[90%] ${m.role === "user" ? "self-end" : "self-start"}`}
+              className={`max-w-[88%] ${m.role === "user" ? "self-end" : "self-start"}`}
             >
               {m.role === "user" ? (
-                <div className="bg-foreground text-background px-5 py-3.5 rounded-3xl rounded-tr-sm text-[14px] leading-relaxed shadow-sm">
+                <div className="bg-foreground text-background px-5 py-3.5 rounded-[1.5rem] rounded-tr-none text-[14px] leading-relaxed shadow-[0_4px_12px_rgba(0,0,0,0.03)] border border-foreground/5 font-medium selection:bg-background/25 selection:text-background">
                   {m.content}
                 </div>
               ) : (
-                <div className="bg-secondary/75 border border-border/60 px-5 py-3.5 rounded-3xl rounded-tl-sm text-[14px] leading-relaxed text-foreground/85 font-medium">
+                <div className="glass-card border border-white/20 px-6 py-4 rounded-[1.75rem] rounded-tl-none text-[14.5px] leading-relaxed text-foreground shadow-sm flex flex-col gap-3 font-medium selection:bg-foreground/10 selection:text-foreground">
                   {m.content ? (
                     <>
                       <Markdown content={m.content} />
                       {m.products && m.products.length > 0 && (
-                        <div className="mt-4 flex flex-col gap-2">
-                          <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">Productos recomendados:</p>
+                        <div className="mt-4 flex flex-col gap-2 border-t border-foreground/5 pt-3">
+                          <p className="text-eyebrow text-muted-foreground/80 mb-1">Productos recomendados por Lumi:</p>
                           <ProductMentionGroup products={m.products} />
                         </div>
                       )}
@@ -222,12 +253,12 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
 
       {/* Suggestions — only on fresh start */}
       {messages.length <= 1 && (
-        <div className="flex flex-wrap gap-2 mb-3 pt-2 shrink-0">
+        <div className="flex flex-wrap gap-2 mb-4 pt-2 shrink-0 animate-fade-in">
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
               onClick={() => send(s)}
-              className="px-3.5 py-2 rounded-full glass-input text-label text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
+              className="px-4 py-2 rounded-full bg-background/40 hover:bg-background/80 text-[12px] font-bold text-muted-foreground/80 hover:text-foreground border border-border/40 hover:border-foreground/20 hover:shadow-soft active:scale-[0.98] transition-all duration-300"
             >
               {s}
             </button>
@@ -253,14 +284,25 @@ export function ChatPanel({ onRecommendations, onClearChat }: Props) {
             aria-label="Mensaje para Lumi"
             className="flex-1 bg-transparent border-none outline-none px-4 text-[14.5px] placeholder:text-muted-foreground/60"
           />
-          <button
-            type="submit"
-            disabled={loading || !input.trim()}
-            aria-label="Enviar mensaje"
-            className="size-10 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 transition-transform"
-          >
-            <ArrowUpRight className="size-4" />
-          </button>
+          {loading ? (
+            <button
+              type="button"
+              onClick={handleStop}
+              aria-label="Detener generación"
+              className="size-10 rounded-full bg-red-500/10 text-red-600 border border-red-500/15 flex items-center justify-center hover:bg-red-500/18 hover:shadow-[0_10px_26px_-18px_rgba(220,38,38,0.7)] active:scale-95 transition-all"
+            >
+              <div className="size-3.5 bg-current rounded-[0.35rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              aria-label="Enviar mensaje"
+              className="size-10 rounded-full bg-foreground text-background flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 transition-transform"
+            >
+              <ArrowUpRight weight="light" className="size-5" />
+            </button>
+          )}
         </div>
       </form>
     </div>
@@ -281,96 +323,88 @@ function TypingDots() {
 }
 
 function ProductMentionGroup({ products }: { products: Product[] }) {
-  const [openId, setOpenId] = useState<string | null>(null);
-
+  // Solo analizamos/renderizamos en profundidad los 3 primeros, pero listamos el resto sin analizar
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <div className="flex flex-col gap-3">
       {products.map((p, idx) => (
         <ProductMention 
           key={p.id} 
           product={p} 
           index={idx + 1} 
-          isOpen={openId === p.id}
-          onToggle={() => setOpenId(openId === p.id ? null : p.id)}
         />
       ))}
     </div>
   );
 }
 
-function ProductMention({ product, index, isOpen, onToggle }: { product: Product; index: number; isOpen: boolean; onToggle: () => void }) {
+function ProductMention({ product, index }: { product: Product; index: number }) {
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
 
+  const loadReason = useCallback(() => {
+    if (!product.query || loadingReason) return;
+    setLoadingReason(true);
+    fetchProductReason(product.query, product)
+      .then(reason => setLocalReason(reason))
+      .catch(err => {
+        console.error(err);
+        setLocalReason("No se pudo obtener la recomendación.");
+      })
+      .finally(() => setLoadingReason(false));
+  }, [loadingReason, product]);
+
   useEffect(() => {
-    if (isOpen && !localReason && product.query) {
-      setLoadingReason(true);
-      fetchProductReason(product.query, product)
-        .then(reason => setLocalReason(reason))
-        .catch(err => {
-          console.error(err);
-          setLocalReason("No se pudo obtener la recomendación.");
-        })
-        .finally(() => setLoadingReason(false));
+    // Si no tenemos la razón local, pedirla automáticamente al montar (solo para los 3 primeros)
+    if (!localReason && product.query && index <= 3) {
+      loadReason();
     }
-  }, [isOpen, localReason, product]);
+  }, [localReason, product.query, index, loadReason]);
 
   return (
-    <div className="relative">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center gap-3 p-2 rounded-xl bg-background/50 hover:bg-background/80 border border-border/40 transition-colors text-left"
-      >
-        <div className="shrink-0 size-8 rounded-lg bg-white overflow-hidden flex items-center justify-center shadow-sm">
-          {product.image_url ? (
-            <img src={product.image_url} alt={product.name} className="size-full object-contain" />
-          ) : (
-            <span className="text-[10px] text-muted-foreground font-bold">{index}</span>
-          )}
+    <div className="relative flex flex-col gap-2 p-2.5 rounded-[1.25rem] bg-background/75 border border-border/30 shadow-[inset_0_1px_1.5px_rgba(255,255,255,0.7),_0_2px_8px_-1px_rgba(0,0,0,0.02)]">
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 size-9 rounded-xl bg-secondary overflow-hidden flex items-center justify-center border border-foreground/5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
+          <img
+            src={getProductImage(product)}
+            alt={product.name}
+            className="size-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[12.5px] font-bold text-foreground truncate">{product.name}</p>
-          <p className="text-[11px] text-muted-foreground truncate">{product.brand}</p>
+          <p className="text-[13px] font-bold text-foreground truncate tracking-tight">{product.name}</p>
+          <p className="text-[11px] text-muted-foreground/70 truncate font-bold uppercase tracking-wider">{product.brand}</p>
         </div>
-      </button>
+      </div>
 
-      {/* Popover/Dialog for Reason */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute bottom-full mb-2 left-0 w-64 md:w-80 z-50 bg-background/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl p-4"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="size-6 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
-                {index}
-              </div>
-              <p className="text-[13px] font-bold text-foreground leading-tight">{product.name}</p>
+      {(index <= 3 || localReason || loadingReason) && (
+        <div className="pl-11 pr-2 pb-1">
+          {loadingReason ? (
+            <div className="flex items-center gap-2 text-[12px] text-muted-foreground py-1">
+              <CircleNotch weight="light" className="size-3.5 animate-spin" />
+              <span className="italic">El especialista está analizando</span>
             </div>
-            {loadingReason ? (
-              <div className="flex items-center gap-2 text-[12.5px] text-muted-foreground py-2">
-                <Loader2 className="size-3.5 animate-spin" />
-                <span>Lumi está analizando...</span>
-              </div>
-            ) : (
-              <p className="text-[12.5px] text-muted-foreground leading-relaxed text-justify">
-                <strong className="text-foreground">¿Por qué lo recomiendo?</strong><br/>
-                {localReason || "Este producto es relevante según tu consulta y preferencias."}
-              </p>
-            )}
-            
-            <button 
-              onClick={onToggle}
-              className="mt-3 w-full py-1.5 rounded-lg bg-secondary text-[12px] font-medium hover:bg-muted transition-colors text-foreground"
-            >
-              Cerrar
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ) : localReason ? (
+            <div className="text-[12.5px] text-muted-foreground leading-relaxed">
+              <Markdown content={localReason} />
+            </div>
+          ) : null}
+        </div>
+      )}
+      {index > 3 && !localReason && !loadingReason && product.query && (
+        <div className="pl-11 pr-2 pb-1">
+          <button
+            type="button"
+            onClick={loadReason}
+            className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-background/70 px-3 py-1.5 text-[11px] font-bold text-foreground/75 hover:text-foreground hover:bg-background transition"
+          >
+            <Sparkle weight="light" className="size-3.5" />
+            <span>Preguntar por qué recomienda el #{index}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

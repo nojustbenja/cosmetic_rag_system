@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useProfile } from "@/hooks/useProfile";
-import { X, Printer, Sparkles, RefreshCw } from "lucide-react";
+import { X, Printer, Sparkle, ArrowsCounterClockwise } from "@phosphor-icons/react";
 import { formatCLP } from "@/lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -115,7 +115,7 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
               aria-label="Cerrar vista de ticket"
               className="size-9 rounded-full bg-background/80 backdrop-blur-md flex items-center justify-center hover:bg-background transition shadow-sm text-foreground"
             >
-              <X className="size-4" />
+              <X weight="light" className="size-5" />
             </button>
           </div>
 
@@ -265,14 +265,14 @@ export function ReceiptModal({ isOpen, onClose }: Props) {
               onClick={handlePrint}
               className="w-full bg-foreground text-background rounded-full py-4 text-cta hover:opacity-95 active:scale-[0.98] transition flex items-center justify-center gap-2 shadow-lg"
             >
-              <Printer className="size-4" />
+              <Printer weight="light" className="size-5" />
               <span>Imprimir Ticket de Compra</span>
             </button>
             <button
               onClick={handleNewConsultation}
               className="w-full bg-background/40 hover:bg-background/60 text-foreground border border-foreground/15 rounded-full py-3.5 text-cta active:scale-[0.98] transition flex items-center justify-center gap-2 backdrop-blur-md"
             >
-              <RefreshCw className="size-3.5 animate-spin-slow" />
+              <ArrowsCounterClockwise weight="light" className="size-5 animate-spin-slow" />
               <span>Nueva Consulta (Limpiar)</span>
             </button>
           </div>

@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%; /* Zinc 50 / Off-white for a clean gallery feel */
-    --foreground: 240 10% 4%; /* Zinc 950 for sharp contrast */
+    --background: 232 33% 98%; /* cool porcelain, not pure white */
+    --foreground: 235 18% 9%; /* inked neutral, not pure black */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card: 230 28% 99%;
+    --card-foreground: 235 18% 9%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
+    --popover: 230 28% 99%;
+    --popover-foreground: 235 18% 9%;
 
     --primary: 240 10% 4%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 4%;
+    --secondary: 235 22% 94%;
+    --secondary-foreground: 235 18% 9%;
 
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%; /* Zinc 500 */
+    --muted: 236 20% 93%;
+    --muted-foreground: 235 8% 38%;
 
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 10% 4%;
+    --accent: 228 24% 93%;
+    --accent-foreground: 235 18% 9%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -35,23 +35,19 @@
     --radius: 1.5rem;
 
     /* High-End Liquid Glass Tokens */
-    --glass-surface: 0 0% 100% / 0.6;
-    --glass-edge: 0 0% 100% / 0.8;
-    --glass-deep: 0 0% 100% / 0.4;
-    --glass-input: 0 0% 100% / 0.7;
-
-    /* Ambient blobs (desaturated, tasteful) */
-    --blob-violet: 240 20% 90%;
-    --blob-blue: 210 20% 90%;
-    --blob-peach: 30 20% 92%;
+    --glass-surface: 232 35% 99% / 0.64;
+    --glass-edge: 232 50% 100% / 0.78;
+    --glass-deep: 232 30% 99% / 0.48;
+    --glass-input: 232 35% 99% / 0.72;
+    --glass-tint: 224 54% 72%;
 
     /* Diffusion Shadows (Soft & Wide) */
-    --shadow-glass: 0 20px 40px -15px rgba(0,0,0,0.05);
-    --shadow-glass-lg: 0 30px 60px -20px rgba(0,0,0,0.08);
-    --shadow-soft: 0 4px 20px -2px rgba(0,0,0,0.03);
+    --shadow-glass: 0 24px 60px -28px hsl(235 28% 12% / 0.18), 0 1px 0 hsl(0 0% 100% / 0.55);
+    --shadow-glass-lg: 0 34px 90px -36px hsl(235 28% 12% / 0.24), 0 1px 0 hsl(0 0% 100% / 0.62);
+    --shadow-soft: 0 14px 36px -28px hsl(235 28% 12% / 0.2);
     
     /* Liquid Refraction Border */
-    --shadow-refraction: inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(0,0,0,0.02);
+    --shadow-refraction: inset 0 1px 0 hsl(0 0% 100% / 0.78), inset 0 -1px 0 hsl(235 20% 20% / 0.035);
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
@@ -79,24 +75,77 @@
 @layer components {
   .glass-panel {
     background: hsl(var(--glass-surface));
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
+    backdrop-filter: blur(34px) saturate(1.18);
+    -webkit-backdrop-filter: blur(34px) saturate(1.18);
     border: 1px solid hsl(var(--glass-edge));
     box-shadow: var(--shadow-glass), var(--shadow-refraction);
+    position: relative;
+    isolation: isolate;
+  }
+  .glass-panel::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(145deg, hsl(0 0% 100% / 0.5), transparent 28%),
+      linear-gradient(315deg, hsl(var(--glass-tint) / 0.09), transparent 42%);
+    mask: linear-gradient(rgb(0 0 0), transparent 62%);
+    z-index: -1;
   }
   .glass-card {
     background: hsl(var(--glass-deep));
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
+    backdrop-filter: blur(26px) saturate(1.14);
+    -webkit-backdrop-filter: blur(26px) saturate(1.14);
     border: 1px solid hsl(var(--glass-edge));
     box-shadow: var(--shadow-soft), var(--shadow-refraction);
   }
   .glass-input {
     background: hsl(var(--glass-input));
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(22px) saturate(1.12);
+    -webkit-backdrop-filter: blur(22px) saturate(1.12);
     border: 1px solid hsl(var(--glass-edge));
     box-shadow: var(--shadow-refraction);
+  }
+  .product-dialog-content {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
+    z-index: 70 !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: 88dvh !important;
+    transform: none !important;
+    border-radius: 2.5rem 2.5rem 0 0 !important;
+  }
+  @media (min-width: 768px) {
+    .product-dialog-content {
+      left: 50% !important;
+      right: auto !important;
+      top: 50% !important;
+      bottom: auto !important;
+      width: min(920px, 92vw) !important;
+      max-height: 86dvh !important;
+      transform: translate(-50%, -50%) !important;
+      border-radius: 2.5rem !important;
+    }
+  }
+  .catalog-shell {
+    background: hsl(232 35% 99% / 0.42);
+    backdrop-filter: blur(22px) saturate(1.1);
+    -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  }
+  .shadow-glass-lg {
+    box-shadow: var(--shadow-glass-lg);
+  }
+  .ambient-bg {
+    --lumi-x: 50vw;
+    --lumi-y: 35vh;
+    --lumi-shift-x: 0px;
+    --lumi-shift-y: 0px;
   }
   .ambient-bg::before {
     content: "";
@@ -105,12 +154,37 @@
     z-index: 0;
     pointer-events: none;
     background:
-      radial-gradient(50% 50% at 10% 20%, hsl(var(--blob-violet) / 0.5) 0%, transparent 60%),
-      radial-gradient(60% 60% at 90% 80%, hsl(var(--blob-blue) / 0.4) 0%, transparent 60%),
-      radial-gradient(40% 40% at 50% 100%, hsl(var(--blob-peach) / 0.4) 0%, transparent 60%);
-    filter: blur(80px);
-    transform: translateZ(0);
-    will-change: filter, transform;
+      radial-gradient(720px circle at var(--lumi-x) var(--lumi-y), hsl(202 82% 78% / 0.42), transparent 58%),
+      radial-gradient(920px circle at calc(100% - var(--lumi-x)) calc(100% - var(--lumi-y)), hsl(27 86% 82% / 0.34), transparent 62%),
+      linear-gradient(125deg, hsl(236 55% 92% / 0.64), transparent 34%),
+      linear-gradient(245deg, hsl(173 48% 91% / 0.54), transparent 42%),
+      linear-gradient(0deg, hsl(28 52% 94% / 0.42), hsl(232 33% 98% / 0.22));
+    filter: blur(34px);
+    transform: translate3d(var(--lumi-shift-x), var(--lumi-shift-y), 0) scale(1.03);
+    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    contain: paint;
+  }
+  .ambient-bg::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.42;
+    background-image:
+      linear-gradient(hsl(235 18% 9% / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(235 18% 9% / 0.035) 1px, transparent 1px),
+      linear-gradient(120deg, transparent 0 38%, hsl(235 18% 9% / 0.025) 38% 39%, transparent 39% 100%);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(to bottom, transparent, black 18%, black 78%, transparent);
+    transform: translate3d(calc(var(--lumi-shift-x) * -0.45), calc(var(--lumi-shift-y) * -0.45), 0);
+    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .icon-orb {
+    @apply shrink-0 flex items-center justify-center rounded-2xl border border-foreground/10 bg-background/55 text-foreground shadow-sm backdrop-blur-xl;
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.72), 0 12px 26px -20px hsl(235 28% 12% / 0.38);
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -178,6 +252,15 @@
 }
 .animate-fade-in { animation: fade-in 0.25s ease-out both; }
 
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  .ambient-bg::before,
+  .ambient-bg::after {
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
+}
+
 @keyframes slide-in-right {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
@@ -191,6 +274,8 @@
     color: #000000 !important;
     height: auto !important;
     overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Ocultar UI principal del chat y catálogo */
@@ -198,32 +283,43 @@
   aside, 
   nav, 
   footer, 
-  button, 
+  button,
+  .glass-panel,
+  .ambient-bg::before,
+  [role="dialog"],
   .print\:hidden {
     display: none !important;
   }
 
-  /* Asegurar que el contenedor del ticket ocupe todo el ancho */
+  /* Asegurar que el contenedor del ticket sea visible */
   #lumi-receipt-ticket {
     display: block !important;
-    position: absolute !important;
-    left: 50% !important;
-    top: 20px !important;
-    transform: translateX(-50%) !important;
+    visibility: visible !important;
+    position: relative !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
     width: 100% !important;
     max-width: 80mm !important; /* Ancho estándar de impresora térmica */
-    margin: 0 auto !important;
-    padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
     color: #000000 !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
   }
 
-  /* Configuraciones de página para evitar encabezados automáticos del navegador */
+  /* El wrapper del modal debe dejar de ser fijo */
+  .fixed.inset-0.z-50 {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  /* Configuraciones de página */
   @page {
     margin: 0;
     size: auto;
   }
 }
-

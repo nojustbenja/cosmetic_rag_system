@@ -3,23 +3,25 @@ import { Link } from "react-router-dom";
 import {
   ArrowLeft,
   ShoppingBag,
-  DollarSign,
   PlusCircle,
-  FileText,
-  Sparkles,
-  AlertTriangle,
-  Upload,
+  Sparkle,
+  Warning,
+  UploadSimple,
   Check,
-  Loader2,
-  Tag,
+  CircleNotch,
   Package,
   Clock,
-  HelpCircle,
+  Question,
   CreditCard,
-  TrendingUp,
+  TrendUp,
   Pencil,
   X,
-} from "lucide-react";
+  Trash,
+  Key,
+  PlugsConnected,
+  ShieldCheck,
+  Cpu,
+} from "@phosphor-icons/react";
 import {
   fetchProducts,
   fetchOrders,
@@ -27,22 +29,44 @@ import {
   importProductsCsv,
   getAiAssistedProduct,
   updateOrderStatus,
+  deleteOrder,
   updateProduct,
+  fetchProviderConfig,
+  saveProviderConfig,
+  validateProviderConfig,
+  ProviderConfig,
 } from "@/lib/api";
-import { Product } from "@/types/shop";
+import { Product, Order, OrderItem } from "@/types/shop";
 import { formatCLP } from "@/lib/format";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { LumiStatus } from "@/components/LumiStatus";
 
+interface EditProductState {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  price: number;
+  description: string;
+  image_url: string;
+  stock: number;
+  tags: string;
+  skin_types: string;
+  benefits: string;
+  ingredients: string;
+  _originalName: string;
+}
+
 export default function BackOffice() {
-  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add" | "csv">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "products" | "add" | "csv" | "providers">("orders");
   const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [updatingPayment, setUpdatingPayment] = useState<string | null>(null);
+  const [deletingOrder, setDeletingOrder] = useState<string | null>(null);
 
   // Form State
   const [name, setName] = useState("");
@@ -65,7 +89,7 @@ export default function BackOffice() {
   const [missingFields, setMissingFields] = useState<string[]>([]);
 
   // Edit Product Modal State
-  const [editProduct, setEditProduct] = useState<any | null>(null);
+  const [editProduct, setEditProduct] = useState<EditProductState | null>(null);
   const [editLoading, setEditLoading] = useState(false);
 
   // CSV State
@@ -73,10 +97,90 @@ export default function BackOffice() {
   const [importMode, setImportMode] = useState<"merge" | "replace">("merge");
   const [csvLoading, setCsvLoading] = useState(false);
 
+  // Runtime LLM provider state
+  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(null);
+  const [providerForm, setProviderForm] = useState({
+    provider: "kilo",
+    model: "kilo-auto/free",
+    base_url: "https://api.kilo.ai/api/gateway",
+    api_key: "",
+    kilo_mode: "free",
+  });
+  const [providerLoading, setProviderLoading] = useState(false);
+  const [providerChecking, setProviderChecking] = useState(false);
+  const [providerValidation, setProviderValidation] = useState<{ ok: boolean; message: string } | null>(null);
+
   // Cargar datos al montar
   useEffect(() => {
     loadData();
+    loadProviderConfig();
   }, []);
+
+  const loadProviderConfig = async () => {
+    setProviderLoading(true);
+    try {
+      const config = await fetchProviderConfig();
+      setProviderConfig(config);
+      setProviderForm({
+        provider: config.provider,
+        model: config.model,
+        base_url: config.base_url,
+        api_key: "",
+        kilo_mode: config.kilo_mode || "free",
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo cargar la configuración de proveedores.");
+    } finally {
+      setProviderLoading(false);
+    }
+  };
+
+  const selectedProvider = providerConfig?.providers.find((provider) => provider.id === providerForm.provider);
+
+  const handleProviderChange = (providerId: string) => {
+    const next = providerConfig?.providers.find((provider) => provider.id === providerId);
+    if (!next) return;
+    setProviderValidation(null);
+    setProviderForm({
+      provider: next.id,
+      model: next.default_model,
+      base_url: next.default_base_url,
+      api_key: "",
+      kilo_mode: next.supports_kilo_mode ? "free" : "",
+    });
+  };
+
+  const handleValidateProvider = async () => {
+    setProviderChecking(true);
+    try {
+      const result = await validateProviderConfig(providerForm);
+      setProviderValidation({ ok: result.ok, message: result.message });
+      if (result.ok) toast.success(result.message);
+      else toast.error(result.message);
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo validar el proveedor.");
+    } finally {
+      setProviderChecking(false);
+    }
+  };
+
+  const handleSaveProvider = async () => {
+    setProviderLoading(true);
+    try {
+      const config = await saveProviderConfig(providerForm);
+      setProviderConfig(config);
+      setProviderForm((prev) => ({ ...prev, api_key: "" }));
+      setProviderValidation({ ok: true, message: `${config.label} quedó activo para las próximas consultas.` });
+      toast.success("Configuración runtime guardada.");
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo guardar la configuración del proveedor.");
+    } finally {
+      setProviderLoading(false);
+    }
+  };
 
   const loadData = async () => {
     setLoadingProducts(true);
@@ -128,7 +232,7 @@ export default function BackOffice() {
           loadData();
           return "Producto actualizado y re-indexado en el RAG ✅";
         },
-        error: (err: any) => err?.message || "No se pudo guardar el producto.",
+        error: (err: unknown) => (err as { message?: string })?.message || "No se pudo guardar el producto.",
       }
     ).finally(() => setEditLoading(false));
   };
@@ -147,6 +251,26 @@ export default function BackOffice() {
       }
     ).finally(() => {
       setUpdatingPayment(null);
+    });
+  };
+
+  const handleDeleteOrder = async (ticketNumber: string) => {
+    const confirmed = window.confirm(`Eliminar el ticket pendiente ${ticketNumber}? Esta accion no se puede deshacer.`);
+    if (!confirmed) return;
+
+    setDeletingOrder(ticketNumber);
+    toast.promise(
+      deleteOrder(ticketNumber),
+      {
+        loading: "Eliminando ticket pendiente...",
+        success: () => {
+          loadData();
+          return "Ticket pendiente eliminado.";
+        },
+        error: "No se pudo eliminar el ticket.",
+      }
+    ).finally(() => {
+      setDeletingOrder(null);
     });
   };
 
@@ -296,24 +420,26 @@ export default function BackOffice() {
   const projectedRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
   const totalItemsOrdered = orders.reduce(
-    (sum, o) => sum + o.items.reduce((itemSum: number, item: any) => itemSum + (item.qty || 0), 0),
+    (sum, o) => sum + o.items.reduce((itemSum: number, item: OrderItem) => itemSum + (item.qty || 0), 0),
     0
   );
 
   return (
-    <main className="min-h-[100dvh] w-full relative overflow-x-hidden bg-background ambient-bg py-8 px-4 lg:px-8">
+    <main className="min-h-[100dvh] w-full relative overflow-x-clip bg-background ambient-bg py-8 px-4 lg:px-8">
       {/* Botón Volver */}
       <div className="max-w-6xl mx-auto mb-6 flex justify-between items-center z-10 relative">
         <Link
           to="/"
           className="inline-flex items-center text-sm font-semibold text-foreground bg-secondary hover:bg-muted py-2.5 px-4 rounded-full transition-transform active:scale-[0.98] shadow-sm"
         >
-          <ArrowLeft className="size-4 mr-2" />
+          <ArrowLeft weight="light" className="size-5 mr-2" />
           Volver a Lumi
         </Link>
         <div className="flex items-center gap-4">
           <LumiStatus />
-          <span className="text-eyebrow text-white tracking-widest drop-shadow-md">ADMIN CONTROL PANEL</span>
+          <span className="text-eyebrow text-foreground/75 tracking-widest rounded-full border border-foreground/10 bg-background/55 px-3 py-1.5 backdrop-blur-xl">
+            LUMI ADMIN CONTROL
+          </span>
         </div>
       </div>
 
@@ -332,7 +458,9 @@ export default function BackOffice() {
               activeTab === "orders" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
             }`}
           >
-            <ShoppingBag className="size-4" />
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "orders" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <ShoppingBag weight="light" className="size-4" />
+            </span>
             <span>Órdenes & Ventas</span>
           </button>
 
@@ -342,7 +470,9 @@ export default function BackOffice() {
               activeTab === "products" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
             }`}
           >
-            <Package className="size-4" />
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "products" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <Package weight="light" className="size-4" />
+            </span>
             <span>Catálogo RAG</span>
           </button>
 
@@ -352,7 +482,9 @@ export default function BackOffice() {
               activeTab === "add" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
             }`}
           >
-            <PlusCircle className="size-4" />
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "add" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <PlusCircle weight="light" className="size-4" />
+            </span>
             <span>Nuevo Producto</span>
           </button>
 
@@ -362,8 +494,22 @@ export default function BackOffice() {
               activeTab === "csv" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
             }`}
           >
-            <Upload className="size-4" />
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "csv" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <UploadSimple weight="light" className="size-4" />
+            </span>
             <span>Importar CSV</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("providers")}
+            className={`w-full text-left py-3.5 px-5 rounded-2xl flex items-center gap-3 transition ${
+              activeTab === "providers" ? "bg-foreground text-background font-bold shadow-md" : "hover:bg-secondary text-foreground"
+            }`}
+          >
+            <span className={`icon-orb size-8 rounded-xl ${activeTab === "providers" ? "bg-background/20 text-background border-background/20" : ""}`}>
+              <PlugsConnected weight="light" className="size-4" />
+            </span>
+            <span>Proveedor IA</span>
           </button>
         </aside>
 
@@ -387,29 +533,29 @@ export default function BackOffice() {
 
                 {/* Métricas */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-emerald-500/10">
-                    <div className="size-11 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                      <CreditCard className="size-5" />
+                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-foreground/5">
+                    <div className="size-11 rounded-2xl bg-foreground/5 text-foreground flex items-center justify-center">
+                      <CreditCard weight="light" className="size-6" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ingresos Confirmados</p>
-                      <h3 className="text-lg font-bold tracking-tight mt-0.5 text-emerald-400">{formatCLP(confirmedRevenue)}</h3>
+                      <h3 className="text-lg font-bold tracking-tight mt-0.5 text-foreground">{formatCLP(confirmedRevenue)}</h3>
                     </div>
                   </div>
 
-                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-indigo-500/10">
-                    <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-                      <TrendingUp className="size-5" />
+                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-foreground/5">
+                    <div className="size-11 rounded-2xl bg-foreground/5 text-foreground flex items-center justify-center">
+                      <TrendUp weight="light" className="size-6" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Venta Proyectada</p>
-                      <h3 className="text-lg font-bold tracking-tight mt-0.5 text-indigo-400">{formatCLP(projectedRevenue)}</h3>
+                      <h3 className="text-lg font-bold tracking-tight mt-0.5 text-foreground">{formatCLP(projectedRevenue)}</h3>
                     </div>
                   </div>
 
-                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4">
-                    <div className="size-11 rounded-2xl bg-violet-500/10 text-violet-400 flex items-center justify-center">
-                      <ShoppingBag className="size-5" />
+                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-foreground/5">
+                    <div className="size-11 rounded-2xl bg-foreground/5 text-foreground flex items-center justify-center">
+                      <ShoppingBag weight="light" className="size-6" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Ítems Ordenados</p>
@@ -417,9 +563,9 @@ export default function BackOffice() {
                     </div>
                   </div>
 
-                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4">
-                    <div className="size-11 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                      <Clock className="size-5" />
+                  <div className="glass-card p-5 rounded-3xl flex items-center gap-4 border border-foreground/5">
+                    <div className="size-11 rounded-2xl bg-foreground/5 text-foreground flex items-center justify-center">
+                      <Clock weight="light" className="size-6" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tickets Generados</p>
@@ -432,7 +578,7 @@ export default function BackOffice() {
                 <div className="glass-card rounded-[2rem] overflow-hidden">
                   {loadingOrders ? (
                     <div className="p-12 text-center text-muted-foreground">
-                      <Loader2 className="size-6 animate-spin mx-auto mb-2 text-foreground" />
+                      <CircleNotch weight="light" className="size-6 animate-spin mx-auto mb-2 text-foreground" />
                       Cargando órdenes de venta...
                     </div>
                   ) : orders.length === 0 ? (
@@ -464,7 +610,7 @@ export default function BackOffice() {
                               </td>
                               <td className="py-4 px-6 max-w-[240px]">
                                 <div className="space-y-1">
-                                  {o.items?.map((item: any, iIdx: number) => (
+                                  {o.items?.map((item: OrderItem, iIdx: number) => (
                                     <div key={iIdx} className="text-xs truncate text-muted-foreground">
                                       <span className="font-bold text-foreground">{item.qty}</span> × {item.name}
                                       <span className="text-[10px] text-muted-foreground/60 font-mono block">ID: {item.id}</span>
@@ -474,12 +620,12 @@ export default function BackOffice() {
                               </td>
                               <td className="py-4 px-6">
                                 {o.status === "pagado" ? (
-                                  <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs font-bold font-mono">
-                                    <Check className="size-3" /> PAGADO
+                                  <span className="inline-flex items-center gap-1 bg-emerald-500/5 text-emerald-600 border border-emerald-500/10 px-2.5 py-1 rounded-full text-xs font-bold font-mono">
+                                    <Check weight="bold" className="size-3" /> PAGADO
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-xs font-bold font-mono animate-pulse">
-                                    <Clock className="size-3" /> PENDIENTE
+                                  <span className="inline-flex items-center gap-1 bg-amber-500/5 text-amber-600 border border-amber-500/10 px-2.5 py-1 rounded-full text-xs font-bold font-mono animate-pulse">
+                                    <Clock weight="bold" className="size-3" /> PENDIENTE
                                   </span>
                                 )}
                               </td>
@@ -488,17 +634,32 @@ export default function BackOffice() {
                               </td>
                               <td className="py-4 px-6 text-center">
                                 {o.status !== "pagado" ? (
-                                  <button
-                                    onClick={() => handleConfirmPayment(o.ticket_number)}
-                                    disabled={updatingPayment === o.ticket_number}
-                                    className="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-1.5 px-3.5 text-xs font-bold transition-transform active:scale-95 shadow-sm disabled:opacity-50 disabled:scale-100"
-                                  >
-                                    <CreditCard className="size-3" />
-                                    <span>Confirmar Pago</span>
-                                  </button>
+                                  <div className="inline-flex items-center justify-center gap-2">
+                                    <button
+                                      onClick={() => handleConfirmPayment(o.ticket_number)}
+                                      disabled={updatingPayment === o.ticket_number || deletingOrder === o.ticket_number}
+                                      className="inline-flex items-center gap-1 bg-foreground text-background hover:opacity-90 rounded-full py-1.5 px-3.5 text-xs font-bold transition-transform active:scale-95 shadow-sm disabled:opacity-50 disabled:scale-100"
+                                    >
+                                      <CreditCard weight="bold" className="size-3" />
+                                      <span>Confirmar Pago</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteOrder(o.ticket_number)}
+                                      disabled={deletingOrder === o.ticket_number || updatingPayment === o.ticket_number}
+                                      className="inline-flex size-8 items-center justify-center rounded-full border border-red-500/15 bg-red-500/5 text-red-600 hover:bg-red-500/10 transition-transform active:scale-95 disabled:opacity-50 disabled:scale-100"
+                                      title="Eliminar ticket pendiente"
+                                      aria-label={`Eliminar ticket pendiente ${o.ticket_number}`}
+                                    >
+                                      {deletingOrder === o.ticket_number ? (
+                                        <CircleNotch weight="light" className="size-3.5 animate-spin" />
+                                      ) : (
+                                        <Trash weight="bold" className="size-3.5" />
+                                      )}
+                                    </button>
+                                  </div>
                                 ) : (
                                   <span className="text-xs text-muted-foreground font-semibold flex items-center justify-center gap-1">
-                                    <Check className="size-3.5 text-emerald-500" />
+                                    <Check weight="bold" className="size-3.5 text-emerald-600" />
                                     <span>Listo</span>
                                   </span>
                                 )}
@@ -534,7 +695,7 @@ export default function BackOffice() {
 
                 {loadingProducts ? (
                   <div className="p-12 text-center text-muted-foreground">
-                    <Loader2 className="size-6 animate-spin mx-auto mb-2 text-foreground" />
+                    <CircleNotch weight="light" className="size-6 animate-spin mx-auto mb-2 text-foreground" />
                     Cargando catálogo del RAG...
                   </div>
                 ) : products.length === 0 ? (
@@ -580,14 +741,14 @@ export default function BackOffice() {
                               _originalName: p.name,
                               skin_types: Array.isArray(p.skin_types) ? p.skin_types.join(",") : p.skin_types || "",
                               tags: Array.isArray(p.tags) ? p.tags.join(",") : p.tags || "",
-                              benefits: Array.isArray((p as any).benefits) ? (p as any).benefits.join(",") : (p as any).benefits || "",
-                              ingredients: (p as any).ingredients || "",
+                              benefits: Array.isArray(p.benefits) ? p.benefits.join(",") : p.benefits || "",
+                              ingredients: p.ingredients || "",
                             })
                           }
-                          className="absolute top-3 right-3 size-8 rounded-full bg-background/60 border border-border/40 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition opacity-0 group-hover:opacity-100"
+                          className="absolute top-3 right-3 size-8 rounded-full bg-background/60 border border-border/40 backdrop-blur flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-foreground/30 transition opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-foreground focus-visible:outline-none"
                           aria-label="Editar producto"
                         >
-                          <Pencil className="size-3.5" />
+                          <Pencil weight="light" className="size-4" />
                         </button>
                       </div>
                     ))}
@@ -613,12 +774,12 @@ export default function BackOffice() {
                   <button
                     onClick={handleAiAssist}
                     disabled={aiLoading}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full py-2.5 px-4 text-xs font-bold flex items-center gap-1.5 active:scale-95 transition disabled:opacity-50"
+                    className="bg-foreground text-background hover:opacity-90 rounded-full py-2.5 px-4 text-xs font-bold flex items-center gap-1.5 active:scale-95 transition disabled:opacity-50 shadow-sm"
                   >
                     {aiLoading ? (
-                      <Loader2 className="size-3.5 animate-spin" />
+                      <CircleNotch weight="light" className="size-4 animate-spin" />
                     ) : (
-                      <Sparkles className="size-3.5" />
+                      <Sparkle weight="light" className="size-4" />
                     )}
                     <span>Completar con IA ✨</span>
                   </button>
@@ -780,7 +941,7 @@ export default function BackOffice() {
                     disabled={saveLoading}
                     className="bg-foreground text-background font-bold text-xs py-3.5 px-8 rounded-full hover:opacity-90 transition active:scale-95 flex items-center gap-2 disabled:opacity-50"
                   >
-                    {saveLoading && <Loader2 className="size-3.5 animate-spin" />}
+                    {saveLoading && <CircleNotch weight="light" className="size-4 animate-spin" />}
                     <span>Registrar Producto</span>
                   </button>
                 </div>
@@ -804,9 +965,9 @@ export default function BackOffice() {
                 </div>
 
                 {/* Formato Requerido */}
-                <div className="glass-card p-4 rounded-2xl space-y-2 border border-indigo-500/10">
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-indigo-400 font-mono flex items-center gap-1">
-                    <HelpCircle className="size-3" /> Formato de columnas requerido (CSV)
+                <div className="glass-card p-4 rounded-2xl space-y-2 border border-foreground/5">
+                  <span className="text-[10px] uppercase tracking-widest font-bold text-foreground/75 font-mono flex items-center gap-1">
+                    <Question weight="light" className="size-4" /> Formato de columnas requerido (CSV)
                   </span>
                   <code className="text-[10.5px] font-mono bg-background/50 p-2.5 rounded-lg block overflow-x-auto text-muted-foreground border border-border/30">
                     nombre,marca,categoria,tipo_piel,ingredientes,beneficios,precio,descripcion,image_url,stock,tags
@@ -820,7 +981,7 @@ export default function BackOffice() {
                   className="border-2 border-dashed border-border/40 hover:border-foreground/20 bg-secondary/20 rounded-3xl p-8 text-center flex flex-col items-center justify-center gap-3 transition cursor-pointer"
                 >
                   <div className="size-12 rounded-full bg-secondary flex items-center justify-center text-foreground">
-                    <Upload className="size-5" />
+                    <UploadSimple weight="light" className="size-6" />
                   </div>
                   <div>
                     <p className="text-sm font-bold">Arrastra tu archivo catálogo.csv aquí</p>
@@ -872,9 +1033,162 @@ export default function BackOffice() {
                     disabled={csvLoading}
                     className="bg-foreground text-background font-bold text-xs py-3.5 px-8 rounded-full hover:opacity-90 transition active:scale-95 flex items-center gap-2 disabled:opacity-50 w-full sm:w-auto justify-center"
                   >
-                    {csvLoading && <Loader2 className="size-3.5 animate-spin" />}
+                    {csvLoading && <CircleNotch weight="light" className="size-4 animate-spin" />}
                     <span>Importar Catálogo</span>
                   </button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* PESTAÑA: PROVEEDOR IA */}
+            {activeTab === "providers" && (
+              <motion.div
+                key="providers"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                className="space-y-6"
+              >
+                <div className="flex flex-col gap-4 border-b border-border/30 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <h2 className="text-title">Proveedor IA Runtime</h2>
+                    <p className="text-xs text-muted-foreground mt-1 max-w-[62ch] leading-relaxed">
+                      Cambia el motor de Lumi sin editar `.env`. La configuración queda persistida para las próximas consultas RAG.
+                    </p>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-3 py-2 text-[11px] font-bold text-foreground/75 backdrop-blur-xl">
+                    <ShieldCheck weight="light" className="size-4" />
+                    <span>{providerConfig?.api_key_set ? "Clave activa" : "Clave pendiente"}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[0.92fr_1.08fr] gap-5">
+                  <div className="glass-card rounded-[2rem] p-5 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-orb size-11">
+                        <Cpu weight="light" className="size-5" />
+                      </div>
+                      <div>
+                        <p className="text-label">Selector de proveedor</p>
+                        <p className="text-[11px] text-muted-foreground">OpenAI, Gemini, Claude, LiteLLM, Kilo y OpenRouter</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+                      {providerConfig?.providers.map((provider) => (
+                        <button
+                          key={provider.id}
+                          type="button"
+                          onClick={() => handleProviderChange(provider.id)}
+                          className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${
+                            providerForm.provider === provider.id
+                              ? "border-foreground/30 bg-foreground text-background shadow-md"
+                              : "border-border/40 bg-background/40 text-foreground hover:border-foreground/20 hover:bg-background/70"
+                          }`}
+                        >
+                          <span className="text-sm font-bold">{provider.label}</span>
+                          <span className="text-[10px] font-mono opacity-70">{provider.default_model}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="glass-card rounded-[2rem] p-5 space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label htmlFor="provider-model" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Modelo por defecto</label>
+                        <input
+                          id="provider-model"
+                          value={providerForm.model}
+                          onChange={(e) => setProviderForm({ ...providerForm, model: e.target.value })}
+                          placeholder={selectedProvider?.default_model || "modelo"}
+                          className="w-full bg-background/55 border border-border/40 rounded-2xl py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                        />
+                      </div>
+
+                      {selectedProvider?.supports_kilo_mode && (
+                        <div className="space-y-1.5">
+                          <label htmlFor="provider-kilo-mode" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Modo Kilo</label>
+                          <select
+                            id="provider-kilo-mode"
+                            value={providerForm.kilo_mode}
+                            onChange={(e) => setProviderForm({ ...providerForm, kilo_mode: e.target.value })}
+                            className="w-full bg-background/55 border border-border/40 rounded-2xl py-3 px-4 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                          >
+                            <option value="free">Free</option>
+                            <option value="balanced">Balanced</option>
+                            <option value="general">General</option>
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="provider-base-url" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Base URL</label>
+                        <input
+                          id="provider-base-url"
+                          value={providerForm.base_url}
+                          onChange={(e) => setProviderForm({ ...providerForm, base_url: e.target.value })}
+                          placeholder={selectedProvider?.default_base_url || "https://..."}
+                          className="w-full bg-background/55 border border-border/40 rounded-2xl py-3 px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <label htmlFor="provider-api-key" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">API Key</label>
+                        <div className="relative">
+                          <Key weight="light" className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                          <input
+                            id="provider-api-key"
+                            type="password"
+                            value={providerForm.api_key}
+                            onChange={(e) => setProviderForm({ ...providerForm, api_key: e.target.value })}
+                            placeholder={providerConfig?.api_key_set ? "Clave guardada, deja vacío para conservarla" : "Pega la clave del proveedor"}
+                            className="w-full bg-background/55 border border-border/40 rounded-2xl py-3 pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-border/35 bg-background/45 p-4">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-foreground/75">Roadmap billing</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        Billing sigue desactivado. El backend expone metadata para conectar límites, planes o cuotas después.
+                      </p>
+                    </div>
+
+                    {providerValidation && (
+                      <div
+                        className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+                          providerValidation.ok
+                            ? "border-emerald-500/15 bg-emerald-500/5 text-emerald-700"
+                            : "border-amber-500/20 bg-amber-500/5 text-amber-700"
+                        }`}
+                      >
+                        {providerValidation.message}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-end border-t border-border/25 pt-5">
+                      <button
+                        type="button"
+                        onClick={handleValidateProvider}
+                        disabled={providerChecking || providerLoading}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-background/60 border border-border/40 px-5 py-3 text-xs font-bold text-foreground hover:border-foreground/20 active:scale-95 transition disabled:opacity-50"
+                      >
+                        {providerChecking ? <CircleNotch weight="light" className="size-4 animate-spin" /> : <ShieldCheck weight="light" className="size-4" />}
+                        <span>Validar configuración</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSaveProvider}
+                        disabled={providerLoading}
+                        className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-xs font-bold text-background hover:opacity-90 active:scale-95 transition disabled:opacity-50"
+                      >
+                        {providerLoading ? <CircleNotch weight="light" className="size-4 animate-spin" /> : <Check weight="bold" className="size-4" />}
+                        <span>Guardar runtime</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -902,8 +1216,8 @@ export default function BackOffice() {
               className="bg-secondary/95 border border-border/55 glass-card rounded-[2.5rem] p-8 max-w-md w-full relative z-10 shadow-2xl space-y-6"
             >
               <div className="flex items-start gap-4">
-                <div className="size-12 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="size-6" />
+                <div className="size-12 rounded-full bg-amber-500/5 text-amber-600 flex items-center justify-center shrink-0">
+                  <Warning weight="light" className="size-8" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-foreground">¡Faltan cositas en la ficha técnica! ⚠️</h3>
@@ -916,7 +1230,7 @@ export default function BackOffice() {
               {/* Campos faltantes */}
               <div className="bg-background/40 border border-border/20 rounded-2xl p-4 max-h-[140px] overflow-y-auto">
                 <ul className="text-xs space-y-1.5 text-muted-foreground list-disc list-inside">
-                  {missingFields.map((field, idx) => (
+                  {missingFields.map((field: string, idx: number) => (
                     <li key={idx} className="font-medium text-foreground/85">
                       {field}
                     </li>
@@ -924,7 +1238,7 @@ export default function BackOffice() {
                 </ul>
               </div>
 
-              <div className="bg-amber-500/5 border border-amber-500/10 rounded-2xl p-3 text-[11px] leading-relaxed text-amber-500/90 font-medium">
+              <div className="bg-slate-500/5 border border-slate-500/10 rounded-2xl p-3 text-[11px] leading-relaxed text-slate-600 font-medium">
                 <strong>💡 RAG Tips:</strong> Las imágenes del catálogo, ingredientes clave, tags de búsqueda y la compatibilidad con tipos de piel mejoran drásticamente las recomendaciones inteligentes de Lumi.
               </div>
 
@@ -940,7 +1254,7 @@ export default function BackOffice() {
                   disabled={saveLoading}
                   className="flex-1 bg-foreground text-background text-xs font-bold py-3.5 rounded-full hover:opacity-90 active:scale-95 transition flex items-center justify-center gap-1.5"
                 >
-                  {saveLoading && <Loader2 className="size-3.5 animate-spin" />}
+                  {saveLoading && <CircleNotch weight="light" className="size-4 animate-spin" />}
                   <span>Guardar de todas formas</span>
                 </button>
               </div>
@@ -973,7 +1287,7 @@ export default function BackOffice() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <Pencil className="size-4 text-muted-foreground" />
+                    <Pencil weight="light" className="size-5 text-muted-foreground" />
                     Editar Producto
                   </h3>
                   <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">{editProduct._originalName}</p>
@@ -983,7 +1297,7 @@ export default function BackOffice() {
                   aria-label="Cerrar editor de producto"
                   className="size-9 rounded-full bg-background/60 border border-border/30 flex items-center justify-center text-muted-foreground hover:text-foreground transition"
                 >
-                  <X className="size-4" />
+                  <X weight="light" className="size-5" />
                 </button>
               </div>
 
@@ -1147,7 +1461,7 @@ export default function BackOffice() {
                   disabled={editLoading || !editProduct.name || !editProduct.brand || !editProduct.description || !editProduct.price}
                   className="flex-1 py-3 rounded-full bg-foreground text-background text-sm font-bold hover:opacity-90 active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:scale-100"
                 >
-                  {editLoading ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                  {editLoading ? <CircleNotch weight="light" className="size-5 animate-spin" /> : <Check weight="bold" className="size-5" />}
                   <span>Guardar Cambios</span>
                 </button>
               </div>

@@ -1,14 +1,23 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 import chromadb
 
 from config import settings
 from rag.embeddings import embed_text
 
+_client_lock = threading.Lock()
+_shared_client: chromadb.PersistentClient | None = None
+
 
 def _client() -> chromadb.PersistentClient:
-    return chromadb.PersistentClient(path=settings.chroma_path)
+    global _shared_client
+    if _shared_client is None:
+        with _client_lock:
+            if _shared_client is None:
+                _shared_client = chromadb.PersistentClient(path=settings.chroma_path)
+    return _shared_client
 
 
 def _format_results(results: dict) -> list[dict]:
