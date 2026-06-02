@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { ClientProfile, Product, ProductAction, ProductActionResult } from "@/types/shop";
 import { useCart } from "@/hooks/useCart";
 import { Plus, Sparkle, BookOpen, CircleNotch } from "@phosphor-icons/react";
@@ -44,7 +44,7 @@ const getCalibratedScore = (score: number) => {
   return Math.round(minResult + ratio * (maxResult - minResult));
 };
 
-export function ProductCard({ product, highlighted, isRecommended, index, layoutScope = "main", clientProfile }: Props) {
+export function ProductCardInner({ product, highlighted, isRecommended, index, layoutScope = "main", clientProfile }: Props) {
   const { add } = useCart();
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [localReason, setLocalReason] = useState(product.reason || "");
@@ -120,10 +120,9 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
   return (
     <>
       <motion.div
-        layout
-        layoutId={`product-${layoutScope}-${product.id}`}
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
         tabIndex={0}
         role="button"
         aria-label={`Ver detalles de ${product.name} de ${product.brand}`}
@@ -134,10 +133,9 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
           }
         }}
         transition={{
-          type: "spring",
-          stiffness: 100,
-          damping: 20,
-          delay: index * 0.05, // Staggered orchestration
+          duration: 0.24,
+          ease: [0.16, 1, 0.3, 1],
+          delay: Math.min(index * 0.03, 0.24), // Limit maximum delay to keep rendering fast
         }}
         className={`w-full flex flex-col group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 rounded-[2.5rem] ${spanClasses}`}
         onClick={() => setDetailsOpen(true)}
@@ -456,3 +454,20 @@ export function ProductCard({ product, highlighted, isRecommended, index, layout
     </>
   );
 }
+
+// Custom comparator: only re-render when the product's displayed data actually changes.
+// This prevents all cards from re-rendering during stream when only one new product arrives.
+function arePropsEqual(prev: Props, next: Props) {
+  return (
+    prev.product.id === next.product.id &&
+    prev.product.reason === next.product.reason &&
+    prev.product.score === next.product.score &&
+    prev.product.stock === next.product.stock &&
+    prev.highlighted === next.highlighted &&
+    prev.isRecommended === next.isRecommended &&
+    prev.index === next.index &&
+    prev.clientProfile === next.clientProfile
+  );
+}
+
+export const ProductCard = memo(ProductCardInner, arePropsEqual);

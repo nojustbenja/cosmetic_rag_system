@@ -98,6 +98,9 @@ export function ChatPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const activeQuestionRef = useRef("");
+  // RAF-based token batching: accumulate tokens between frames, flush once per rAF tick
+  const tokenBatchRef = useRef("");
+  const rafIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -268,14 +271,38 @@ export function ChatPanel({
                 : `Encontré **${productCount} productos** relevantes. Explora las tarjetas →\n\n`;
             hasToken = true;
           }
+          // Accumulate token in the batch buffer
           assistantText += token;
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantMessageId ? { ...m, content: assistantText } : m
-            )
-          );
+          tokenBatchRef.current += token;
+
+          // Schedule a single DOM update per animation frame (RAF batching)
+          if (rafIdRef.current === null) {
+            rafIdRef.current = requestAnimationFrame(() => {
+              rafIdRef.current = null;
+              tokenBatchRef.current = "";
+              const snapshot = assistantText;
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessageId ? { ...m, content: snapshot } : m
+                )
+              );
+            });
+          }
         },
       }, abortControllerRef.current.signal);
+      // Flush any remaining buffered tokens after stream ends
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      tokenBatchRef.current = "";
+      if (assistantText) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMessageId ? { ...m, content: assistantText } : m
+          )
+        );
+      }
       completed = true;
       // Auto-save after each completed exchange (≥2 messages means at least 1 Q&A)
       setMessages((prev) => {
@@ -819,9 +846,11 @@ function ProductMention({
 }) {
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
+  const isLoadingRef = useRef(false);
 
   const loadReason = useCallback(() => {
-    if (!product.query || loadingReason) return;
+    if (!product.query || isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setLoadingReason(true);
     fetchProductReason(product.query, product)
       .then((reason) => {
@@ -834,8 +863,11 @@ function ProductMention({
         console.error(err);
         setLocalReason("No se pudo obtener la recomendación.");
       })
-      .finally(() => setLoadingReason(false));
-  }, [loadingReason, product, onUpdateProductReason]);
+      .finally(() => {
+        isLoadingRef.current = false;
+        setLoadingReason(false);
+      });
+  }, [product, onUpdateProductReason]);
 
   useEffect(() => {
     // Si no tenemos la razón local, pedirla automáticamente al montar (solo para los 3 primeros)

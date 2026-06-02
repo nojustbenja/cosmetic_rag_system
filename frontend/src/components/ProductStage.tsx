@@ -1,6 +1,7 @@
 import { ClientProfile, Product } from "@/types/shop";
 import { ProductCard } from "./ProductCard";
 import { AnimatePresence, motion } from "framer-motion";
+import { memo } from "react";
 
 type Props = {
   products: Product[];
@@ -9,7 +10,7 @@ type Props = {
   clientProfile?: ClientProfile | null;
 };
 
-export function ProductStage({ products, recIds, layoutScope = "main", clientProfile }: Props) {
+function ProductStageInner({ products, recIds, layoutScope = "main", clientProfile }: Props) {
   // If recommendations exist, show them first ordered by product_index; otherwise show all
   const visible = recIds.length
     ? recIds
@@ -54,11 +55,10 @@ export function ProductStage({ products, recIds, layoutScope = "main", clientPro
         )}
       </AnimatePresence>
 
-      <motion.div
-        layout
+      <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-[minmax(350px,auto)] grid-flow-dense gap-8 w-full"
       >
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {visible.map((p, i) => (
             <ProductCard
               key={p.id}
@@ -71,7 +71,9 @@ export function ProductStage({ products, recIds, layoutScope = "main", clientPro
             />
           ))}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   );
 }
+
+export const ProductStage = memo(ProductStageInner);

@@ -100,6 +100,7 @@
     -webkit-backdrop-filter: blur(26px) saturate(1.14);
     border: 1px solid hsl(var(--glass-edge));
     box-shadow: var(--shadow-soft), var(--shadow-refraction);
+    will-change: transform;
   }
   .glass-input {
     background: hsl(var(--glass-input));
@@ -138,50 +139,41 @@
     backdrop-filter: blur(22px) saturate(1.1);
     -webkit-backdrop-filter: blur(22px) saturate(1.1);
   }
+
+  /* Mobile GPU relief: reduce blur cost on devices with weaker GPUs */
+  @media (max-width: 768px) {
+    .glass-panel {
+      backdrop-filter: blur(22px) saturate(1.12);
+      -webkit-backdrop-filter: blur(22px) saturate(1.12);
+    }
+    .glass-card {
+      backdrop-filter: blur(14px) saturate(1.08);
+      -webkit-backdrop-filter: blur(14px) saturate(1.08);
+    }
+    .catalog-shell {
+      backdrop-filter: blur(14px) saturate(1.06);
+      -webkit-backdrop-filter: blur(14px) saturate(1.06);
+    }
+  }
+
+  /* Disable all blur for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .glass-panel, .glass-card, .glass-input, .catalog-shell {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
   .shadow-glass-lg {
     box-shadow: var(--shadow-glass-lg);
   }
   .ambient-bg {
-    --lumi-x: 50vw;
-    --lumi-y: 35vh;
-    --lumi-shift-x: 0px;
-    --lumi-shift-y: 0px;
-  }
-  .ambient-bg::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
     background:
-      radial-gradient(720px circle at var(--lumi-x) var(--lumi-y), hsl(202 82% 78% / 0.42), transparent 58%),
-      radial-gradient(920px circle at calc(100% - var(--lumi-x)) calc(100% - var(--lumi-y)), hsl(27 86% 82% / 0.34), transparent 62%),
       linear-gradient(125deg, hsl(236 55% 92% / 0.64), transparent 34%),
       linear-gradient(245deg, hsl(173 48% 91% / 0.54), transparent 42%),
       linear-gradient(0deg, hsl(28 52% 94% / 0.42), hsl(232 33% 98% / 0.22));
-    filter: blur(34px);
-    transform: translate3d(var(--lumi-shift-x), var(--lumi-shift-y), 0) scale(1.03);
-    transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
     contain: paint;
   }
-  .ambient-bg::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.42;
-    background-image:
-      linear-gradient(hsl(235 18% 9% / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(235 18% 9% / 0.035) 1px, transparent 1px),
-      linear-gradient(120deg, transparent 0 38%, hsl(235 18% 9% / 0.025) 38% 39%, transparent 39% 100%);
-    background-size: 44px 44px;
-    mask-image: linear-gradient(to bottom, transparent, black 18%, black 78%, transparent);
-    transform: translate3d(calc(var(--lumi-shift-x) * -0.45), calc(var(--lumi-shift-y) * -0.45), 0);
-    transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-  }
+
   .icon-orb {
     @apply shrink-0 flex items-center justify-center rounded-2xl border border-foreground/10 bg-background/55 text-foreground shadow-sm backdrop-blur-xl;
     box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.72), 0 12px 26px -20px hsl(235 28% 12% / 0.38);
@@ -252,14 +244,7 @@
 }
 .animate-fade-in { animation: fade-in 0.25s ease-out both; }
 
-@media (prefers-reduced-motion: reduce), (pointer: coarse) {
-  .ambient-bg::before,
-  .ambient-bg::after {
-    transform: none;
-    transition: none;
-    will-change: auto;
-  }
-}
+
 
 @keyframes slide-in-right {
   from { transform: translateX(100%); }
@@ -285,7 +270,6 @@
   footer, 
   button,
   .glass-panel,
-  .ambient-bg::before,
   [role="dialog"],
   .print\:hidden {
     display: none !important;

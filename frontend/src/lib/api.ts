@@ -160,7 +160,36 @@ export async function fetchQuestionSuggestions(): Promise<QuestionSuggestion[]> 
   return response.json();
 }
 
+// Impression event batcher: queue impressions and send in bulk after 500ms
+// to avoid saturating the connection pool during SSE streaming.
+const _impressionQueue: QuestionEventPayload[] = [];
+let _impressionFlushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function _flushImpressions() {
+  if (_impressionQueue.length === 0) return;
+  const batch = _impressionQueue.splice(0);
+  // Fire all queued impression events — they are low-priority analytics
+  batch.forEach((payload) => {
+    fetch(endpoint('/questions/events'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...payload,
+        session_id: payload.session_id || getQuestionSessionId(),
+      }),
+    }).catch(() => { /* silently ignore analytics failures */ });
+  });
+}
+
 export async function trackQuestionEvent(payload: QuestionEventPayload): Promise<void> {
+  // Batch impression events to avoid saturating connections during SSE streaming
+  if (payload.event_type === 'impression') {
+    _impressionQueue.push(payload);
+    if (_impressionFlushTimer !== null) clearTimeout(_impressionFlushTimer);
+    _impressionFlushTimer = setTimeout(_flushImpressions, 500);
+    return;
+  }
+  // All other event types (sent, answered, click, cart_add, etc.) fire immediately
   try {
     await fetch(endpoint('/questions/events'), {
       method: 'POST',
