@@ -1,1 +1,84 @@
-[]
+[
+  {
+    "ticket_number": "LM-822175",
+    "timestamp": "26-05-2026, 09:32:26 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-12-champú-reparador-keratina",
+        "name": "Champú Reparador Keratina",
+        "qty": 1,
+        "price": 34000,
+        "brand": "Soie"
+      }
+    ],
+    "total": 34000.0,
+    "status": "pagado"
+  },
+  {
+    "ticket_number": "LM-318927",
+    "timestamp": "26-05-2026, 11:51:19 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-1-crema-reparadora-noche-velvet",
+        "name": "Crema Reparadora Noche Velvet",
+        "qty": 1,
+        "price": 62000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 62000.0,
+    "status": "pendiente"
+  },
+  {
+    "ticket_number": "LM-131220",
+    "timestamp": "02-06-2026, 10:06:31 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-8-máscara-de-pestañas-volumen-xl",
+        "name": "Máscara de Pestañas Volumen XL",
+        "qty": 1,
+        "price": 32000,
+        "brand": "Nuda"
+      },
+      {
+        "id": "producto-10-eau-de-parfum-bois-sauvage",
+        "name": "Eau de Parfum Bois Sauvage",
+        "qty": 1,
+        "price": 120000,
+        "brand": "Maison Auré"
+      }
+    ],
+    "total": 152000.0,
+    "status": "pagado"
+  },
+  {
+    "ticket_number": "LM-734641",
+    "timestamp": "02-06-2026, 10:26:25 a. m.",
+    "client_name": "CLIENTE GENERAL",
+    "skin_type": "",
+    "items": [
+      {
+        "id": "producto-10-eau-de-parfum-bois-sauvage",
+        "name": "Eau de Parfum Bois Sauvage",
+        "qty": 1,
+        "price": 120000,
+        "brand": "Maison Auré"
+      },
+      {
+        "id": "producto-0-sérum-hidratante-glow-drops",
+        "name": "Sérum Hidratante Glow Drops",
+        "qty": 1,
+        "price": 48000,
+        "brand": "Lumère"
+      }
+    ],
+    "total": 168000.0,
+    "status": "pendiente"
+  }
+]

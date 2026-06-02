@@ -55,32 +55,7 @@ const Index = () => {
     loadCatalog();
   }, [loadCatalog]);
 
-  useEffect(() => {
-    const main = mainRef.current;
-    const canTrackPointer = window.matchMedia("(pointer: fine) and (min-width: 900px)").matches;
-    if (!main || !canTrackPointer) return;
 
-    let frameId = 0;
-    const handlePointerMove = (event: PointerEvent) => {
-      cancelAnimationFrame(frameId);
-      frameId = requestAnimationFrame(() => {
-        const x = event.clientX;
-        const y = event.clientY;
-        const shiftX = (x / window.innerWidth - 0.5) * 24;
-        const shiftY = (y / window.innerHeight - 0.5) * 18;
-        main.style.setProperty("--lumi-x", `${x}px`);
-        main.style.setProperty("--lumi-y", `${y}px`);
-        main.style.setProperty("--lumi-shift-x", `${shiftX}px`);
-        main.style.setProperty("--lumi-shift-y", `${shiftY}px`);
-      });
-    };
-
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    return () => {
-      cancelAnimationFrame(frameId);
-      window.removeEventListener("pointermove", handlePointerMove);
-    };
-  }, []);
 
   const handleUpdateProductReason = useCallback((productId: string, reason: string) => {
     setProducts((prev) =>
@@ -129,6 +104,7 @@ const Index = () => {
     <CartProvider>
       <CartDrawer />
       <main ref={mainRef} className="min-h-[100dvh] w-full relative overflow-x-clip bg-background ambient-bg">
+
         {/* Grain overlay for haptic paper/matte texture */}
         <div 
           className="fixed inset-0 pointer-events-none z-[100] opacity-[0.01] md:opacity-[0.015] mix-blend-overlay"
