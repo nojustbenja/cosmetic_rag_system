@@ -100,49 +100,67 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
     history = sessions.get(request.session_id, [])
 
     async def event_generator():
-        response = ""
-        try:
-            from rag.pipeline import analyze_intent, generate_profiler_response, generate_recommender_response
-            has_profile = await analyze_intent(request.message, history)
-            profile = extract_client_profile(request.message, history)
-            yield {"event": "profile", "data": json.dumps(profile)}
+        from utils.timing import profile_block
+        with profile_block(f"Chat request: {request.message[:20]}..."):
+            response = ""
+            try:
+                from rag.pipeline import analyze_intent, generate_profiler_response, generate_recommender_response
+                has_profile = await analyze_intent(request.message, history)
+                profile = extract_client_profile(request.message, history)
+                yield {"event": "profile", "data": json.dumps(profile)}
 
-            if not has_profile:
-                # Emit empty context_done first to prevent UI waiting for products
-                yield {
-                    "event": "context_done",
-                    "data": json.dumps({"guides": [], "total": 0}),
-                }
-                async for token in generate_profiler_response(request.message, history):
-                    response += token
-                    yield {"event": "token", "data": json.dumps({"token": token})}
-            else:
-                context_payload, retrieved_items = await retrieve_context(request.message)
+                if not has_profile:
+                    # Emit empty context_done first to prevent UI waiting for products
+                    yield {
+                        "event": "context_done",
+                        "data": json.dumps({"guides": [], "total": 0}),
+                    }
+                    profiler_data = await generate_profiler_response(request.message, history)
+                    response = profiler_data.get("message", "")
+                    yield {"event": "token", "data": json.dumps({"token": response})}
+                    if "chips" in profiler_data:
+                        yield {"event": "chips", "data": json.dumps(profiler_data["chips"])}
+                else:
+                    context_payload, retrieved_items = await retrieve_context(request.message)
 
-                # Emit each product individually so the frontend can show them progressively
-                products = context_payload.get("products", [])
-                guides = context_payload.get("guides", [])
-                for idx, product in enumerate(products):
-                    product_with_index = {**product, "product_index": idx + 1}
-                    yield {"event": "product", "data": json.dumps(product_with_index)}
+                    products = context_payload.get("products", [])
+                    guides = context_payload.get("guides", [])
+                    
+                    # Check for 40% match threshold
+                    best_score = max([item["score"] for item in retrieved_items], default=0.0)
+                    if best_score < 0.4 or not products:
+                        # RAG found no good match, pass to Recommender with empty items
+                        # so it explains we don't have exactly what they need, without asking more questions.
+                        yield {
+                            "event": "context_done",
+                            "data": json.dumps({"guides": [], "total": 0}),
+                        }
+                        async for token in generate_recommender_response(request.message, history, retrieved_items=[]):
+                            response += token
+                            yield {"event": "token", "data": json.dumps({"token": token})}
+                    else:
+                        # Emit each product individually so the frontend can show them progressively
+                        for idx, product in enumerate(products):
+                            product_with_index = {**product, "product_index": idx + 1}
+                            yield {"event": "product", "data": json.dumps(product_with_index)}
 
-                # Emit guides + total count as a summary event
-                yield {
-                    "event": "context_done",
-                    "data": json.dumps({"guides": guides, "total": len(products)}),
-                }
+                        # Emit guides + total count as a summary event
+                        yield {
+                            "event": "context_done",
+                            "data": json.dumps({"guides": guides, "total": len(products)}),
+                        }
 
-                async for token in generate_recommender_response(request.message, history, retrieved_items):
-                    response += token
-                    yield {"event": "token", "data": json.dumps({"token": token})}
+                        async for token in generate_recommender_response(request.message, history, retrieved_items):
+                            response += token
+                            yield {"event": "token", "data": json.dumps({"token": token})}
 
-            sessions[request.session_id] = (history + [
-                {"role": "user", "content": request.message},
-                {"role": "assistant", "content": response},
-            ])[-8:]
-            yield {"event": "done", "data": json.dumps({"ok": True})}
-        except Exception as exc:
-            yield {"event": "error", "data": json.dumps({"error": str(exc)})}
+                sessions[request.session_id] = (history + [
+                    {"role": "user", "content": request.message},
+                    {"role": "assistant", "content": response},
+                ])[-8:]
+                yield {"event": "done", "data": json.dumps({"ok": True})}
+            except Exception as exc:
+                yield {"event": "error", "data": json.dumps({"error": str(exc)})}
 
     return EventSourceResponse(event_generator())
 

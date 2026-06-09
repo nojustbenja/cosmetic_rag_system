@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ClientProfile, Product } from "@/types/shop";
 import { ProductStage } from "./ProductStage";
 import { X } from "@phosphor-icons/react";
@@ -24,7 +25,7 @@ export function MobileRecsSheet({ products, recIds, clientProfile }: Props) {
 
   if (recIds.length === 0) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Botón flotante */}
       <button
@@ -82,6 +83,7 @@ export function MobileRecsSheet({ products, recIds, clientProfile }: Props) {
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   );
 }

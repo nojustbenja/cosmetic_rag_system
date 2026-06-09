@@ -157,13 +157,35 @@ async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
     query_embedding = await asyncio.to_thread(embed_text, query)
     active_filters = filters if filters is not None else infer_filters(query)
     
-    # Ejecutar búsquedas en paralelo
-    products_task = retrieve_products(query_embedding, active_filters)
-    guides_task = retrieve_guides(query_embedding)
+    # Obtener más candidatos para el reranking híbrido
+    products_task = retrieve_products(query_embedding, active_filters, top_k=15)
+    guides_task = retrieve_guides(query_embedding, top_k=8)
     
     products, guides = await asyncio.gather(products_task, guides_task)
     
     results = products + guides
+    if not results:
+        return []
+        
+    try:
+        from rank_bm25 import BM25Okapi
+        corpus = [item["text"] for item in results]
+        tokenized_corpus = [doc.lower().split() for doc in corpus]
+        bm25 = BM25Okapi(tokenized_corpus)
+        
+        tokenized_query = query.lower().split()
+        bm25_scores = bm25.get_scores(tokenized_query)
+        
+        max_bm25 = max(bm25_scores) if max(bm25_scores) > 0 else 1.0
+        normalized_bm25 = [score / max_bm25 for score in bm25_scores]
+        
+        for item, bm_score in zip(results, normalized_bm25):
+            dense_score = item.get("score", 0.0)
+            # RRF (Reciprocal Rank Fusion) style blending: 70% dense, 30% keyword
+            item["score"] = (0.7 * dense_score) + (0.3 * bm_score)
+    except ImportError:
+        pass
+        
     return sorted(results, key=lambda item: item["score"], reverse=True)[:10]
 
 

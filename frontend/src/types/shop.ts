@@ -49,6 +49,7 @@ export type ChatMessage = {
   content: string;
   recIds?: string[];
   products?: Product[];
+  chips?: string[];
 };
 
 export type CartItem = { product: Product; qty: number };

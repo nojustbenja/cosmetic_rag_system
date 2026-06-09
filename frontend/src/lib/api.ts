@@ -89,6 +89,7 @@ export type StreamHandlers = {
   onProduct?: (product: Product) => void;
   onContextDone?: (data: { guides: unknown[]; total: number }) => void;
   onToken?: (token: string) => void;
+  onChips?: (chips: string[]) => void;
 };
 
 export async function streamChat(message: string, sessionId: string, handlers: StreamHandlers, signal?: AbortSignal) {
@@ -116,6 +117,7 @@ export async function streamChat(message: string, sessionId: string, handlers: S
     if (parsed.event === 'product') handlers.onProduct?.(parsed.data);
     if (parsed.event === 'context_done') handlers.onContextDone?.(parsed.data);
     if (parsed.event === 'token' && parsed.data.token) handlers.onToken?.(parsed.data.token);
+    if (parsed.event === 'chips') handlers.onChips?.(parsed.data);
     if (parsed.event === 'error') throw new Error(parsed.data.error ?? 'Error inesperado.');
   };
 

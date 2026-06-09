@@ -31,13 +31,19 @@ const getSpanClasses = (index: number) => {
   return "col-span-1 row-span-1"; // Standard card
 };
 
-const getCalibratedScore = (score: number) => {
+const getCalibratedScore = (score: number, index: number) => {
   // With cosine similarity, scores range from ~0.15 (low match) to ~0.85 (high match).
   // Map the meaningful range [0.20, 0.80] → [60%, 99%] for clear visual differentiation.
   const minRaw = 0.20;
   const maxRaw = 0.80;
   const minResult = 60;
   const maxResult = 99;
+
+  if (score < minRaw) {
+    // When scores are very low (e.g. hash model fallback or poor matches),
+    // they would all clamp to 60%. We use their rank (index) to create a visual spread.
+    return Math.max(15, minResult - (index * 4));
+  }
 
   const clamped = Math.max(minRaw, Math.min(maxRaw, score));
   const ratio = (clamped - minRaw) / (maxRaw - minRaw);
@@ -224,7 +230,7 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
               {product.score != null && (
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold uppercase tracking-tight animate-fade-in flex items-center gap-1">
                   <Sparkle weight="fill" className="size-2.5" />
-                  {getCalibratedScore(Number(product.score))}% Match
+                  {getCalibratedScore(Number(product.score), index)}% Match
                 </span>
               )}
               {product.category && (
@@ -267,7 +273,7 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
                 {isRecommended && product.score != null && (
                   <div className="absolute top-4 left-4 px-3.5 py-1.5 bg-emerald-500/90 text-white backdrop-blur-xl rounded-full text-[10px] uppercase tracking-wider font-bold shadow-lg flex items-center gap-1.5 animate-fade-in border border-white/20">
                     <Sparkle weight="fill" className="size-3.5" />
-                    Match: {getCalibratedScore(Number(product.score))}%
+                    Match: {getCalibratedScore(Number(product.score), index)}%
                   </div>
                 )}
                 {isRecommended && product.product_index != null && (

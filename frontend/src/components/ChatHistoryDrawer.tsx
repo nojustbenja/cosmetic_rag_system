@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ClockCounterClockwise,
@@ -220,7 +221,7 @@ export function ChatHistoryDrawer({
     toast.success("Conversación restaurada.");
   }
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <div className="fixed inset-0 z-50 flex justify-start overflow-hidden">
@@ -298,7 +299,8 @@ export function ChatHistoryDrawer({
           </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
 

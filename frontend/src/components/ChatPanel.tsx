@@ -156,6 +156,48 @@ export function ChatPanel({
     [sessionId, clientProfile]
   );
 
+  const handleInternalUpdateProductReason = useCallback((productId: string, reason: string) => {
+    // Update local messages so history has the reasons
+    setMessages((prev) => {
+      const next = prev.map((msg) => {
+        if (!msg.products) return msg;
+        const hasProduct = msg.products.some((p) => p.id === productId);
+        if (!hasProduct) return msg;
+        
+        return {
+          ...msg,
+          products: msg.products.map((p) => p.id === productId ? { ...p, reason } : p)
+        };
+      });
+
+      // Update refs for correct persistence
+      currentRecProductsRef.current = currentRecProductsRef.current.map((p) => 
+        p.id === productId ? { ...p, reason } : p
+      );
+
+      // Auto-save session immediately with the new reasons
+      const userCount = next.filter((m) => m.role === "user").length;
+      if (userCount >= 1) {
+        const session: ChatSession = {
+          id: sessionId,
+          title: deriveTitle(next),
+          timestamp: Date.now(),
+          messages: next,
+          clientProfile: clientProfile ?? null,
+          recProductIds: currentRecIdsRef.current,
+          recProducts: currentRecProductsRef.current,
+        };
+        saveSession(session);
+        setHistorySessions(loadSessions());
+      }
+
+      return next;
+    });
+
+    // Notify parent
+    onUpdateProductReason?.(productId, reason);
+  }, [onUpdateProductReason, sessionId, clientProfile]);
+
   /** Reset everything — new session, empty history, clear parent catalog state */
   const handleClear = useCallback(() => {
     // Save current session before clearing, if it has real content
@@ -288,6 +330,13 @@ export function ChatPanel({
               );
             });
           }
+        },
+        onChips: (chips) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId ? { ...m, chips } : m
+            )
+          );
         },
       }, abortControllerRef.current.signal);
       // Flush any remaining buffered tokens after stream ends
@@ -460,7 +509,24 @@ export function ChatPanel({
                       {m.products && m.products.length > 0 && (
                         <div className="mt-4 flex flex-col gap-2 border-t border-foreground/5 pt-3">
                           <p className="text-eyebrow text-muted-foreground/80 mb-1">Productos recomendados por Lumi:</p>
-                          <ProductMentionGroup products={m.products} onUpdateProductReason={onUpdateProductReason} />
+                          <ProductMentionGroup products={m.products} onUpdateProductReason={handleInternalUpdateProductReason} />
+                        </div>
+                      )}
+                      {m.chips && m.chips.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {m.chips.map((chip, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                send(chip, { source: "inline_chip" });
+                                setMessages((prev) => prev.map(msg => msg.id === m.id ? { ...msg, chips: undefined } : msg));
+                              }}
+                              disabled={loading}
+                              className="inline-flex items-center justify-center rounded-full border border-foreground/15 bg-background/50 px-3 py-1.5 text-[13px] font-medium text-foreground shadow-sm hover:bg-foreground hover:text-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {chip}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </>

@@ -10,6 +10,7 @@ import logging
 
 from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECOMMENDER_SYSTEM_PROMPT, ANALYZER_SYSTEM_PROMPT, SUBAGENT_PROMPT, build_context
 from rag.retriever import retrieve_all
+from utils.timing import profile_time, profile_block
 import json
 
 logger = logging.getLogger(__name__)
@@ -55,6 +56,7 @@ def _profile_signals(message: str) -> list[str]:
             signals.append(label)
     return signals or ["necesidad descrita por el cliente"]
 
+@profile_time
 def extract_client_profile(message: str, session_history: list[dict] | None = None) -> dict:
     history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:])
     text = f"{history_text} {message}".lower()
@@ -202,16 +204,23 @@ def generate_product_action(message: str, product: dict, action: str, profile: d
 async def generate_product_reason(message: str, product: dict) -> str:
     # `product` here is the structured product item (not the raw item with `metadata`)
     # We reconstruct a simple text for the prompt
+    
+    # Retrieve all items to give the subagent global context
+    retrieved_items = await retrieve_all(message)
+    global_context = build_context(retrieved_items)
+    
     benefits = _split_csv(product.get("benefits", []))
     skin_types = _split_csv(product.get("skin_types", []))
     tags = _split_csv(product.get("tags", []))
     ingredients = _split_csv(product.get("ingredients", []))
     signals = _profile_signals(message)
+    
     prompt = (
         f"{SUBAGENT_PROMPT}\n\n"
         f"Requerimiento del usuario: {message}\n\n"
         f"Señales detectadas para orientar al vendedor: {', '.join(signals)}\n\n"
-        f"Contexto del producto recuperado:\n"
+        f"Contexto GLOBAL del RAG (otras opciones recuperadas):\n{global_context}\n\n"
+        f"Contexto ESPECÍFICO del producto a justificar:\n"
         f"Nombre: {product.get('name', 'Producto')}\n"
         f"Marca: {product.get('brand', '')}\n"
         f"Categoría: {product.get('category', '')}\n"
@@ -288,29 +297,21 @@ def build_retrieval_context(message: str, retrieved_items: list[dict]) -> dict:
             
     return {"products": products[:6], "guides": guides[:4]}
 
+@profile_time
 async def retrieve_context(message: str) -> tuple[dict, list[dict]]:
     retrieved_items = await retrieve_all(message)
     context_data = build_retrieval_context(message, retrieved_items)
     return context_data, retrieved_items
 
 
+@profile_time
 async def analyze_intent(message: str, session_history: list[dict]) -> bool:
-    messages = [{"role": "system", "content": ANALYZER_SYSTEM_PROMPT}]
-    messages.extend(session_history[-4:])
-    messages.append({"role": "user", "content": message})
-    client = LLMClient()
-    try:
-        response = await client.generate_completion(messages)
-        cleaned = response.strip()
-        if cleaned.startswith("```json"):
-            cleaned = cleaned.split("```json", 1)[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
-        data = json.loads(cleaned.strip())
-        return data.get("has_enough_profile", False)
-    except Exception as e:
-        logger.error(f"Error analizando intención: {e}")
-        return True
+    profile = extract_client_profile(message, session_history)
+    missing = profile.get("missing_fields", [])
+    if missing:
+        logger.info(f"Faltan campos: {missing}. Retornando perfil incompleto.")
+        return False
+    return True
 
 
 async def _fallback_response(message: str, retrieved_items: list[dict]) -> AsyncGenerator[str, None]:
@@ -337,18 +338,31 @@ async def _fallback_response(message: str, retrieved_items: list[dict]) -> Async
         yield f"- **Precio**: {price_str}\n"
         yield f"- **Contexto**: {text}\n\n"
 
+@profile_time
 async def generate_profiler_response(
     message: str,
     session_history: list[dict],
-) -> AsyncGenerator[str, None]:
+) -> dict:
     messages = [{"role": "system", "content": PROFILER_SYSTEM_PROMPT}]
     messages.extend(FEW_SHOT_MESSAGES)
     messages.extend(session_history[-8:])
     messages.append({"role": "user", "content": message})
     
     client = LLMClient()
-    async for token in client.stream_completion(messages):
-        yield token
+    try:
+        response_text = await client.generate_completion(messages)
+        cleaned = response_text.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned.split("```json", 1)[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
+        return json.loads(cleaned.strip())
+    except Exception as e:
+        logger.error(f"Error parseando JSON en Profiler: {e}")
+        return {
+            "message": "¿Me podrías dar un poco más de detalle para ayudarte mejor?", 
+            "chips": ["Piel Seca", "Piel Grasa", "Piel Sensible"]
+        }
 
 async def generate_recommender_response(
     message: str,
@@ -365,6 +379,10 @@ async def generate_recommender_response(
     client = LLMClient()
     messages = [{"role": "system", "content": RECOMMENDER_SYSTEM_PROMPT}]
     messages.extend(session_history[-8:])
-    messages.append({"role": "user", "content": message})
+    
+    context_text = build_context(retrieved_items)
+    augmented_message = f"{message}\n\n{context_text}"
+    messages.append({"role": "user", "content": augmented_message})
+    
     async for token in client.stream_completion(messages):
         yield token
