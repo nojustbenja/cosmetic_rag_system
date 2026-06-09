@@ -239,9 +239,20 @@ El sistema soporta múltiples proveedores de LLM:
 - Kilo AI (con balanceo automático por modo: free / general / pro)
 - LiteLLM (cualquier proveedor compatible con la API de OpenAI)
 
-**Auto-detección inteligente**: Selecciona automáticamente el provider según las claves API disponibles en el entorno.
+**Auto-detección inteligente**: Selecciona automáticamente el provider según las claves API disponibles en el entorno (`.env` en el backend).
 
 **Configuración en runtime**: El BackOffice permite cambiar el proveedor, modelo, base URL y API key sin reiniciar el servidor.
+
+#### 6. **Seguridad y Gestión de API Keys (Frontend vs Backend)** 🔒
+
+Es crucial entender la separación estricta de responsabilidades en la arquitectura del sistema para garantizar la seguridad de las API Keys (OpenAI, Gemini, Anthropic, etc.):
+
+- **El Frontend NO almacena ni usa API Keys directamente**: Todo el código de React en la carpeta `frontend/` actúa **únicamente como interfaz de usuario**. No hay llamadas directas desde el navegador hacia las APIs de OpenAI o Gemini.
+- **El Backend centraliza las credenciales**: Todas las claves se configuran de forma segura en el archivo `.env` dentro de la carpeta `backend/`, o se mantienen en memoria segura durante la configuración en "runtime" (en el proceso de FastAPI).
+- **El formulario "Proveedor IA" en el BackOffice**: Aunque el usuario ingresa su *API Key* en la interfaz del frontend, esta no se guarda en el navegador ni se usa ahí. El frontend la envía de inmediato a través de una petición segura (`PUT /provider-config`) al **Backend**. Es el backend quien asume la responsabilidad de contactar a los distintos modelos de lenguaje.
+- **Función Edge de Supabase (ai-shopper)**: Si se utiliza el componente de AI Shopper, este se ejecuta como un Edge Function en el servidor de Supabase (runtime de Deno), utilizando credenciales seguras (como `LOVABLE_API_KEY` vía `Deno.env`) fuera del alcance del navegador.
+
+Esta arquitectura protege completamente tus credenciales, garantizando que el usuario final jamás tenga acceso a las API Keys en el código fuente de la página web.
 
 ---
 

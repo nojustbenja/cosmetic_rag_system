@@ -9,9 +9,9 @@ import {
   QuestionSuggestion,
 } from "@/types/shop";
 
-const API_URL = 'http://localhost:8000/chat';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-const endpoint = (path: string) => API_URL.replace('/chat', path);
+const endpoint = (path: string) => `${API_URL}${path}`;
 
 export type ProviderOption = {
   id: string;
@@ -93,7 +93,7 @@ export type StreamHandlers = {
 };
 
 export async function streamChat(message: string, sessionId: string, handlers: StreamHandlers, signal?: AbortSignal) {
-  const response = await fetch(API_URL, {
+  const response = await fetch(endpoint('/chat'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, session_id: sessionId }),
