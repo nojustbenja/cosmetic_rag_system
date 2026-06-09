@@ -1958,5 +1958,74 @@
     "suggestion_id": "case-acne-sensible",
     "source": "chip_mixed",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-09T13:11:17.918460+00:00",
+    "session_id": "38e5f0a9-de43-4763-985a-7502c606c1ee",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "fallback-random-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-09T13:11:38.725065+00:00",
+    "session_id": "d16992fd-9725-41ed-b0c1-d71a823b0c66",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-09T13:11:52.702797+00:00",
+    "session_id": "d16992fd-9725-41ed-b0c1-d71a823b0c66",
+    "event_type": "click",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-09T13:11:52.709625+00:00",
+    "session_id": "d16992fd-9725-41ed-b0c1-d71a823b0c66",
+    "event_type": "sent",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-09T13:11:58.396318+00:00",
+    "session_id": "d16992fd-9725-41ed-b0c1-d71a823b0c66",
+    "event_type": "answered",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-19-srum-vitamina-c-antioxidante",
+      "producto-10-eau-de-parfum-bois-sauvage",
+      "producto-11-eau-de-toilette-fleur-blanche",
+      "producto-13-aceite-capilar-brillo-espejo"
+    ]
+  },
+  {
+    "timestamp": "2026-06-09T13:12:17.284023+00:00",
+    "session_id": "d16992fd-9725-41ed-b0c1-d71a823b0c66",
+    "event_type": "product_view",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
   }
 ]

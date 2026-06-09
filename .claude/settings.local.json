@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -v \"^\\\\.$\")",
-      "Bash(grep -v \"^\\\\..$\")",
-      "Bash(pip3 --version)"
-    ]
-  }
-}
