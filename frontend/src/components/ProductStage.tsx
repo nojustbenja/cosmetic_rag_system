@@ -1,7 +1,11 @@
 import { ClientProfile, Product } from "@/types/shop";
 import { ProductCard } from "./ProductCard";
 import { AnimatePresence, motion } from "framer-motion";
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+
+// Cuántas cards se montan inicialmente y por cada "página" en el catálogo.
+// Mantiene el DOM liviano cuando el catálogo crece (evita montar 48 cards de golpe).
+const PAGE_SIZE = 12;
 
 type Props = {
   products: Product[];
@@ -20,6 +24,37 @@ function ProductStageInner({ products, recIds, layoutScope = "main", clientProfi
     : products;
 
   const isRecMode = recIds.length > 0;
+
+  // Revelado incremental: en modo catálogo solo montamos un lote y vamos
+  // sumando más a medida que el usuario se acerca al final (lazy load por scroll).
+  // En modo recomendación son pocas piezas, así que se muestran todas.
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Reinicia el límite cuando cambia el conjunto visible (nueva búsqueda/catálogo).
+  useEffect(() => {
+    setLimit(PAGE_SIZE);
+  }, [isRecMode, visible.length]);
+
+  const hasMore = !isRecMode && limit < visible.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setLimit((prev) => prev + PAGE_SIZE);
+        }
+      },
+      { rootMargin: "600px 0px" } // precarga antes de llegar al borde
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
+  const rendered = isRecMode ? visible : visible.slice(0, limit);
 
   return (
     <div className="w-full p-6 lg:p-12">
@@ -59,7 +94,7 @@ function ProductStageInner({ products, recIds, layoutScope = "main", clientProfi
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-[minmax(350px,auto)] grid-flow-dense gap-8 w-full"
       >
         <AnimatePresence mode="sync">
-          {visible.map((p, i) => (
+          {rendered.map((p, i) => (
             <ProductCard
               key={p.id}
               product={p}
@@ -72,6 +107,16 @@ function ProductStageInner({ products, recIds, layoutScope = "main", clientProfi
           ))}
         </AnimatePresence>
       </div>
+
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          aria-hidden
+          className="h-12 w-full flex items-center justify-center mt-8 text-[11px] uppercase tracking-[0.15em] text-muted-foreground/60"
+        >
+          Cargando más…
+        </div>
+      )}
     </div>
   );
 }

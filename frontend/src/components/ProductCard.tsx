@@ -159,6 +159,7 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
               src={getProductImage(product)}
               alt={product.name}
               loading="lazy"
+              decoding="async"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = FALLBACK_IMAGE_URL;
               }}
