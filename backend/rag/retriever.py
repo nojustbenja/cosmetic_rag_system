@@ -152,12 +152,23 @@ def infer_filters(query: str) -> dict | None:
         "champú": "cabello",
         "shampoo": "cabello",
         "aceite capilar": "cabello",
+        "corporal": "cuidado_corporal",
+        "cuerpo": "cuidado_corporal",
+        "exfoliante corporal": "cuidado_corporal",
+        "crema corporal": "cuidado_corporal",
+        "brocha": "accesorios",
+        "brochas": "accesorios",
+        "esponja": "accesorios",
+        "accesorio": "accesorios",
     }
-    matches: list[tuple[int, str]] = []
+    # (idx, -len(alias), category): el índice prioriza el alias más cercano y,
+    # ante un empate de posición, el alias más largo gana (más específico),
+    # p. ej. "crema corporal" → cuidado_corporal en vez de "crema" → cuidado_facial.
+    matches: list[tuple[int, int, str]] = []
     for alias, candidate_category in category_aliases.items():
         idx = normalized.find(alias)
         if idx != -1:
-            matches.append((idx, candidate_category))
+            matches.append((idx, -len(alias), candidate_category))
 
     category = None
     if matches:
@@ -177,7 +188,7 @@ def infer_filters(query: str) -> dict | None:
             if after_anchor:
                 candidates = after_anchor
 
-        category = min(candidates, key=lambda m: m[0])[1]
+        category = min(candidates, key=lambda m: (m[0], m[1]))[2]
 
     if not skin_type and not category:
         return None

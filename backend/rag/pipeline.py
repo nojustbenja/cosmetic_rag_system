@@ -8,7 +8,7 @@ from config import settings
 import asyncio
 import logging
 
-from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECOMMENDER_SYSTEM_PROMPT, ANALYZER_SYSTEM_PROMPT, SUBAGENT_PROMPT, build_context
+from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECOMMENDER_SYSTEM_PROMPT, SOFT_RECOMMENDER_SYSTEM_PROMPT, ANALYZER_SYSTEM_PROMPT, SUBAGENT_PROMPT, build_context
 from rag.retriever import retrieve_all
 from utils.timing import profile_time, profile_block
 import json
@@ -76,10 +76,12 @@ def extract_client_profile(message: str, session_history: list[dict] | None = No
     })
     category = pick({
         "fragancias": ["perfume", "fragancia", "aroma", "amaderado", "floral"],
-        "proteccion_solar": ["protector", "solar", "spf", "bloqueador"],
+        "proteccion_solar": ["protector", "solar", "spf", "bloqueador", "after sun", "after-sun"],
         "limpieza": ["limpiador", "limpieza", "agua micelar", "desmaquillante"],
         "maquillaje": ["maquillaje", "base", "labial", "pestañas", "sombras"],
         "cabello": ["cabello", "pelo", "champú", "shampoo", "capilar"],
+        "accesorios": ["brocha", "brochas", "esponja", "accesorio", "set de brochas"],
+        "cuidado_corporal": ["corporal", "cuerpo", "body", "exfoliante corporal"],
         "cuidado_facial": ["crema", "serum", "sérum", "rutina", "rostro", "facial"],
     })
     usage_moment = pick({
@@ -397,6 +399,7 @@ async def generate_recommender_response(
     message: str,
     session_history: list[dict],
     retrieved_items: list[dict] | None = None,
+    soft_match: bool = False,
 ) -> AsyncGenerator[str, None]:
     if retrieved_items is None:
         retrieved_items = await retrieve_all(message)
@@ -405,13 +408,18 @@ async def generate_recommender_response(
             yield token
         return
 
+    # En modo "soft" (sin calce fuerte) usamos un prompt más flexible: Lumi reconoce
+    # con honestidad que no hay un calce exacto y ofrece lo más cercano del catálogo,
+    # en vez de una respuesta seca de "no tengo nada".
+    system_prompt = SOFT_RECOMMENDER_SYSTEM_PROMPT if soft_match else RECOMMENDER_SYSTEM_PROMPT
+
     client = LLMClient()
-    messages = [{"role": "system", "content": RECOMMENDER_SYSTEM_PROMPT}]
+    messages = [{"role": "system", "content": system_prompt}]
     messages.extend(session_history[-8:])
-    
+
     context_text = build_context(retrieved_items)
     augmented_message = f"{message}\n\n{context_text}"
     messages.append({"role": "user", "content": augmented_message})
-    
+
     async for token in client.stream_completion(messages):
         yield token
