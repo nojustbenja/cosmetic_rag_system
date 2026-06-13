@@ -87,9 +87,10 @@ export type StreamHandlers = {
   onContext?: (context: Record<string, unknown> | unknown[]) => void;
   onProfile?: (profile: ClientProfile) => void;
   onProduct?: (product: Product) => void;
-  onContextDone?: (data: { guides: unknown[]; total: number }) => void;
+  onContextDone?: (data: { guides: unknown[]; total: number; mode?: "profiler" | "soft" | "match" }) => void;
   onToken?: (token: string) => void;
   onChips?: (chips: string[]) => void;
+  onStatus?: (data: { stage: string; label: string }) => void;
 };
 
 export async function streamChat(message: string, sessionId: string, handlers: StreamHandlers, signal?: AbortSignal) {
@@ -113,6 +114,7 @@ export async function streamChat(message: string, sessionId: string, handlers: S
     if (!parsed) return;
 
     if (parsed.event === 'context') handlers.onContext?.(parsed.data);
+    if (parsed.event === 'status') handlers.onStatus?.(parsed.data);
     if (parsed.event === 'profile') handlers.onProfile?.(parsed.data);
     if (parsed.event === 'product') handlers.onProduct?.(parsed.data);
     if (parsed.event === 'context_done') handlers.onContextDone?.(parsed.data);
@@ -381,7 +383,7 @@ export async function validateProviderConfig(payload: ProviderConfigPayload): Pr
 }
 
 export async function fetchProductReason(message: string, product: Product): Promise<string> {
-  const url = `${API_URL}/reason`;
+  const url = endpoint('/chat/reason');
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -400,7 +402,7 @@ export async function fetchProductAction(
   action: ProductAction,
   profile: ClientProfile,
 ): Promise<ProductActionResult> {
-  const url = `${API_URL}/product-action`;
+  const url = endpoint('/chat/product-action');
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

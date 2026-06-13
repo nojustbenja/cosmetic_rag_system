@@ -88,6 +88,8 @@ export function ChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  // Etiqueta de progreso en vivo (analizando / buscando / preparando)
+  const [statusLabel, setStatusLabel] = useState("");
   const [sessionId, setSessionId] = useState(() => getQuestionSessionId());
   const [suggestions, setSuggestions] = useState<QuestionSuggestion[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -238,6 +240,7 @@ export function ChatPanel({
     const history = [...messages, userMsg];
     setMessages(history);
     setLoading(true);
+    setStatusLabel("Lumi está pensando");
 
     let assistantText = "";
     let productCount = 0;
@@ -268,10 +271,15 @@ export function ChatPanel({
 
     try {
       await streamChat(text, sessionId, {
+        onStatus: ({ label }) => {
+          // Solo actualizar mientras no haya empezado a llegar contenido real.
+          if (!hasToken && productCount === 0) setStatusLabel(label);
+        },
         onProfile: (profile) => {
           onProfile(profile);
         },
         onProduct: (product) => {
+          setStatusLabel("");
           streamedProducts = [...streamedProducts, product];
           productCount = streamedProducts.length;
           // keep refs in sync for persistence
@@ -291,20 +299,14 @@ export function ChatPanel({
             )
           );
         },
-        onContextDone: ({ guides, total }) => {
+        onContextDone: ({ guides }) => {
+          // Ya no inyectamos un "No encontré productos" prematuro: el backend
+          // siempre stremea una respuesta (pregunta de perfilado, opción cercana
+          // o recomendación). Dejar que el LLM hable evita el mensaje contradictorio.
           onRecommendations(streamedProducts, guides);
-          if (!hasToken && total === 0) {
-            assistantText =
-              "No encontré productos específicos en el catálogo actual. Permíteme asesorarte con algunas pautas generales:\n\n";
-            setMessages((prev) =>
-              prev.map((m) =>
-                m.id === assistantMessageId ? { ...m, content: assistantText } : m
-              )
-            );
-            hasToken = true;
-          }
         },
         onToken: (token) => {
+          setStatusLabel("");
           // If products were already found, append LLM commentary below the summary
           if (productCount > 0 && !hasToken) {
             assistantText =
@@ -383,6 +385,7 @@ export function ChatPanel({
       );
     } finally {
       setLoading(false);
+      setStatusLabel("");
       abortControllerRef.current = null;
       if (completed) activeQuestionRef.current = "";
     }
@@ -531,7 +534,7 @@ export function ChatPanel({
                       )}
                     </>
                   ) : loading ? (
-                    <TypingDots />
+                    <TypingDots label={statusLabel} />
                   ) : null}
                 </div>
               )}
@@ -866,10 +869,10 @@ function ClientProfileCard({ profile }: { profile: ClientProfile }) {
   );
 }
 
-function TypingDots() {
+function TypingDots({ label }: { label?: string }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="text-[13px] text-muted-foreground font-medium italic">Lumi está pensando</span>
+      <span className="text-[13px] text-muted-foreground font-medium italic">{label || "Lumi está pensando"}</span>
       <span className="inline-flex gap-1.5 items-center">
         <span className="size-1.5 rounded-full bg-muted-foreground animate-pulse-dot" style={{ animationDelay: "0ms" }} />
         <span className="size-1.5 rounded-full bg-muted-foreground animate-pulse-dot" style={{ animationDelay: "200ms" }} />
@@ -912,22 +915,29 @@ function ProductMention({
 }) {
   const [localReason, setLocalReason] = useState(product.reason || "");
   const [loadingReason, setLoadingReason] = useState(false);
+  const [reasonError, setReasonError] = useState(false);
   const isLoadingRef = useRef(false);
+  // Cuántas veces reintentó automáticamente (evita bucles infinitos en el useEffect)
+  const autoTriesRef = useRef(0);
 
   const loadReason = useCallback(() => {
     if (!product.query || isLoadingRef.current) return;
     isLoadingRef.current = true;
+    setReasonError(false);
     setLoadingReason(true);
     fetchProductReason(product.query, product)
       .then((reason) => {
         setLocalReason(reason);
+        setReasonError(false);
         if (onUpdateProductReason) {
           onUpdateProductReason(product.id, reason);
         }
       })
       .catch((err) => {
-        console.error(err);
-        setLocalReason("No se pudo obtener la recomendación.");
+        console.error("No se pudo obtener la razón del producto:", err);
+        // No contaminamos localReason con el error: usamos un estado aparte
+        // para poder ofrecer un botón de reintento.
+        setReasonError(true);
       })
       .finally(() => {
         isLoadingRef.current = false;
@@ -936,11 +946,19 @@ function ProductMention({
   }, [product, onUpdateProductReason]);
 
   useEffect(() => {
-    // Si no tenemos la razón local, pedirla automáticamente al montar (solo para los 3 primeros)
-    if (!localReason && product.query && index <= 3) {
+    // Pedir la razón automáticamente al montar (solo para los 3 primeros).
+    // Reintenta una vez de forma automática ante un fallo transitorio.
+    if (!localReason && !reasonError && product.query && index <= 3 && autoTriesRef.current < 1) {
+      autoTriesRef.current += 1;
       loadReason();
     }
-  }, [localReason, product.query, index, loadReason]);
+  }, [localReason, reasonError, product.query, index, loadReason]);
+
+  const retryReason = useCallback(() => {
+    autoTriesRef.current = 0;
+    setReasonError(false);
+    loadReason();
+  }, [loadReason]);
 
   const sources = (product.rag_source || product.source || "")
     .split(/[,\n;]/)
@@ -966,12 +984,24 @@ function ProductMention({
         </div>
       </div>
 
-      {(index <= 3 || localReason || loadingReason) && (
+      {(index <= 3 || localReason || loadingReason || reasonError) && (
         <div className="pl-11 pr-2 pb-1">
           {loadingReason ? (
             <div className="flex items-center gap-2 text-[12px] text-muted-foreground py-1">
               <CircleNotch weight="light" className="size-3.5 animate-spin" />
               <span className="italic">El especialista está analizando</span>
+            </div>
+          ) : reasonError ? (
+            <div className="flex items-center gap-2 flex-wrap py-1">
+              <span className="text-[12px] text-muted-foreground italic">No se pudo obtener la recomendación.</span>
+              <button
+                type="button"
+                onClick={retryReason}
+                className="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 bg-background/70 px-2.5 py-1 text-[11px] font-bold text-foreground/75 hover:text-foreground hover:bg-background transition"
+              >
+                <ArrowCounterClockwise weight="light" className="size-3.5" />
+                <span>Reintentar</span>
+              </button>
             </div>
           ) : localReason ? (
             <div className="flex flex-col gap-2">
@@ -1001,7 +1031,7 @@ function ProductMention({
           ) : null}
         </div>
       )}
-      {index > 3 && !localReason && !loadingReason && product.query && (
+      {index > 3 && !localReason && !loadingReason && !reasonError && product.query && (
         <div className="pl-11 pr-2 pb-1">
           <button
             type="button"

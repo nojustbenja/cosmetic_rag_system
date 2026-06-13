@@ -104,16 +104,20 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
         with profile_block(f"Chat request: {request.message[:20]}..."):
             response = ""
             try:
-                from rag.pipeline import analyze_intent, generate_profiler_response, generate_recommender_response
-                has_profile = await analyze_intent(request.message, history)
+                from rag.pipeline import generate_profiler_response, generate_recommender_response
+
+                # 1. Analizar el perfil UNA sola vez (regex, rápido) y avisar a la UI.
+                yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
                 profile = extract_client_profile(request.message, history)
+                has_profile = not profile.get("missing_fields")
                 yield {"event": "profile", "data": json.dumps(profile)}
 
                 if not has_profile:
-                    # Emit empty context_done first to prevent UI waiting for products
+                    # Falta información: Lumi hace UNA pregunta de perfilado.
+                    # mode="profiler" para que la UI no muestre el aviso de "sin productos".
                     yield {
                         "event": "context_done",
-                        "data": json.dumps({"guides": [], "total": 0}),
+                        "data": json.dumps({"guides": [], "total": 0, "mode": "profiler"}),
                     }
                     profiler_data = await generate_profiler_response(request.message, history)
                     response = profiler_data.get("message", "")
@@ -121,35 +125,42 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                     if "chips" in profiler_data:
                         yield {"event": "chips", "data": json.dumps(profiler_data["chips"])}
                 else:
+                    # 2. Buscar en el catálogo.
+                    yield {"event": "status", "data": json.dumps({"stage": "searching", "label": "Lumi está buscando en el catálogo…"})}
                     context_payload, retrieved_items = await retrieve_context(request.message)
 
                     products = context_payload.get("products", [])
                     guides = context_payload.get("guides", [])
-                    
-                    # Check for 40% match threshold
+
                     best_score = max([item["score"] for item in retrieved_items], default=0.0)
+
                     if best_score < 0.4 or not products:
-                        # RAG found no good match, pass to Recommender with empty items
-                        # so it explains we don't have exactly what they need, without asking more questions.
+                        # No hay un calce fuerte. En vez de dejar al recomendador SIN
+                        # contexto (lo que producía respuestas vacías y secas), le pasamos
+                        # las mejores opciones disponibles para que ofrezca lo más cercano
+                        # con honestidad. mode="soft" → la UI no dice "no encontré nada".
                         yield {
                             "event": "context_done",
-                            "data": json.dumps({"guides": [], "total": 0}),
+                            "data": json.dumps({"guides": [], "total": 0, "mode": "soft"}),
                         }
-                        async for token in generate_recommender_response(request.message, history, retrieved_items=[]):
+                        yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando una recomendación cercana…"})}
+                        async for token in generate_recommender_response(
+                            request.message, history, retrieved_items=retrieved_items[:3], soft_match=True
+                        ):
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
                     else:
-                        # Emit each product individually so the frontend can show them progressively
+                        # Emitir cada producto para que el frontend los muestre progresivamente.
                         for idx, product in enumerate(products):
                             product_with_index = {**product, "product_index": idx + 1}
                             yield {"event": "product", "data": json.dumps(product_with_index)}
 
-                        # Emit guides + total count as a summary event
                         yield {
                             "event": "context_done",
-                            "data": json.dumps({"guides": guides, "total": len(products)}),
+                            "data": json.dumps({"guides": guides, "total": len(products), "mode": "match"}),
                         }
 
+                        yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando tu recomendación…"})}
                         async for token in generate_recommender_response(request.message, history, retrieved_items):
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
