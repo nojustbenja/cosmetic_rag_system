@@ -141,6 +141,12 @@ def _normalize_product(product: dict) -> dict:
         "category": product.get("category") or product.get("categoria") or "",
     }
 
+def _relevance_terms(product: dict) -> set[str]:
+    terms: set[str] = set()
+    for value in (*_split_csv(product.get("tags")), *_split_csv(product.get("benefits"))):
+        terms.update(value.lower().replace("-", " ").split())
+    return terms
+
 def _product_matches_profile(candidate: dict, product: dict, profile: dict) -> bool:
     if candidate.get("id") == product.get("id"):
         return False
@@ -151,7 +157,33 @@ def _product_matches_profile(candidate: dict, product: dict, profile: dict) -> b
     candidate_skins = [skin.lower() for skin in _split_csv(candidate.get("skin_types"))]
     if skin_type and candidate_skins and "todas" not in candidate_skins and skin_type not in candidate_skins:
         return False
+    # Exige al menos un tag o beneficio en común para no ofrecer productos
+    # de la misma categoria pero sin relacion real (ej. contorno de ojos vs exfoliante).
+    target_terms = _relevance_terms(product)
+    if target_terms and not (target_terms & _relevance_terms(candidate)):
+        return False
     return True
+
+_SKIN_LABELS = {
+    "seca": "tu piel seca",
+    "sensible": "tu piel sensible",
+    "grasa": "tu piel grasa",
+    "mixta": "tu piel mixta",
+    "normal": "tu piel normal",
+}
+
+_CONCERN_LABELS = {
+    "hidratacion": "la hidratación",
+    "luminosidad": "la luminosidad",
+    "antiedad": "el cuidado antiedad",
+    "acne": "el control de acné e imperfecciones",
+    "aroma amaderado": "un aroma amaderado",
+}
+
+_USAGE_LABELS = {
+    "dia": "el día",
+    "noche": "la noche",
+}
 
 def generate_product_action(message: str, product: dict, action: str, profile: dict, catalog: list[dict]) -> dict:
     normalized_product = _normalize_product(product)
@@ -163,42 +195,42 @@ def generate_product_action(message: str, product: dict, action: str, profile: d
     ]
 
     selected: dict | None = None
-    title = "Por qué este"
+    title = "Por qué te lo recomiendo"
     if action == "cheaper":
-        title = "Alternativa más barata"
+        title = "Una opción más económica"
         cheaper = [item for item in candidates if float(item.get("price") or 0) < current_price]
         selected = sorted(cheaper, key=lambda item: float(item.get("price") or 0), reverse=True)[:1]
         selected = selected[0] if selected else None
     elif action == "premium":
-        title = "Alternativa premium"
+        title = "Una opción premium"
         premium = [item for item in candidates if float(item.get("price") or 0) > current_price]
         selected = sorted(premium, key=lambda item: float(item.get("price") or 0))[:1]
         selected = selected[0] if selected else None
 
     target = selected or normalized_product
     benefits = ", ".join(_split_csv(target.get("benefits"))) or "sus beneficios principales"
-    skin = profile.get("skin_type") or "el perfil detectado"
-    concern = profile.get("concern") or "la necesidad declarada"
-    usage = profile.get("usage_moment") or "la rutina"
+    skin = _SKIN_LABELS.get(profile.get("skin_type"), "tu tipo de piel")
+    concern = _CONCERN_LABELS.get(profile.get("concern"), "lo que buscas")
+    usage = _USAGE_LABELS.get(profile.get("usage_moment"), "tu rutina")
 
     if action == "cheaper" and not selected:
-        seller_note = "No hay una alternativa más barata clara con la misma categoría y perfil de piel."
+        seller_note = "No tengo una alternativa más económica que mantenga el mismo enfoque para tu piel, pero esta opción ya está pensada para ajustarse a tu presupuesto."
     elif action == "premium" and not selected:
-        seller_note = "No hay una alternativa premium clara con la misma categoría y perfil de piel."
+        seller_note = "No tengo una alternativa premium dentro de la misma línea, pero esta opción ya cubre muy bien lo que necesitas."
     elif action == "cheaper":
-        seller_note = f"Si el cliente quiere bajar presupuesto, ofrece {target.get('name')} porque mantiene el foco en {concern} con menor precio."
+        seller_note = f"Si prefieres algo más accesible, {target.get('name')} mantiene el foco en {concern} a un precio menor."
     elif action == "premium":
-        seller_note = f"Si el cliente busca una opción más aspiracional, ofrece {target.get('name')} como upgrade dentro de la misma necesidad."
+        seller_note = f"Si quieres darte un upgrade, {target.get('name')} es una excelente opción dentro de la misma línea de cuidado."
     else:
-        seller_note = f"Calza con {skin} y {concern}; apóyate en {benefits} para dar seguridad al cliente."
+        seller_note = f"Encaja con {skin} y con {concern}; destaca por {benefits}."
 
     return {
         "action": action,
         "title": title,
         "product": target if selected else None,
         "seller_note": seller_note,
-        "customer_phrase": f"Te lo propongo porque encaja con lo que me contaste y funciona bien para {usage}.",
-        "usage_tip": "Confirma tolerancia y frecuencia de uso; si hay sensibilidad, partir gradual.",
+        "customer_phrase": f"Te lo recomiendo porque encaja con lo que me contaste y funciona muy bien para {usage}.",
+        "usage_tip": "Confirma la tolerancia y la frecuencia de uso; si tu piel es sensible, comienza de forma gradual.",
     }
 
 async def generate_product_reason(message: str, product: dict) -> str:
@@ -231,7 +263,7 @@ async def generate_product_reason(message: str, product: dict) -> str:
         f"Precio: {_format_clp(product.get('price'))}\n"
         f"Stock: {product.get('stock', 'no especificado')}\n"
         f"Descripción: {product.get('description', '')}\n\n"
-        f"Genera el argumento de venta:"
+        f"Genera tu respuesta para el cliente:"
     )
     messages = [{"role": "user", "content": prompt}]
     client = LLMClient()
@@ -317,26 +349,23 @@ async def analyze_intent(message: str, session_history: list[dict]) -> bool:
 async def _fallback_response(message: str, retrieved_items: list[dict]) -> AsyncGenerator[str, None]:
     products = [item for item in retrieved_items if item["metadata"].get("source") == "catalog"][:3]
     if not products:
-        yield "No encontre productos adecuados en el catalogo ingresado. Ejecuta la ingesta o agrega productos al CSV."
+        yield "Por ahora no encontré productos que calcen con lo que buscas. Cuéntame un poco más para poder ayudarte mejor."
         return
 
-    yield "Modo local sin API key. Estas son recomendaciones basadas en el catalogo recuperado:\n\n"
+    yield "Estas son las opciones que mejor calzan con lo que me contaste:\n\n"
     for item in products:
         metadata = item["metadata"]
         text = item["text"]
         price_str = _format_clp(metadata.get("price"))
-        yield f"- **Producto**: {metadata.get('product_name', 'Producto')}\n"
+        yield f"- **{metadata.get('product_name', 'Producto')}** ({price_str})\n"
         benefits = _extract_field(text, "Beneficios")
         skin_types = _extract_field(text, "Tipo de piel")
         signals = ", ".join(_profile_signals(message))
-        reason = benefits or "sus atributos principales calzan con la necesidad detectada"
+        reason = benefits or "sus beneficios principales encajan con lo que buscas"
         if skin_types:
-            reason += f" y esta orientado a piel {skin_types}"
-        yield f"- **Por que venderlo**: responde a {signals}; {reason}.\n"
-        yield "- **Frase para el cliente**: te lo recomiendo porque calza con lo que me contaste y ayuda a sostener la rutina sin complicarla.\n"
-        yield "- **Tip de uso**: explicar frecuencia y momento de uso segun tolerancia, especialmente si la piel es sensible.\n"
-        yield f"- **Precio**: {price_str}\n"
-        yield f"- **Contexto**: {text}\n\n"
+            reason += f" y está pensado para piel {skin_types}"
+        yield f"  Te lo recomiendo porque responde a {signals}; {reason}.\n"
+        yield "  Tip: ajusta la frecuencia y el momento de uso según tu tolerancia, sobre todo si tu piel es sensible.\n\n"
 
 @profile_time
 async def generate_profiler_response(

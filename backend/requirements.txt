@@ -8,3 +8,4 @@ python-dotenv
 pydantic-settings
 sse-starlette
 anthropic
+rank-bm25

@@ -39,37 +39,11 @@ def _format_results(results: dict) -> list[dict]:
     return formatted
 
 
-def _split_filters(filters: dict | None) -> tuple[dict | None, dict[str, str]]:
-    if not filters:
-        return None, {}
-
-    exact_filters: list[dict] = []
-    contains_filters: dict[str, str] = {}
-    filter_items = filters.get("$and", [filters])
-
-    for item in filter_items:
-        for key, value in item.items():
-            if isinstance(value, dict) and "$contains" in value:
-                contains_filters[key] = str(value["$contains"]).lower()
-            else:
-                exact_filters.append({key: value})
-
-    if not exact_filters:
-        return None, contains_filters
-    if len(exact_filters) == 1:
-        return exact_filters[0], contains_filters
-    return {"$and": exact_filters}, contains_filters
-
-
-def _matches_contains_filters(result: dict, contains_filters: dict[str, str]) -> bool:
-    metadata = result["metadata"]
-    for key, expected in contains_filters.items():
-        val = str(metadata.get(key, "")).lower()
-        if key == "skin_types" and "todas" in val:
-            continue
-        if expected not in val:
-            return False
-    return True
+def _matches_skin_type(metadata: dict, skin_type: str) -> bool:
+    val = str(metadata.get("skin_types", "")).lower()
+    if "todas" in val:
+        return True
+    return skin_type in val
 
 
 async def retrieve_products(
@@ -84,16 +58,25 @@ async def retrieve_products(
         )
         if collection.count() == 0:
             return []
-        exact_filters, contains_filters = _split_filters(filters)
+        skin_type = (filters or {}).get("skin_type")
+        category = (filters or {}).get("category")
+
         results = collection.query(
             query_embeddings=[query_embedding],
             n_results=min(max(top_k * 3, top_k), collection.count()),
-            where=exact_filters,
             include=["documents", "metadatas", "distances"],
         )
         formatted = _format_results(results)
-        if contains_filters:
-            formatted = [item for item in formatted if _matches_contains_filters(item, contains_filters)]
+
+        if skin_type:
+            formatted = [item for item in formatted if _matches_skin_type(item["metadata"], skin_type)]
+
+        if category:
+            for item in formatted:
+                if str(item["metadata"].get("category", "")) == category:
+                    item["score"] = min(1.0, item["score"] + 0.12)
+            formatted = sorted(formatted, key=lambda item: item["score"], reverse=True)
+
         return formatted[:top_k]
 
     return await asyncio.to_thread(_sync_query)
@@ -117,39 +100,88 @@ async def retrieve_guides(query_embedding: list[float], top_k: int = 4) -> list[
     return await asyncio.to_thread(_sync_query)
 
 
+def _is_negated(text: str, idx: int, window: int = 20) -> bool:
+    prefix = text[max(0, idx - window):idx]
+    return any(neg in prefix for neg in ("no ", "sin ", "para nada", "nada de"))
+
+
 def infer_filters(query: str) -> dict | None:
     normalized = query.lower()
-    filters: list[dict] = []
-    for skin_type in ("seca", "grasa", "mixta", "sensible", "normal"):
-        if f"piel {skin_type}" in normalized or skin_type in normalized:
-            filters.append({"skin_types": {"$contains": skin_type}})
+
+    skin_type = None
+    for candidate in ("seca", "grasa", "mixta", "sensible", "normal"):
+        for pattern in (f"piel {candidate}", candidate):
+            idx = normalized.find(pattern)
+            if idx != -1 and not _is_negated(normalized, idx):
+                skin_type = candidate
+                break
+        if skin_type:
+            break
 
     category_aliases = {
         "facial": "cuidado_facial",
         "rostro": "cuidado_facial",
+        "crema": "cuidado_facial",
+        "serum": "cuidado_facial",
+        "sérum": "cuidado_facial",
+        "mascarilla": "cuidado_facial",
+        "contorno de ojos": "cuidado_facial",
+        "tonico": "cuidado_facial",
+        "tónico": "cuidado_facial",
+        "exfoliante": "cuidado_facial",
         "solar": "proteccion_solar",
         "protector": "proteccion_solar",
+        "bloqueador": "proteccion_solar",
         "maquillaje": "maquillaje",
+        "base liquida": "maquillaje",
+        "base líquida": "maquillaje",
+        "labial": "maquillaje",
+        "pestañas": "maquillaje",
+        "sombras": "maquillaje",
+        "iluminador": "maquillaje",
         "limpiador": "limpieza",
         "limpieza": "limpieza",
+        "desmaquillante": "limpieza",
+        "agua micelar": "limpieza",
         "perfume": "fragancias",
         "fragancia": "fragancias",
+        "eau de": "fragancias",
         "cabello": "cabello",
         "pelo": "cabello",
         "champu": "cabello",
+        "champú": "cabello",
         "shampoo": "cabello",
         "aceite capilar": "cabello",
     }
-    for alias, category in category_aliases.items():
-        if alias in normalized:
-            filters.append({"category": category})
-            break
+    matches: list[tuple[int, str]] = []
+    for alias, candidate_category in category_aliases.items():
+        idx = normalized.find(alias)
+        if idx != -1:
+            matches.append((idx, candidate_category))
 
-    if not filters:
+    category = None
+    if matches:
+        # Si hay un verbo de necesidad ("necesito", "busco", etc.), la categoría
+        # buscada suele ser el alias más cercano que aparece DESPUÉS de ese verbo
+        # (evita que palabras mencionadas de paso, ej. "maquillaje" al hablar de
+        # removerlo, se confundan con el producto que el cliente realmente pide).
+        anchor_idx = None
+        for anchor in ("necesito", "busco", "quiero", "quisiera", "recomi", "dame", "ocupo"):
+            i = normalized.find(anchor)
+            if i != -1 and (anchor_idx is None or i < anchor_idx):
+                anchor_idx = i
+
+        candidates = matches
+        if anchor_idx is not None:
+            after_anchor = [m for m in matches if m[0] >= anchor_idx]
+            if after_anchor:
+                candidates = after_anchor
+
+        category = min(candidates, key=lambda m: m[0])[1]
+
+    if not skin_type and not category:
         return None
-    if len(filters) == 1:
-        return filters[0]
-    return {"$and": filters}
+    return {"skin_type": skin_type, "category": category}
 
 
 async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
@@ -168,12 +200,24 @@ async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
         return []
         
     try:
+        import re
         from rank_bm25 import BM25Okapi
-        corpus = [item["text"] for item in results]
-        tokenized_corpus = [doc.lower().split() for doc in corpus]
+
+        def _tokenize(text: str) -> list[str]:
+            return re.findall(r"\w+", text.lower())
+
+        # El campo "Tipo de piel" es una lista de etiquetas separadas por comas
+        # (ej. "todas,sensible,seca,grasa,mixta"). Si se tokeniza junto al resto,
+        # cualquier mención de un tipo de piel en la consulta hace match con
+        # productos "todas" aunque no sean relevantes, distorsionando el ranking.
+        # Se excluye del texto usado para BM25 (la búsqueda semántica y los
+        # filtros de tipo de piel ya se encargan de eso).
+        skin_type_pattern = re.compile(r"tipo de piel:[^.]*\.", re.IGNORECASE)
+        corpus = [skin_type_pattern.sub("", item["text"]) for item in results]
+        tokenized_corpus = [_tokenize(doc) for doc in corpus]
         bm25 = BM25Okapi(tokenized_corpus)
-        
-        tokenized_query = query.lower().split()
+
+        tokenized_query = _tokenize(query)
         bm25_scores = bm25.get_scores(tokenized_query)
         
         max_bm25 = max(bm25_scores) if max(bm25_scores) > 0 else 1.0
