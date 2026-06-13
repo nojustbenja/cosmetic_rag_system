@@ -39,6 +39,11 @@ class Settings(BaseSettings):
         return str(path.resolve())
 
     @property
+    def frontend_origins(self) -> list[str]:
+        origins = [origin.strip() for origin in self.frontend_origin.split(",")]
+        return [origin for origin in origins if origin]
+
+    @property
     def resolved_provider(self) -> str:
         try:
             from rag.provider_config import resolve_provider_config
