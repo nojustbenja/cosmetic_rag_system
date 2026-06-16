@@ -1,18 +1,18 @@
 [
   {
-    "id": "faq-piel-mixta-glow",
+    "id": "faq-crema-dia",
     "group": "frequent",
-    "text": "Tengo piel mixta y quiero más luminosidad"
+    "text": "Busco una crema hidratante de día"
   },
   {
-    "id": "faq-rutina-antiedad",
+    "id": "faq-serum-vit-c",
     "group": "frequent",
-    "text": "Necesito una rutina antiedad básica"
+    "text": "Qué sérums con vitamina C recomiendas"
   },
   {
-    "id": "faq-protector-sensible",
+    "id": "faq-protector-ligero",
     "group": "frequent",
-    "text": "Qué protector solar sirve para piel sensible"
+    "text": "Busco un protector solar que no deje blanco"
   },
   {
     "id": "trend-perfume-noche",
@@ -30,18 +30,18 @@
     "text": "Qué regalo de skincare premium recomiendas"
   },
   {
-    "id": "case-acne-sensible",
+    "id": "case-contorno-ojos",
     "group": "specific",
-    "text": "Tengo piel sensible con brotes y no quiero irritarme"
+    "text": "Necesito un buen contorno de ojos"
   },
   {
-    "id": "case-presupuesto-bajo",
+    "id": "case-limpiador-suave",
     "group": "specific",
-    "text": "Arma una rutina simple con presupuesto bajo"
+    "text": "Busco un limpiador que no reseque la piel"
   },
   {
     "id": "case-maquillaje-larga-duracion",
     "group": "specific",
-    "text": "Necesito maquillaje de larga duración para piel grasa"
+    "text": "Necesito una base de larga duración"
   }
 ]

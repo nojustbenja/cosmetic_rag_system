@@ -34,7 +34,6 @@ from analytics.questions import get_suggestions, get_stats, record_event, search
 
 
 router = APIRouter()
-sessions: dict[str, list[dict]] = {}
 ORDERS_PATH = Path(__file__).resolve().parents[1] / "data" / "orders.json"
 
 
@@ -97,7 +96,8 @@ async def question_search(q: str = "") -> dict[str, list[dict]]:
 
 @router.post("/chat")
 async def chat(request: ChatRequest) -> EventSourceResponse:
-    history = sessions.get(request.session_id, [])
+    # Use history directly from the frontend request to be 100% stateless
+    history = request.history[-8:] if getattr(request, "history", None) else []
 
     async def event_generator():
         from utils.timing import profile_block
@@ -108,7 +108,10 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
 
                 # 1. Analizar el perfil UNA sola vez (regex, rápido) y avisar a la UI.
                 yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
-                profile = extract_client_profile(request.message, history)
+                
+                profile = extract_client_profile(request.message, history, frontend_profile=request.profile)
+                if request.profile:
+                    profile.update(request.profile)
                 has_profile = not profile.get("missing_fields")
                 yield {"event": "profile", "data": json.dumps(profile)}
 
@@ -127,7 +130,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                 else:
                     # 2. Buscar en el catálogo.
                     yield {"event": "status", "data": json.dumps({"stage": "searching", "label": "Lumi está buscando en el catálogo…"})}
-                    context_payload, retrieved_items = await retrieve_context(request.message)
+                    context_payload, retrieved_items = await retrieve_context(request.message, filters=profile)
 
                     products = context_payload.get("products", [])
                     guides = context_payload.get("guides", [])
@@ -165,10 +168,6 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
 
-                sessions[request.session_id] = (history + [
-                    {"role": "user", "content": request.message},
-                    {"role": "assistant", "content": response},
-                ])[-8:]
                 yield {"event": "done", "data": json.dumps({"ok": True})}
             except Exception as exc:
                 yield {"event": "error", "data": json.dumps({"error": str(exc)})}

@@ -60,22 +60,33 @@ async def retrieve_products(
             return []
         skin_type = (filters or {}).get("skin_type")
         category = (filters or {}).get("category")
+        allergies = (filters or {}).get("allergies", [])
+
+        where_clause = {}
+        if category:
+            where_clause["category"] = category
 
         results = collection.query(
             query_embeddings=[query_embedding],
             n_results=min(max(top_k * 3, top_k), collection.count()),
             include=["documents", "metadatas", "distances"],
+            where=where_clause if where_clause else None
         )
         formatted = _format_results(results)
 
         if skin_type:
             formatted = [item for item in formatted if _matches_skin_type(item["metadata"], skin_type)]
 
-        if category:
+        if allergies:
+            safe_items = []
             for item in formatted:
-                if str(item["metadata"].get("category", "")) == category:
-                    item["score"] = min(1.0, item["score"] + 0.12)
-            formatted = sorted(formatted, key=lambda item: item["score"], reverse=True)
+                ingredients = str(item["metadata"].get("ingredients", "")).lower()
+                has_allergen = any(allergy.lower() in ingredients for allergy in allergies)
+                if not has_allergen:
+                    safe_items.append(item)
+            formatted = safe_items
+
+        formatted = sorted(formatted, key=lambda item: item["score"], reverse=True)
 
         return formatted[:top_k]
 

@@ -93,11 +93,23 @@ export type StreamHandlers = {
   onStatus?: (data: { stage: string; label: string }) => void;
 };
 
-export async function streamChat(message: string, sessionId: string, handlers: StreamHandlers, signal?: AbortSignal) {
+export async function streamChat(
+  message: string, 
+  sessionId: string, 
+  profile: ClientProfile | null, 
+  history: { role: string; content: string }[],
+  handlers: StreamHandlers, 
+  signal?: AbortSignal
+) {
   const response = await fetch(endpoint('/chat'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, session_id: sessionId }),
+    body: JSON.stringify({ 
+      message, 
+      session_id: sessionId, 
+      profile: profile || {},
+      history: history 
+    }),
     signal
   });
 

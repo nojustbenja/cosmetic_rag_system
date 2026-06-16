@@ -57,7 +57,7 @@ def _profile_signals(message: str) -> list[str]:
     return signals or ["necesidad descrita por el cliente"]
 
 @profile_time
-def extract_client_profile(message: str, session_history: list[dict] | None = None) -> dict:
+def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
     history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:])
     text = f"{history_text} {message}".lower()
 
@@ -111,6 +111,15 @@ def extract_client_profile(message: str, session_history: list[dict] | None = No
                 if budget_max < 1000:
                     budget_max *= 1000
                 break
+
+    # Merge frontend profile fields BEFORE calculating missing fields!
+    frontend_profile = frontend_profile or {}
+    skin_type = frontend_profile.get("skin_type") or skin_type
+    category = frontend_profile.get("category") or category
+    usage_moment = frontend_profile.get("usage_moment") or usage_moment
+    concern = frontend_profile.get("concern") or concern
+    fragrance_family = frontend_profile.get("fragrance_family") or fragrance_family
+    budget_max = frontend_profile.get("budget_max") or budget_max
 
     missing_fields = []
     if not skin_type and category != "fragancias":
@@ -332,8 +341,8 @@ def build_retrieval_context(message: str, retrieved_items: list[dict]) -> dict:
     return {"products": products[:6], "guides": guides[:4]}
 
 @profile_time
-async def retrieve_context(message: str) -> tuple[dict, list[dict]]:
-    retrieved_items = await retrieve_all(message)
+async def retrieve_context(message: str, filters: dict | None = None) -> tuple[dict, list[dict]]:
+    retrieved_items = await retrieve_all(message, filters)
     context_data = build_retrieval_context(message, retrieved_items)
     return context_data, retrieved_items
 

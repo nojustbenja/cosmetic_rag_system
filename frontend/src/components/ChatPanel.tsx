@@ -6,6 +6,9 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { streamChat, fetchProductReason, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent } from "@/lib/api";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
+import { useToast } from "@/components/ui/use-toast";
+import { ChatProfile } from "./ChatProfile";
+import ReactMarkdown from "react-markdown";
 import { Markdown } from "./Markdown";
 import { LumiStatus } from "./LumiStatus";
 import { ChatHistoryDrawer, loadSessions, saveSession } from "./ChatHistoryDrawer";
@@ -23,7 +26,7 @@ const INITIAL_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Hola. Describe el perfil del cliente y te ayudo a recomendar productos del catalogo cargado.",
+    "¡Hola! Soy Lumi, tu asesora de belleza. Para darte mejores recomendaciones, te sugiero completar tu perfil aquí arriba. ¿Qué producto estás buscando hoy?",
 };
 
 const FALLBACK_QUESTION_SUGGESTIONS: QuestionSuggestion[] = [
@@ -44,32 +47,32 @@ const FALLBACK_QUESTION_SUGGESTIONS: QuestionSuggestion[] = [
     is_trending: true,
   },
   {
-    id: "fallback-frequent-piel-mixta",
-    text: "Tengo piel mixta y quiero más luminosidad",
+    id: "fallback-frequent-crema-dia",
+    text: "Busco una crema hidratante de día",
     group: "frequent",
     label: "Frecuentes",
     score: 0,
     is_trending: false,
   },
   {
-    id: "fallback-frequent-antiedad",
-    text: "Necesito una rutina antiedad básica",
+    id: "fallback-frequent-serum-vit-c",
+    text: "Qué sérums con vitamina C recomiendas",
     group: "frequent",
     label: "Frecuentes",
     score: 0,
     is_trending: false,
   },
   {
-    id: "fallback-random-sensible",
-    text: "Tengo piel sensible con brotes y no quiero irritarme",
+    id: "fallback-random-contorno",
+    text: "Necesito un buen contorno de ojos",
     group: "specific",
     label: "Casos específicos",
     score: 0,
     is_trending: false,
   },
   {
-    id: "fallback-random-presupuesto",
-    text: "Arma una rutina simple con presupuesto bajo",
+    id: "fallback-random-limpiador",
+    text: "Busco un limpiador que no reseque la piel",
     group: "specific",
     label: "Casos específicos",
     score: 0,
@@ -109,8 +112,6 @@ export function ChatPanel({
     if (!el) return;
 
     const performScroll = () => {
-      // During active token streaming, use "auto" (instant) scroll to prevent animation queue buildup.
-      // Use premium "smooth" scroll only on full message completion.
       el.scrollTo({
         top: el.scrollHeight,
         behavior: loading ? "auto" : "smooth",
@@ -120,6 +121,37 @@ export function ChatPanel({
     const frameId = requestAnimationFrame(performScroll);
     return () => cancelAnimationFrame(frameId);
   }, [messages, loading]);
+
+  // Helper to generate the buyer-centric welcome message
+  const getWelcomeMessage = useCallback(() => {
+    if (!clientProfile) return INITIAL_MESSAGE;
+    
+    const skin = clientProfile.skin_type ? `piel ${clientProfile.skin_type}` : "";
+    const age = clientProfile.age ? ` (${clientProfile.age} años)` : "";
+    const text = `¡Hola! Ya tengo configurado tu perfil${age}${skin ? ' con ' + skin : ''}. ¿En qué te puedo ayudar hoy?`;
+    
+    const chips = [];
+    if (clientProfile.skin_type === "seca") chips.push("Rutina súper hidratante", "Sérum luminoso");
+    else if (clientProfile.skin_type === "grasa" || clientProfile.skin_type === "mixta") chips.push("Control de brillo", "Limpieza profunda");
+    else chips.push("Skincare básico", "Rutina de día");
+    
+    if (clientProfile.age && Number(clientProfile.age) > 28) chips.push("Cuidado antiedad", "Contorno de ojos");
+    else chips.push("Protección solar");
+
+    return {
+      id: "welcome",
+      role: "assistant" as const,
+      content: text,
+      chips: chips.slice(0, 4)
+    };
+  }, [clientProfile]);
+
+  // Buyer-centric: Replace the initial message dynamically based on the profile
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].id === "welcome" && messages[0] === INITIAL_MESSAGE && clientProfile) {
+      setMessages([getWelcomeMessage()]);
+    }
+  }, [clientProfile, messages, getWelcomeMessage]);
 
   useEffect(() => {
     fetchQuestionSuggestions()
@@ -269,8 +301,13 @@ export function ChatPanel({
       source: meta.source || "typed",
     });
 
+    // Build history for backend (excluding welcome and the current message we just added)
+    const historyPayload = messages
+      .filter((m) => m.id !== "welcome" && m.id !== userMessageId)
+      .map((m) => ({ role: m.role, content: m.content }));
+
     try {
-      await streamChat(text, sessionId, {
+      await streamChat(text, sessionId, clientProfile || null, historyPayload, {
         onStatus: ({ label }) => {
           // Solo actualizar mientras no haya empezado a llegar contenido real.
           if (!hasToken && productCount === 0) setStatusLabel(label);
@@ -481,9 +518,7 @@ export function ChatPanel({
         </div>
       </div>
 
-      {clientProfile && (
-        <ClientProfileCard profile={clientProfile} />
-      )}
+      <ChatProfile profile={clientProfile} onUpdate={onProfile} />
 
       {/* Messages */}
       <div

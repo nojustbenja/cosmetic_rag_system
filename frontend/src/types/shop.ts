@@ -30,7 +30,11 @@ export type ClientProfile = {
   fragrance_family?: string;
   confidence?: number;
   missing_fields?: string[];
+  age?: number | string;
+  allergies?: string[];
+  climate?: string;
 };
+
 
 export type ProductAction = "why_this" | "cheaper" | "premium";
 

@@ -3472,5 +3472,497 @@
     "suggestion_id": "",
     "source": "inline_chip",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:09:14.812937+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:09:18.039515+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:09:45.083108+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "sent",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:09:45.550860+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:10:01.543794+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "answered",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:10:37.694045+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "product_view",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-0-srum-hidratante-glow-drops"
+    ]
+  },
+  {
+    "timestamp": "2026-06-16T12:10:46.253488+00:00",
+    "session_id": "327596b8-8efd-48a9-8e7e-8050dd2e17b7",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:11:03.858955+00:00",
+    "session_id": "327596b8-8efd-48a9-8e7e-8050dd2e17b7",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:11:11.935687+00:00",
+    "session_id": "327596b8-8efd-48a9-8e7e-8050dd2e17b7",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:11:19.660462+00:00",
+    "session_id": "327596b8-8efd-48a9-8e7e-8050dd2e17b7",
+    "event_type": "click",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:11:19.664228+00:00",
+    "session_id": "327596b8-8efd-48a9-8e7e-8050dd2e17b7",
+    "event_type": "sent",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:12:08.116469+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:13:35.525821+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:16:03.628364+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:16:47.295375+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:17:49.521621+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Arma una rutina simple con presupuesto bajo",
+    "normalized_question": "arma rutina simple presupuesto bajo",
+    "suggestion_id": "case-presupuesto-bajo",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:17:49.531868+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Necesito maquillaje de larga duración para piel grasa",
+    "normalized_question": "necesito maquillaje larga duracion piel grasa",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:17:50.113050+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Hola, este fin de semana voy a la playa y necesito bloqueador. Estoy buscando uno que sea súper fácil de aplicar en todo el cuerpo, ojalá en spray y que resista el agua. Mi piel es normal.",
+    "normalized_question": "hola fin semana voy playa necesito bloqueador estoy buscando uno sea super facil aplicar todo cuerpo ojala spray resista agua piel normal",
+    "suggestion_id": "event-hola-fin-semana-voy-playa-necesito-bloqu",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:18:11.307742+00:00",
+    "session_id": "85769d9a-d089-4836-80c9-1e4c6d86cd79",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "case-acne-sensible",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:18:29.073651+00:00",
+    "session_id": "ad25498c-f613-4078-a86e-e379cc3a0175",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:18:41.636336+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:18:56.181407+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "impression",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:18:57.200316+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:19:44.989091+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "event-piel-sensible-brotes-no-irritarme",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:07.318930+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:15.589352+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:31.988582+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "Uso diario",
+    "normalized_question": "uso diario",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:44.083164+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "Uso diario",
+    "normalized_question": "uso diario",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:49.511809+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "Piel Grasa",
+    "normalized_question": "piel grasa",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:20:59.689601+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "Piel Grasa",
+    "normalized_question": "piel grasa",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:21:02.791239+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "SPF alto",
+    "normalized_question": "spf alto",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:21:37.759786+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "SPF alto",
+    "normalized_question": "spf alto",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:21:43.866911+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "Crema ligera",
+    "normalized_question": "crema ligera",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:21:57.739680+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "Crema ligera",
+    "normalized_question": "crema ligera",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:02.625319+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "No sé",
+    "normalized_question": "no se",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:15.191028+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "No sé",
+    "normalized_question": "no se",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:21.455091+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "impression",
+    "question": "Tengo piel sensible con brotes y no quiero irritarme",
+    "normalized_question": "piel sensible brotes no irritarme",
+    "suggestion_id": "event-piel-sensible-brotes-no-irritarme",
+    "source": "chip_trending",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:22.201524+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "No sé",
+    "normalized_question": "no se",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:30.942264+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "No sé",
+    "normalized_question": "no se",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:33.168320+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "No",
+    "normalized_question": "no",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:43.953955+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "No",
+    "normalized_question": "no",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:46.763060+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "sent",
+    "question": "No",
+    "normalized_question": "no",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:22:53.885174+00:00",
+    "session_id": "f990b3bf-3534-4caa-aa4e-6e105bab59f6",
+    "event_type": "answered",
+    "question": "No",
+    "normalized_question": "no",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:24:27.937778+00:00",
+    "session_id": "37c6a9b9-9e4f-42a0-89c5-f3505cf562c2",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:25:41.680237+00:00",
+    "session_id": "37c6a9b9-9e4f-42a0-89c5-f3505cf562c2",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:26:06.781311+00:00",
+    "session_id": "37c6a9b9-9e4f-42a0-89c5-f3505cf562c2",
+    "event_type": "sent",
+    "question": "Rutina de día",
+    "normalized_question": "rutina dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:26:49.216460+00:00",
+    "session_id": "37c6a9b9-9e4f-42a0-89c5-f3505cf562c2",
+    "event_type": "answered",
+    "question": "Rutina de día",
+    "normalized_question": "rutina dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:29:59.812761+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:30:10.986106+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
   }
 ]

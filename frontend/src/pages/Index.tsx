@@ -55,7 +55,9 @@ const Index = () => {
     loadCatalog();
   }, [loadCatalog]);
 
-
+  const handleUpdateProfile = useCallback((profile: ClientProfile) => {
+    setClientProfile(profile);
+  }, []);
 
   const handleUpdateProductReason = useCallback((productId: string, reason: string) => {
     setProducts((prev) =>
@@ -118,7 +120,7 @@ const Index = () => {
           <ChatPanel
             onClearChat={handleClearChat}
             clientProfile={clientProfile}
-            onProfile={setClientProfile}
+            onProfile={handleUpdateProfile}
             onUpdateProductReason={handleUpdateProductReason}
             onRestoreSession={handleRestoreSession}
             onRecommendations={(recProducts, newGuides) => {

@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1)
     session_id: str = Field(min_length=1)
+    profile: dict = Field(default_factory=dict)
+    history: list[dict] = Field(default_factory=list)
 
 
 class ChatMessage(BaseModel):
