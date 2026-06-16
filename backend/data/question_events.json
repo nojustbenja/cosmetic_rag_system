@@ -3964,5 +3964,25 @@
     "suggestion_id": "",
     "source": "inline_chip",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:30:25.138715+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T12:30:33.391833+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Piel Sensible",
+    "normalized_question": "piel sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
   }
 ]

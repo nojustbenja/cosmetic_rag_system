@@ -5,6 +5,7 @@
 .DS_Store
 .vscode/
 .idea/
+.atl/
 
 # Python
 __pycache__/
@@ -30,3 +31,4 @@ pnpm-debug.log*
 # Databases
 *.sqlite3
 chroma_db/
+
