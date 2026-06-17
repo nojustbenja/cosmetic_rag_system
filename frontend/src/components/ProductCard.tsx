@@ -129,28 +129,15 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -15 }}
-        tabIndex={0}
-        role="button"
-        aria-label={`Ver detalles de ${product.name} de ${product.brand}`}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setDetailsOpen(true);
-          }
-        }}
         transition={{
           duration: 0.24,
           ease: [0.16, 1, 0.3, 1],
           delay: Math.min(index * 0.03, 0.24), // Limit maximum delay to keep rendering fast
         }}
-        className={`w-full flex flex-col group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 rounded-[2.5rem] ${spanClasses}`}
-        onClick={() => setDetailsOpen(true)}
+        className={`relative text-left w-full flex flex-col group rounded-[2.5rem] ${spanClasses}`}
       >
-        <motion.div
-          whileHover={{ scale: 0.98, y: -2 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          className={`relative flex-1 flex flex-col p-2 rounded-[2.5rem] ${
+        <div
+          className={`relative flex-1 flex flex-col p-2 rounded-[2.5rem] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[0.98] group-hover:-translate-y-0.5 group-active:scale-[0.95] ${
             highlighted ? "glass-panel" : "glass-card"
           }`}
         >
@@ -185,7 +172,7 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
               }}
               aria-label={`Ver detalles de recomendación para ${product.name} (producto ${product.product_index})`}
               title="Ver por qué Lumi lo recomendó"
-              className="absolute top-6 left-6 size-9 bg-foreground/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-sm hover:bg-foreground hover:scale-110 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50"
+              className="absolute top-6 left-6 z-10 size-9 bg-foreground/90 backdrop-blur-xl rounded-full flex items-center justify-center shadow-sm hover:bg-foreground hover:scale-110 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/50"
             >
               <span className="text-background text-[13px] font-bold tabular-nums">
                 {product.product_index}
@@ -193,13 +180,21 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
             </button>
           )}
 
-        </motion.div>
+        </div>
 
         {/* Info rendered outside the card for clean gallery presentation */}
         <div className="pt-4 px-2 flex flex-col gap-1.5">
           <div className="flex justify-between items-start gap-4">
             <div className="flex flex-col gap-0.5 min-w-0">
-              <h3 className="text-product-name line-clamp-2">{product.name}</h3>
+              <h3 className="text-product-name line-clamp-2">
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen(true)}
+                  className="before:absolute before:inset-0 before:z-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 rounded-sm text-left"
+                >
+                  {product.name}
+                </button>
+              </h3>
               <p className="text-[12px] font-medium text-muted-foreground/80">{product.brand}</p>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
@@ -211,7 +206,7 @@ export function ProductCardInner({ product, highlighted, isRecommended, index, l
                   handleAddToCart();
                 }}
                 disabled={isOutOfStock}
-                className="icon-orb size-8 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/55 disabled:hover:text-foreground"
+                className="relative z-10 icon-orb size-8 rounded-full hover:bg-foreground hover:text-background transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-background/55 disabled:hover:text-foreground"
                 title={isOutOfStock ? "Sin stock" : "Añadir al carrito"}
                 aria-label={isOutOfStock ? `${product.name} sin stock` : `Añadir ${product.name} al carrito`}
               >

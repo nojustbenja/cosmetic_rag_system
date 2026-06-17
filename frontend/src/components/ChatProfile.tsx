@@ -52,7 +52,7 @@ export function ChatProfile({ profile, onUpdate }: Props) {
         className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-white/50 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <UserCircle2 className="w-4 h-4 text-emerald-600" />
+          <UserCircle2 className="w-4 h-4 text-primary" />
           <span>Mi Perfil {profile ? "(Guardado)" : "(Recomendado para mejores respuestas)"}</span>
         </div>
         {isOpen ? <ChevronUp className="w-4 h-4 opacity-50" /> : <ChevronDown className="w-4 h-4 opacity-50" />}
@@ -118,7 +118,7 @@ export function ChatProfile({ profile, onUpdate }: Props) {
             </select>
           </div>
 
-          <Button type="submit" size="sm" className="w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button type="submit" size="sm" className="w-full mt-1">
             Guardar Perfil
           </Button>
         </form>
