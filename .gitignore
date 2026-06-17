@@ -32,3 +32,6 @@ pnpm-debug.log*
 *.sqlite3
 chroma_db/
 
+# SDD 
+openspec/
+.atl/

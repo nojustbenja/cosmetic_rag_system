@@ -3984,5 +3984,529 @@
     "suggestion_id": "",
     "source": "inline_chip",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T13:56:38.962748+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T13:58:43.953224+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:05:56.898803+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:09:52.183449+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:09:57.661764+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "product_view",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-0-srum-hidratante-glow-drops"
+    ]
+  },
+  {
+    "timestamp": "2026-06-16T14:11:09.041591+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:29:24.161792+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "soy negro lumi, que hago",
+    "normalized_question": "soy negro lumi hago",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:29:29.492827+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "soy negro lumi, que hago",
+    "normalized_question": "soy negro lumi hago",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:29:39.400506+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "ser negro",
+    "normalized_question": "ser negro",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:29:55.353849+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "ser negro",
+    "normalized_question": "ser negro",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:30:19.091679+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "piel negra",
+    "normalized_question": "piel negra",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:30:25.213391+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "piel negra",
+    "normalized_question": "piel negra",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:30:39.627642+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "dime cuanto es 2+2",
+    "normalized_question": "dime cuanto 2 2",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:31:15.575662+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "dime cuanto es 2+2",
+    "normalized_question": "dime cuanto 2 2",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:31:18.797477+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Sensibilidad",
+    "normalized_question": "sensibilidad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:31:23.740272+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Sensibilidad",
+    "normalized_question": "sensibilidad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:31:45.764515+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Ver opciones",
+    "normalized_question": "ver opciones",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:33:50.082136+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Ver opciones",
+    "normalized_question": "ver opciones",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:34:11.449336+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Sin perfume",
+    "normalized_question": "perfume",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:34:33.473887+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Sin perfume",
+    "normalized_question": "perfume",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:35:40.930195+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Grasa/brillos",
+    "normalized_question": "grasa brillos",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:36:33.693281+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Grasa/brillos",
+    "normalized_question": "grasa brillos",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:36:42.413663+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Gel ligero",
+    "normalized_question": "gel ligero",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:37:55.448481+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Gel ligero",
+    "normalized_question": "gel ligero",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:38:32.754372+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "NORMAL TE DIJE ANIMAL, NORMAL",
+    "normalized_question": "normal te dije animal normal",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:39:28.857655+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "NORMAL TE DIJE ANIMAL, NORMAL",
+    "normalized_question": "normal te dije animal normal",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:00.659664+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Seca",
+    "normalized_question": "seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:07.034339+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Seca",
+    "normalized_question": "seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:11.673337+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Seca",
+    "normalized_question": "seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:14.260165+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Seca",
+    "normalized_question": "seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:17.365046+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Sensible",
+    "normalized_question": "sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:50:37.543506+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Sensible",
+    "normalized_question": "sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T14:53:19.174044+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:09:44.284386+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:16:24.750934+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:16:44.902169+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:18:11.514383+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:18:27.769561+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Toque seco",
+    "normalized_question": "toque seco",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:18:49.561990+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Toque seco",
+    "normalized_question": "toque seco",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:36:44.246115+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:37:05.061037+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Rutina súper hidratante",
+    "normalized_question": "rutina super hidratante",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:38:21.467465+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:38:36.723272+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:39:16.912805+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "product_view",
+    "question": "",
+    "normalized_question": "",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-8-mscara-de-pestaas-volumen-xl"
+    ]
+  },
+  {
+    "timestamp": "2026-06-16T15:40:49.743862+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:40:56.644640+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Piel Seca",
+    "normalized_question": "piel seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T15:43:07.917653+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Piel Seca",
+    "normalized_question": "piel seca",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T17:53:20.348407+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T17:53:31.725626+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-16T17:54:02.316940+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T00:15:42.682661+00:00",
+    "session_id": "95b07cf5-d169-4a87-9db1-db9b020f6ccb",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T00:16:10.425734+00:00",
+    "session_id": "70f251ad-bfed-4964-ae84-c3d23a2c3f9e",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
   }
 ]
