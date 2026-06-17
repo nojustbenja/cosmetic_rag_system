@@ -12,6 +12,7 @@ from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECO
 from rag.retriever import retrieve_all
 from utils.timing import profile_time, profile_block
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -58,46 +59,52 @@ def _profile_signals(message: str) -> list[str]:
 
 @profile_time
 def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
-    history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:])
-    text = f"{history_text} {message}".lower()
+    # Only consider user messages from history to avoid extracting options from the AI's questions
+    user_history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:] if item.get("role") == "user")
+    text = f"{user_history_text} {message}".lower()
 
     def pick(label_map: dict[str, list[str]]) -> str:
         for label, needles in label_map.items():
-            if any(needle in text for needle in needles):
-                return label
+            for needle in needles:
+                if message.lower().strip() == needle:
+                    return label
+                # Allow matching prefixes by not forcing a right word boundary if the needle is a root (e.g., 'hidrat')
+                pattern = rf'\b{re.escape(needle)}' if needle.endswith('t') or needle.endswith('r') or needle.endswith('m') else rf'\b{re.escape(needle)}\b'
+                if re.search(pattern, text):
+                    return label
         return ""
 
     skin_type = pick({
-        "seca": ["piel seca", "reseca", "tirantez", "descam"],
-        "sensible": ["piel sensible", "sensible", "irrita", "rojec", "rosacea"],
-        "grasa": ["piel grasa", "brillo", "sebo", "oil control"],
-        "mixta": ["piel mixta", "zona t"],
-        "normal": ["piel normal"],
+        "seca": ["piel seca", "reseca", "tirantez", "descam", "seca"],
+        "sensible": ["piel sensible", "sensible", "irrita", "rojec", "rosacea", "rosácea"],
+        "grasa": ["piel grasa", "brillo", "sebo", "oil control", "grasa"],
+        "mixta": ["piel mixta", "zona t", "mixta"],
+        "normal": ["piel normal", "normal"],
     })
     category = pick({
-        "fragancias": ["perfume", "fragancia", "aroma", "amaderado", "floral"],
-        "proteccion_solar": ["protector", "solar", "spf", "bloqueador", "after sun", "after-sun"],
+        "fragancias": ["perfume", "fragancia", "aroma", "amaderado", "floral", "fragancias"],
+        "proteccion_solar": ["protector", "solar", "spf", "bloqueador", "after sun", "after-sun", "protección solar", "proteccion solar"],
         "limpieza": ["limpiador", "limpieza", "agua micelar", "desmaquillante"],
-        "maquillaje": ["maquillaje", "base", "labial", "pestañas", "sombras"],
+        "maquillaje": ["maquillaje", "base", "labial", "pestañas", "sombras", "ojos"],
         "cabello": ["cabello", "pelo", "champú", "shampoo", "capilar"],
-        "accesorios": ["brocha", "brochas", "esponja", "accesorio", "set de brochas"],
-        "cuidado_corporal": ["corporal", "cuerpo", "body", "exfoliante corporal"],
-        "cuidado_facial": ["crema", "serum", "sérum", "rutina", "rostro", "facial"],
+        "accesorios": ["brocha", "brochas", "esponja", "accesorio", "set de brochas", "accesorios"],
+        "cuidado_corporal": ["corporal", "cuerpo", "body", "exfoliante corporal", "cuidado corporal"],
+        "cuidado_facial": ["crema", "serum", "sérum", "rutina", "rostro", "facial", "cuidado facial"],
     })
     usage_moment = pick({
         "dia": ["día", "dia", "mañana", "am", "spf", "solar"],
         "noche": ["noche", "nocturna", "pm"],
     })
     concern = pick({
-        "hidratacion": ["hidrata", "hidrat", "acido hialuronico", "ácido hialurónico", "reseca"],
-        "luminosidad": ["luminosidad", "glow", "brillo sano"],
+        "hidratacion": ["hidrata", "hidrat", "acido hialuronico", "ácido hialurónico", "reseca", "hidratación", "hidratacion"],
+        "luminosidad": ["luminosidad", "glow", "brillo sano", "brillo"],
         "antiedad": ["antiedad", "arrugas", "lineas", "líneas", "edad"],
         "acne": ["acne", "acné", "granitos", "poros", "imperfecciones"],
-        "aroma amaderado": ["amaderado", "madera", "cedro", "oud"],
+        "aroma amaderado": ["amaderado", "madera", "cedro", "oud", "aroma amaderado"],
     })
     fragrance_family = pick({
         "amaderado": ["amaderado", "madera", "cedro", "oud"],
-        "floral": ["floral", "flores", "jazmin", "rosa"],
+        "floral": ["floral", "flores", "jazmin", "rosa", "rosas"],
         "fresco": ["fresco", "cítrico", "citrico", "limpio"],
     })
 
@@ -114,17 +121,17 @@ def extract_client_profile(message: str, session_history: list[dict] | None = No
 
     # Merge frontend profile fields BEFORE calculating missing fields!
     frontend_profile = frontend_profile or {}
-    skin_type = frontend_profile.get("skin_type") or skin_type
-    category = frontend_profile.get("category") or category
-    usage_moment = frontend_profile.get("usage_moment") or usage_moment
-    concern = frontend_profile.get("concern") or concern
-    fragrance_family = frontend_profile.get("fragrance_family") or fragrance_family
-    budget_max = frontend_profile.get("budget_max") or budget_max
+    skin_type = skin_type or frontend_profile.get("skin_type")
+    category = category or frontend_profile.get("category")
+    usage_moment = usage_moment or frontend_profile.get("usage_moment")
+    concern = concern or frontend_profile.get("concern")
+    fragrance_family = fragrance_family or frontend_profile.get("fragrance_family")
+    budget_max = budget_max or frontend_profile.get("budget_max")
 
     missing_fields = []
     if not skin_type and category != "fragancias":
         missing_fields.append("tipo de piel")
-    if not concern and category != "fragancias":
+    if not concern and category not in {"fragancias", "proteccion_solar"}:
         missing_fields.append("objetivo")
     if not usage_moment and category in {"cuidado_facial", "proteccion_solar"}:
         missing_fields.append("día o noche")
@@ -356,6 +363,54 @@ async def analyze_intent(message: str, session_history: list[dict]) -> bool:
         return False
     return True
 
+@profile_time
+async def requires_catalog_search(message: str, history: list[dict]) -> bool:
+    try:
+        system_prompt = (
+            "Eres un clasificador de intenciones. Analiza si el mensaje del usuario y su historial "
+            "requieren buscar información en el catálogo de productos o en las guías. "
+            "Responde 'TRUE' si el usuario busca recomendaciones de productos, características, precios, rutinas de cuidado de la piel, "
+            "o si hace preguntas de seguimiento sobre los productos mencionados.\n"
+            "Responde 'FALSE' si es puramente charla casual (small talk), un simple saludo, un agradecimiento corto ('gracias', 'ok'), "
+            "o una confirmación que no requiere información adicional de productos.\n"
+            "Devuelve SÓLO TRUE o FALSE."
+        )
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(history[-20:])
+        messages.append({"role": "user", "content": message})
+        
+        client = LLMClient()
+        response = await client.generate_completion(messages)
+        return "true" in response.lower()
+    except Exception as e:
+        logger.error(f"Error en requires_catalog_search: {e}")
+        return True
+
+@profile_time
+async def generate_contextual_query(message: str, history: list[dict], profile: dict) -> str:
+    try:
+        system_prompt = (
+            "Eres un experto en reescribir consultas de búsqueda. Analiza el historial de conversación "
+            "y el mensaje actual del usuario. Reescribe el mensaje actual para que sea una consulta de "
+            "búsqueda independiente (standalone) que no dependa del contexto conversacional previo.\n"
+            "Debes resolver pronombres implícitos o referencias directas a productos mencionados anteriormente.\n"
+            f"Perfil del usuario conocido: {json.dumps(profile, ensure_ascii=False)}\n\n"
+            "REGLAS:\n"
+            "1. NO respondas a la pregunta, sólo reescribe la consulta.\n"
+            "2. Sé conciso y directo.\n"
+            "3. Devuelve SÓLO la consulta reescrita."
+        )
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(history[-20:])
+        messages.append({"role": "user", "content": message})
+        
+        client = LLMClient()
+        rewritten_query = await client.generate_completion(messages)
+        return rewritten_query.strip()
+    except Exception as e:
+        logger.error(f"Error en generate_contextual_query: {e}")
+        return message
+
 
 async def _fallback_response(message: str, retrieved_items: list[dict]) -> AsyncGenerator[str, None]:
     products = [item for item in retrieved_items if item["metadata"].get("source") == "catalog"][:3]
@@ -382,10 +437,23 @@ async def _fallback_response(message: str, retrieved_items: list[dict]) -> Async
 async def generate_profiler_response(
     message: str,
     session_history: list[dict],
+    profile: dict,
 ) -> dict:
-    messages = [{"role": "system", "content": PROFILER_SYSTEM_PROMPT}]
+    missing_fields = profile.get("missing_fields", [])
+    known_fields = {k: v for k, v in profile.items() if v and k not in {"confidence", "missing_fields", "sensitivity"}}
+    
+    augmented_prompt = (
+        f"{PROFILER_SYSTEM_PROMPT}\n\n"
+        f"--- ESTADO ACTUAL DEL PERFIL ---\n"
+        f"Campos ya conocidos: {json.dumps(known_fields, ensure_ascii=False)}\n"
+        f"Campos faltantes (SÓLO PREGUNTA POR ESTOS): {', '.join(missing_fields) if missing_fields else 'Ninguno'}\n\n"
+        f"REGLA ESTRICTA: Formula preguntas que apunten ÚNICA Y EXCLUSIVAMENTE a obtener los campos faltantes. "
+        f"No vuelvas a preguntar por campos que ya conocemos."
+    )
+    
+    messages = [{"role": "system", "content": augmented_prompt}]
     messages.extend(FEW_SHOT_MESSAGES)
-    messages.extend(session_history[-8:])
+    messages.extend(session_history[-20:])
     messages.append({"role": "user", "content": message})
     
     client = LLMClient()
@@ -424,7 +492,7 @@ async def generate_recommender_response(
 
     client = LLMClient()
     messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(session_history[-8:])
+    messages.extend(session_history[-20:])
 
     context_text = build_context(retrieved_items)
     augmented_message = f"{message}\n\n{context_text}"
