@@ -58,96 +58,73 @@ def _profile_signals(message: str) -> list[str]:
     return signals or ["necesidad descrita por el cliente"]
 
 @profile_time
-def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
-    # Only consider user messages from history to avoid extracting options from the AI's questions
-    user_history_text = " ".join(str(item.get("content", "")) for item in (session_history or [])[-6:] if item.get("role") == "user")
-    text = f"{user_history_text} {message}".lower()
-
-    def pick(label_map: dict[str, list[str]]) -> str:
-        for label, needles in label_map.items():
-            for needle in needles:
-                if message.lower().strip() == needle:
-                    return label
-                # Allow matching prefixes by not forcing a right word boundary if the needle is a root (e.g., 'hidrat')
-                pattern = rf'\b{re.escape(needle)}' if needle.endswith('t') or needle.endswith('r') or needle.endswith('m') else rf'\b{re.escape(needle)}\b'
-                if re.search(pattern, text):
-                    return label
-        return ""
-
-    skin_type = pick({
-        "seca": ["piel seca", "reseca", "tirantez", "descam", "seca"],
-        "sensible": ["piel sensible", "sensible", "irrita", "rojec", "rosacea", "rosácea"],
-        "grasa": ["piel grasa", "brillo", "sebo", "oil control", "grasa"],
-        "mixta": ["piel mixta", "zona t", "mixta"],
-        "normal": ["piel normal", "normal"],
-    })
-    category = pick({
-        "fragancias": ["perfume", "fragancia", "aroma", "amaderado", "floral", "fragancias"],
-        "proteccion_solar": ["protector", "solar", "spf", "bloqueador", "after sun", "after-sun", "protección solar", "proteccion solar"],
-        "limpieza": ["limpiador", "limpieza", "agua micelar", "desmaquillante"],
-        "maquillaje": ["maquillaje", "base", "labial", "pestañas", "sombras", "ojos"],
-        "cabello": ["cabello", "pelo", "champú", "shampoo", "capilar"],
-        "accesorios": ["brocha", "brochas", "esponja", "accesorio", "set de brochas", "accesorios"],
-        "cuidado_corporal": ["corporal", "cuerpo", "body", "exfoliante corporal", "cuidado corporal"],
-        "cuidado_facial": ["crema", "serum", "sérum", "rutina", "rostro", "facial", "cuidado facial"],
-    })
-    usage_moment = pick({
-        "dia": ["día", "dia", "mañana", "am", "spf", "solar"],
-        "noche": ["noche", "nocturna", "pm"],
-    })
-    concern = pick({
-        "hidratacion": ["hidrata", "hidrat", "acido hialuronico", "ácido hialurónico", "reseca", "hidratación", "hidratacion"],
-        "luminosidad": ["luminosidad", "glow", "brillo sano", "brillo"],
-        "antiedad": ["antiedad", "arrugas", "lineas", "líneas", "edad"],
-        "acne": ["acne", "acné", "granitos", "poros", "imperfecciones"],
-        "aroma amaderado": ["amaderado", "madera", "cedro", "oud", "aroma amaderado"],
-    })
-    fragrance_family = pick({
-        "amaderado": ["amaderado", "madera", "cedro", "oud"],
-        "floral": ["floral", "flores", "jazmin", "rosa", "rosas"],
-        "fresco": ["fresco", "cítrico", "citrico", "limpio"],
-    })
-
-    budget_max = 0
-    for marker in ["menos de", "hasta", "presupuesto", "máximo", "maximo"]:
-        if marker in text:
-            tail = text.split(marker, 1)[1]
-            digits = "".join(ch for ch in tail[:18] if ch.isdigit())
-            if digits:
-                budget_max = int(digits)
-                if budget_max < 1000:
-                    budget_max *= 1000
-                break
-
-    # Merge frontend profile fields BEFORE calculating missing fields!
+async def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
+    from rag.prompt_templates import EXTRACTOR_SYSTEM_PROMPT
+    
     frontend_profile = frontend_profile or {}
-    skin_type = skin_type or frontend_profile.get("skin_type")
-    category = category or frontend_profile.get("category")
-    usage_moment = usage_moment or frontend_profile.get("usage_moment")
-    concern = concern or frontend_profile.get("concern")
-    fragrance_family = fragrance_family or frontend_profile.get("fragrance_family")
-    budget_max = budget_max or frontend_profile.get("budget_max")
-
-    missing_fields = []
-    if not skin_type and category != "fragancias":
-        missing_fields.append("tipo de piel")
-    if not concern and category not in {"fragancias", "proteccion_solar"}:
-        missing_fields.append("objetivo")
-    if not usage_moment and category in {"cuidado_facial", "proteccion_solar"}:
-        missing_fields.append("día o noche")
-
-    filled = sum(bool(value) for value in [skin_type, category, usage_moment, concern, fragrance_family, budget_max])
-    return {
-        "skin_type": skin_type,
-        "concern": concern,
-        "category": category,
-        "budget_max": budget_max,
-        "usage_moment": usage_moment,
-        "sensitivity": skin_type == "sensible" or "sensible" in text,
-        "fragrance_family": fragrance_family,
-        "confidence": min(0.95, 0.35 + filled * 0.1),
-        "missing_fields": missing_fields,
-    }
+    
+    # Preparamos el contexto para el extractor
+    user_history = (session_history or [])[-6:]
+    messages = [{"role": "system", "content": EXTRACTOR_SYSTEM_PROMPT}]
+    messages.extend(user_history)
+    messages.append({"role": "user", "content": message})
+    
+    client = LLMClient()
+    try:
+        response_text = await client.generate_completion(messages)
+        cleaned = response_text.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned.split("```json", 1)[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
+        
+        extracted = json.loads(cleaned.strip())
+        
+        # Merge de lo que ya sabíamos por frontend_profile (frontend tiene prioridad si el LLM no lo saca)
+        skin_type = extracted.get("skin_type") or frontend_profile.get("skin_type")
+        category = extracted.get("category") or frontend_profile.get("category")
+        usage_moment = extracted.get("usage_moment") or frontend_profile.get("usage_moment")
+        concern = extracted.get("concern") or frontend_profile.get("concern")
+        budget_max = extracted.get("budget_max") or frontend_profile.get("budget_max")
+        
+        # Recalcular missing fields por si acaso el merge llenó algo
+        missing_fields = []
+        if not skin_type and category != "fragancias":
+            missing_fields.append("tipo de piel")
+        if not concern and category not in {"fragancias", "proteccion_solar"}:
+            missing_fields.append("objetivo")
+        if not usage_moment and category in {"cuidado_facial", "proteccion_solar"}:
+            missing_fields.append("día o noche")
+            
+        filled = sum(bool(value) for value in [skin_type, category, usage_moment, concern, budget_max])
+        
+        return {
+            "skin_type": skin_type,
+            "concern": concern,
+            "category": category,
+            "budget_max": budget_max,
+            "usage_moment": usage_moment,
+            "sensitivity": skin_type == "sensible",
+            "confidence": min(0.95, 0.35 + filled * 0.1),
+            "missing_fields": missing_fields,
+        }
+        
+    except Exception as e:
+        logger.error(f"Error parseando JSON en extract_client_profile: {e}")
+        # Fallback gracefull
+        skin_type = frontend_profile.get("skin_type")
+        category = frontend_profile.get("category")
+        missing_fields = ["tipo de piel", "objetivo"]
+        return {
+            "skin_type": skin_type,
+            "concern": frontend_profile.get("concern"),
+            "category": category,
+            "budget_max": frontend_profile.get("budget_max"),
+            "usage_moment": frontend_profile.get("usage_moment"),
+            "sensitivity": skin_type == "sensible",
+            "confidence": 0.35,
+            "missing_fields": missing_fields,
+        }
 
 def _normalize_product(product: dict) -> dict:
     return {
@@ -356,7 +333,7 @@ async def retrieve_context(message: str, filters: dict | None = None) -> tuple[d
 
 @profile_time
 async def analyze_intent(message: str, session_history: list[dict]) -> bool:
-    profile = extract_client_profile(message, session_history)
+    profile = await extract_client_profile(message, session_history)
     missing = profile.get("missing_fields", [])
     if missing:
         logger.info(f"Faltan campos: {missing}. Retornando perfil incompleto.")

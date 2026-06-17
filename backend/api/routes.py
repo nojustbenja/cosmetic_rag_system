@@ -109,7 +109,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                 # 1. Analizar el perfil UNA sola vez (regex, rápido) y avisar a la UI.
                 yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
                 
-                profile = extract_client_profile(request.message, history, frontend_profile=request.profile)
+                profile = await extract_client_profile(request.message, history, frontend_profile=request.profile)
                 has_profile = not profile.get("missing_fields")
                 yield {"event": "profile", "data": json.dumps(profile)}
 
