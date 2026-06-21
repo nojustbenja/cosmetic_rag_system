@@ -5969,5 +5969,85 @@
       "producto-16-contorno-de-ojos-descongestionante",
       "producto-15-exfoliante-lquido-ahabha"
     ]
+  },
+  {
+    "timestamp": "2026-06-21T16:57:21.171119+00:00",
+    "session_id": "a70546ea-60cf-47e8-91b8-9059ebfccbbc",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T16:57:31.768935+00:00",
+    "session_id": "a70546ea-60cf-47e8-91b8-9059ebfccbbc",
+    "event_type": "sent",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T16:57:40.466338+00:00",
+    "session_id": "a70546ea-60cf-47e8-91b8-9059ebfccbbc",
+    "event_type": "answered",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-25-gel-limpiador-cido-saliclico",
+      "producto-26-agua-micelar-3-en-1"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T16:58:01.592928+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T16:58:06.152230+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T16:58:13.936480+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "ambas",
+    "normalized_question": "ambas",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T16:58:27.173978+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "ambas",
+    "normalized_question": "ambas",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": [
+      "producto-28-protector-solar-fluido-con-color-spf50",
+      "producto-18-protector-solar-corporal-spray-fps50",
+      "producto-29-stick-solar-facial-spf50",
+      "producto-30-after-sun-gel-reparador-aloe",
+      "producto-3-protector-solar-invisible-spf50"
+    ]
   }
 ]

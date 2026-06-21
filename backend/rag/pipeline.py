@@ -8,7 +8,7 @@ from config import settings
 import asyncio
 import logging
 
-from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECOMMENDER_SYSTEM_PROMPT, SOFT_RECOMMENDER_SYSTEM_PROMPT, ANALYZER_SYSTEM_PROMPT, SUBAGENT_PROMPT, build_context
+from rag.prompt_templates import FEW_SHOT_MESSAGES, PROFILER_SYSTEM_PROMPT, RECOMMENDER_SYSTEM_PROMPT, SOFT_RECOMMENDER_SYSTEM_PROMPT, SUBAGENT_PROMPT, UNIFIED_ANALYZER_PROMPT, build_context
 from rag.retriever import retrieve_all
 from utils.timing import profile_time, profile_block
 import json
@@ -60,25 +60,22 @@ def _profile_signals(message: str) -> list[str]:
     return signals or ["necesidad descrita por el cliente"]
 
 @profile_time
-async def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
-    from rag.prompt_templates import EXTRACTOR_SYSTEM_PROMPT
-    
+async def analyze_conversation_intent(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
     frontend_profile = frontend_profile or {}
     
-    # 1. SMART BYPASS (Caché): Verificamos si podemos omitir el LLM
-    missing_fields = frontend_profile.get("missing_fields", ["tipo de piel"])
-    # Regex con palabras de salud críticas
-    health_keywords = re.compile(r"(alergia|alérgic|rosácea|embarazad|arde|roj|sensible|ácido|sulfato|parabeno|dermatitis|picor)", re.IGNORECASE)
-    has_critical_info = bool(health_keywords.search(message))
-    
-    # Si ya tenemos el perfil completo y el nuevo mensaje no menciona nada de salud, retornamos caché
-    if not missing_fields and not has_critical_info:
-        logger.info("⚡ Smart Bypass activado: omitiendo extract_client_profile LLM.")
-        return frontend_profile
-    
-    # Preparamos el contexto para el extractor
+    # 1. Preparar el historial
     user_history = (session_history or [])[-6:]
-    messages = [{"role": "system", "content": EXTRACTOR_SYSTEM_PROMPT}]
+    
+    # 2. Inyectar el perfil actual en el prompt del sistema
+    system_prompt = UNIFIED_ANALYZER_PROMPT
+    if frontend_profile:
+        # Informar al LLM del perfil existente para que lo actualice
+        known_attributes = {k: v for k, v in frontend_profile.items() if v and k not in ("missing_fields", "confidence", "sensitivity")}
+        if known_attributes:
+            system_prompt += f"\n\n[PERFIL ACTUAL CONOCIDO]: {json.dumps(known_attributes, ensure_ascii=False)}\n"
+            system_prompt += "Actualiza este perfil con cualquier nueva información del mensaje actual, manteniendo los valores anteriores si no se contradicen."
+            
+    messages = [{"role": "system", "content": system_prompt}]
     messages.extend(user_history)
     messages.append({"role": "user", "content": message})
     
@@ -93,31 +90,30 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
         
         extracted = json.loads(cleaned.strip())
         
-        # Merge de lo que ya sabíamos por frontend_profile (frontend tiene prioridad si el LLM no lo saca)
-        skin_type = extracted.get("skin_type") or frontend_profile.get("skin_type")
-        category = extracted.get("category") or frontend_profile.get("category")
-        usage_moment = extracted.get("usage_moment") or frontend_profile.get("usage_moment")
-        concern = extracted.get("concern") or frontend_profile.get("concern")
-        budget_max = extracted.get("budget_max") or frontend_profile.get("budget_max")
+        # Validar y formatear la salida
+        profile = extracted.get("profile", {})
+        skin_type = profile.get("skin_type") or frontend_profile.get("skin_type")
+        category = profile.get("category") or frontend_profile.get("category")
+        usage_moment = profile.get("usage_moment") or frontend_profile.get("usage_moment")
+        concern = profile.get("concern") or frontend_profile.get("concern")
+        budget_max = profile.get("budget_max") or frontend_profile.get("budget_max")
         
         # Merge de alergias
         f_allergies = frontend_profile.get("allergies") or []
-        e_allergies = extracted.get("allergies") or []
+        e_allergies = profile.get("allergies") or []
         allergies = list(set(f_allergies + e_allergies))
 
-        
-        # Recalcular missing fields por si acaso el merge llenó algo
         missing_fields = []
-        if not skin_type and category != "fragancias":
+        if not skin_type and category != "fragancias" and category != "accesorios":
             missing_fields.append("tipo de piel")
-        if not concern and category not in {"fragancias", "proteccion_solar"}:
+        if not concern and category not in {"fragancias", "proteccion_solar", "limpieza", "accesorios"}:
             missing_fields.append("objetivo")
         if not usage_moment and category in {"cuidado_facial", "proteccion_solar"}:
             missing_fields.append("día o noche")
             
         filled = sum(bool(value) for value in [skin_type, category, usage_moment, concern, budget_max])
         
-        return {
+        final_profile = {
             "skin_type": skin_type,
             "concern": concern,
             "category": category,
@@ -129,23 +125,39 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
             "missing_fields": missing_fields,
         }
         
+        return {
+            "requires_catalog_search": extracted.get("requires_catalog_search", False),
+            "search_queries": extracted.get("search_queries", [message]),
+            "profile": final_profile
+        }
+        
     except Exception as e:
-        logger.error(f"Error parseando JSON en extract_client_profile: {e}")
+        logger.error(f"Error parseando JSON en analyze_conversation_intent: {e}. Respuesta: {response_text if 'response_text' in locals() else ''}")
         # Fallback gracefull
         skin_type = frontend_profile.get("skin_type")
         category = frontend_profile.get("category")
         missing_fields = ["tipo de piel", "objetivo"]
         return {
-            "skin_type": skin_type,
-            "concern": frontend_profile.get("concern"),
-            "category": category,
-            "budget_max": frontend_profile.get("budget_max"),
-            "usage_moment": frontend_profile.get("usage_moment"),
-            "allergies": frontend_profile.get("allergies") or [],
-            "sensitivity": skin_type == "sensible",
-            "confidence": 0.35,
-            "missing_fields": missing_fields,
+            "requires_catalog_search": True,
+            "search_queries": [message],
+            "profile": {
+                "skin_type": skin_type,
+                "concern": frontend_profile.get("concern"),
+                "category": category,
+                "budget_max": frontend_profile.get("budget_max"),
+                "usage_moment": frontend_profile.get("usage_moment"),
+                "allergies": frontend_profile.get("allergies") or [],
+                "sensitivity": skin_type == "sensible",
+                "confidence": 0.35,
+                "missing_fields": missing_fields,
+            }
         }
+
+@profile_time
+async def extract_client_profile(message: str, session_history: list[dict] | None = None, frontend_profile: dict | None = None) -> dict:
+    """DEPRECATED: Use analyze_conversation_intent instead. Kept for backward compatibility with tests."""
+    result = await analyze_conversation_intent(message, session_history, frontend_profile)
+    return result["profile"]
 
 def _normalize_product(product: dict) -> dict:
     return {
@@ -358,7 +370,9 @@ async def retrieve_context(original_message: str, search_queries: list[str] | st
 
 @profile_time
 async def analyze_intent(message: str, session_history: list[dict]) -> bool:
-    profile = await extract_client_profile(message, session_history)
+    """DEPRECATED"""
+    result = await analyze_conversation_intent(message, session_history)
+    profile = result["profile"]
     missing = profile.get("missing_fields", [])
     if missing:
         logger.info(f"Faltan campos: {missing}. Retornando perfil incompleto.")
@@ -367,62 +381,15 @@ async def analyze_intent(message: str, session_history: list[dict]) -> bool:
 
 @profile_time
 async def requires_catalog_search(message: str, history: list[dict]) -> bool:
-    try:
-        system_prompt = (
-            "Eres un clasificador de intenciones. Analiza si el mensaje del usuario y su historial "
-            "requieren buscar información en el catálogo de productos o en las guías. "
-            "Responde 'TRUE' si el usuario busca recomendaciones de productos, características, precios, rutinas de cuidado de la piel, "
-            "o si hace preguntas de seguimiento sobre los productos mencionados.\n"
-            "Responde 'FALSE' si es puramente charla casual (small talk), un simple saludo, un agradecimiento corto ('gracias', 'ok'), "
-            "o una confirmación que no requiere información adicional de productos.\n"
-            "Devuelve SÓLO TRUE o FALSE."
-        )
-        messages = [{"role": "system", "content": system_prompt}]
-        messages.extend(history[-20:])
-        messages.append({"role": "user", "content": message})
-        
-        client = LLMClient()
-        response = await client.generate_completion(messages)
-        return "true" in response.lower()
-    except Exception as e:
-        logger.error(f"Error en requires_catalog_search: {e}")
-        return True
+    """DEPRECATED: Use analyze_conversation_intent instead."""
+    result = await analyze_conversation_intent(message, history)
+    return result["requires_catalog_search"]
 
 @profile_time
 async def generate_contextual_query(message: str, history: list[dict], profile: dict) -> list[str]:
-    try:
-        system_prompt = (
-            "Eres un experto en reescribir consultas de búsqueda (Query Expansion). Analiza el historial de conversación "
-            "y el mensaje actual del usuario. Tu objetivo es generar 3 variantes semánticas distintas de la consulta "
-            "para maximizar la recuperación de documentos relevantes en una base de datos vectorial.\n"
-            "Debes resolver pronombres implícitos o referencias directas a productos mencionados anteriormente.\n"
-            f"Perfil del usuario conocido: {json.dumps(profile, ensure_ascii=False)}\n\n"
-            "REGLAS:\n"
-            "1. NO respondas a la pregunta, sólo reescribe la consulta.\n"
-            "2. Genera 3 consultas cortas, directas y con distintas palabras clave (sinónimos).\n"
-            "3. Devuelve ÚNICAMENTE un arreglo JSON con las 3 cadenas, sin texto adicional.\n"
-            'Ejemplo: ["crema hidratante para piel seca", "tratamiento nocturno resequedad", "producto humectante rostro"]'
-        )
-        messages = [{"role": "system", "content": system_prompt}]
-        messages.extend(history[-20:])
-        messages.append({"role": "user", "content": message})
-        
-        client = LLMClient()
-        response = await client.generate_completion(messages)
-        
-        cleaned = response.strip()
-        if cleaned.startswith("```json"):
-            cleaned = cleaned.split("```json", 1)[1]
-        if "```" in cleaned:
-            cleaned = cleaned.split("```", 1)[0]
-        
-        queries = json.loads(cleaned.strip())
-        if isinstance(queries, list) and len(queries) > 0:
-            return [str(q) for q in queries]
-        return [message]
-    except Exception as e:
-        logger.error(f"Error en generate_contextual_query: {e}")
-        return [message]
+    """DEPRECATED: Use analyze_conversation_intent instead."""
+    result = await analyze_conversation_intent(message, history, profile)
+    return result["search_queries"]
 
 
 async def _fallback_response(message: str, retrieved_items: list[dict]) -> AsyncGenerator[str, None]:

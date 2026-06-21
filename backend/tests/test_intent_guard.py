@@ -12,7 +12,7 @@ from api.routes import router
 @pytest.mark.asyncio
 @patch('rag.pipeline.LLMClient.generate_completion', new_callable=AsyncMock)
 async def test_requires_catalog_search_small_talk(mock_completion):
-    mock_completion.return_value = "FALSE"
+    mock_completion.return_value = '{"requires_catalog_search": false, "search_queries": [], "profile": {}}'
     
     # "Gracias" is small talk
     result = await requires_catalog_search("¡Muchas gracias!", history=[])
@@ -22,7 +22,7 @@ async def test_requires_catalog_search_small_talk(mock_completion):
 @pytest.mark.asyncio
 @patch('rag.pipeline.LLMClient.generate_completion', new_callable=AsyncMock)
 async def test_requires_catalog_search_product_query(mock_completion):
-    mock_completion.return_value = "TRUE"
+    mock_completion.return_value = '{"requires_catalog_search": true, "search_queries": ["crema hidratante"], "profile": {}}'
     
     # Query for products
     result = await requires_catalog_search("Busco una crema hidratante", history=[])
@@ -32,7 +32,7 @@ async def test_requires_catalog_search_product_query(mock_completion):
 @pytest.mark.asyncio
 @patch('rag.pipeline.LLMClient.generate_completion', new_callable=AsyncMock)
 async def test_generate_contextual_query(mock_completion):
-    mock_completion.return_value = "crema de noche para piel seca más barata"
+    mock_completion.return_value = '{"requires_catalog_search": true, "search_queries": ["crema de noche para piel seca más barata"], "profile": {}}'
     
     history = [
         {"role": "user", "content": "Busco cremas de noche para piel seca."},
@@ -43,7 +43,7 @@ async def test_generate_contextual_query(mock_completion):
     
     result = await generate_contextual_query(message, history, profile)
     
-    assert result == "crema de noche para piel seca más barata"
+    assert result == ["crema de noche para piel seca más barata"]
     mock_completion.assert_called_once()
     # verify that history was passed
     args = mock_completion.call_args[0][0]

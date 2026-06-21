@@ -134,15 +134,16 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                 import asyncio
                 from rag.embeddings import embed_text
                 from rag.retriever import check_semantic_cache, save_to_semantic_cache
-                from rag.pipeline import generate_profiler_response, generate_recommender_response, requires_catalog_search, generate_contextual_query
+                from rag.pipeline import generate_profiler_response, generate_recommender_response, analyze_conversation_intent
 
-                # 1. Analizar el perfil y la intención en PARALELO para ahorrar latencia.
+                # 1. Analizar intención, perfil y generar queries en un solo llamado LLM para evitar latencia de cascada.
                 yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
                 
-                profile_task = asyncio.create_task(extract_client_profile(request.message, history, frontend_profile=request.profile))
-                needs_search_task = asyncio.create_task(requires_catalog_search(request.message, history))
+                analysis = await analyze_conversation_intent(request.message, history, frontend_profile=request.profile)
+                profile = analysis.get("profile", {})
+                needs_search = analysis.get("requires_catalog_search", False)
+                search_queries = analysis.get("search_queries", [request.message])
                 
-                profile, needs_search = await asyncio.gather(profile_task, needs_search_task)
                 has_profile = not profile.get("missing_fields")
                 yield {"event": "profile", "data": json.dumps(profile)}
 
@@ -195,11 +196,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             yield {"event": "done", "data": json.dumps({"ok": True})}
                             return
 
-                        # 4. Reescribir consulta para búsqueda
-                        yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi está procesando tu consulta…"})}
-                        search_queries = await generate_contextual_query(request.message, history, profile)
-                        
-                        # 5. Buscar en el catálogo.
+                        # 4. Buscar en el catálogo. (Las queries ya se generaron en el paso 1)
                         yield {"event": "status", "data": json.dumps({"stage": "searching", "label": "Lumi está buscando en el catálogo…"})}
                         context_payload, retrieved_items = await retrieve_context(request.message, search_queries, filters=profile)
 
