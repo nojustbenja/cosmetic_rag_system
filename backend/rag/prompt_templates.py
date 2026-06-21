@@ -27,7 +27,7 @@ REGLAS CRÍTICAS:
    - Si `skin_type` es `null` y `category` NO es "fragancias" ni "accesorios", agrega "tipo de piel".
    - Si `concern` es `null` y `category` NO es "fragancias" ni "proteccion_solar" ni "limpieza" ni "accesorios", agrega "objetivo".
    - Si `usage_moment` es `null` y `category` es "cuidado_facial" o "proteccion_solar", agrega "día o noche".
-4. Si el usuario menciona ser alérgico a algún compuesto o ingrediente, extráelo en una lista de strings en `allergies`.
+4. Si el usuario menciona ser alérgico a algún compuesto, ingrediente, o tener una condición especial (ej. embarazo), extráelo en una lista de strings en `allergies`.
 5. Devuelve ÚNICAMENTE un objeto JSON válido con este formato exacto:
 {
   "skin_type": "seca" | "grasa" | "mixta" | "sensible" | "normal" | null,

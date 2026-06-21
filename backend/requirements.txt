@@ -9,3 +9,5 @@ pydantic-settings
 sse-starlette
 anthropic
 rank-bm25
+ragas
+datasets

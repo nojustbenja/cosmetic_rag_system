@@ -65,6 +65,17 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
     
     frontend_profile = frontend_profile or {}
     
+    # 1. SMART BYPASS (Caché): Verificamos si podemos omitir el LLM
+    missing_fields = frontend_profile.get("missing_fields", ["tipo de piel"])
+    # Regex con palabras de salud críticas
+    health_keywords = re.compile(r"(alergia|alérgic|rosácea|embarazad|arde|roj|sensible|ácido|sulfato|parabeno|dermatitis|picor)", re.IGNORECASE)
+    has_critical_info = bool(health_keywords.search(message))
+    
+    # Si ya tenemos el perfil completo y el nuevo mensaje no menciona nada de salud, retornamos caché
+    if not missing_fields and not has_critical_info:
+        logger.info("⚡ Smart Bypass activado: omitiendo extract_client_profile LLM.")
+        return frontend_profile
+    
     # Preparamos el contexto para el extractor
     user_history = (session_history or [])[-6:]
     messages = [{"role": "system", "content": EXTRACTOR_SYSTEM_PROMPT}]
@@ -314,10 +325,14 @@ def _product_context_item(item: dict, message: str) -> dict:
 
 def _guide_context_item(item: dict) -> dict:
     metadata = item["metadata"]
+    filename = metadata.get("filename", "guia")
+    page = metadata.get("page", "")
+    page_info = f" | Página: {page}" if page else ""
+    enriched_snippet = f"[Documento: {filename}{page_info}] - {item['text'][:360]}"
     return {
-        "filename": metadata.get("filename", "guia"),
-        "page": metadata.get("page"),
-        "snippet": item["text"][:360],
+        "filename": filename,
+        "page": page,
+        "snippet": enriched_snippet,
         "source": metadata.get("source", "guide"),
         "score": round(float(item.get("score", 0)), 4),
     }
@@ -335,9 +350,9 @@ def build_retrieval_context(message: str, retrieved_items: list[dict]) -> dict:
     return {"products": products[:6], "guides": guides[:4]}
 
 @profile_time
-async def retrieve_context(message: str, filters: dict | None = None) -> tuple[dict, list[dict]]:
-    retrieved_items = await retrieve_all(message, filters)
-    context_data = build_retrieval_context(message, retrieved_items)
+async def retrieve_context(original_message: str, search_queries: list[str] | str, filters: dict | None = None) -> tuple[dict, list[dict]]:
+    retrieved_items = await retrieve_all(search_queries, filters)
+    context_data = build_retrieval_context(original_message, retrieved_items)
     return context_data, retrieved_items
 
 
@@ -374,29 +389,40 @@ async def requires_catalog_search(message: str, history: list[dict]) -> bool:
         return True
 
 @profile_time
-async def generate_contextual_query(message: str, history: list[dict], profile: dict) -> str:
+async def generate_contextual_query(message: str, history: list[dict], profile: dict) -> list[str]:
     try:
         system_prompt = (
-            "Eres un experto en reescribir consultas de búsqueda. Analiza el historial de conversación "
-            "y el mensaje actual del usuario. Reescribe el mensaje actual para que sea una consulta de "
-            "búsqueda independiente (standalone) que no dependa del contexto conversacional previo.\n"
+            "Eres un experto en reescribir consultas de búsqueda (Query Expansion). Analiza el historial de conversación "
+            "y el mensaje actual del usuario. Tu objetivo es generar 3 variantes semánticas distintas de la consulta "
+            "para maximizar la recuperación de documentos relevantes en una base de datos vectorial.\n"
             "Debes resolver pronombres implícitos o referencias directas a productos mencionados anteriormente.\n"
             f"Perfil del usuario conocido: {json.dumps(profile, ensure_ascii=False)}\n\n"
             "REGLAS:\n"
             "1. NO respondas a la pregunta, sólo reescribe la consulta.\n"
-            "2. Sé conciso y directo.\n"
-            "3. Devuelve SÓLO la consulta reescrita."
+            "2. Genera 3 consultas cortas, directas y con distintas palabras clave (sinónimos).\n"
+            "3. Devuelve ÚNICAMENTE un arreglo JSON con las 3 cadenas, sin texto adicional.\n"
+            'Ejemplo: ["crema hidratante para piel seca", "tratamiento nocturno resequedad", "producto humectante rostro"]'
         )
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(history[-20:])
         messages.append({"role": "user", "content": message})
         
         client = LLMClient()
-        rewritten_query = await client.generate_completion(messages)
-        return rewritten_query.strip()
+        response = await client.generate_completion(messages)
+        
+        cleaned = response.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned.split("```json", 1)[1]
+        if "```" in cleaned:
+            cleaned = cleaned.split("```", 1)[0]
+        
+        queries = json.loads(cleaned.strip())
+        if isinstance(queries, list) and len(queries) > 0:
+            return [str(q) for q in queries]
+        return [message]
     except Exception as e:
         logger.error(f"Error en generate_contextual_query: {e}")
-        return message
+        return [message]
 
 
 async def _fallback_response(message: str, retrieved_items: list[dict]) -> AsyncGenerator[str, None]:
@@ -485,7 +511,7 @@ async def generate_recommender_response(
     context_text = build_context(retrieved_items)
     augmented_message = f"{message}\n\n{context_text}"
     if profile and profile.get("allergies"):
-        augmented_message += f"\n\n[INFO IMPORTANTE] Alergias confirmadas del usuario: {', '.join(profile['allergies'])}. NO RECOMENDAR PRODUCTOS CON ESTOS INGREDIENTES."
+        augmented_message += f"\n\n[INFO IMPORTANTE] Restricciones o condiciones del usuario: {', '.join(profile['allergies'])}. TENER EXTREMO CUIDADO DE NO RECOMENDAR PRODUCTOS CONTRAINDICADOS (ej. evitar retinol o ácidos fuertes si está embarazada, o evitar ingredientes si son alergias)."
     messages.append({"role": "user", "content": augmented_message})
 
     async for token in client.stream_completion(messages):

@@ -15,6 +15,14 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class FeedbackRequest(BaseModel):
+    message_id: str = Field(min_length=1)
+    question: str = Field(default="")
+    answer: str = Field(default="")
+    feedback: str = Field(pattern="^(up|down)$")
+    guides: list[dict] = Field(default_factory=list)
+
+
 class QuestionSuggestion(BaseModel):
     id: str
     text: str

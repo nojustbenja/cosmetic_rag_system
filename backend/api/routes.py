@@ -18,6 +18,7 @@ from api.models import (
     CsvImportRequest,
     ProductUpdateRequest,
     ProviderConfigRequest,
+    FeedbackRequest,
 )
 from rag.pipeline import (
     extract_client_profile,
@@ -35,7 +36,7 @@ from analytics.questions import get_suggestions, get_stats, record_event, search
 
 router = APIRouter()
 ORDERS_PATH = Path(__file__).resolve().parents[1] / "data" / "orders.json"
-
+FEEDBACK_PATH = Path(__file__).resolve().parents[1] / "data" / "feedback.json"
 
 @router.get("/health")
 async def health() -> dict[str, str]:
@@ -94,6 +95,32 @@ async def question_search(q: str = "") -> dict[str, list[dict]]:
     return {"results": search_questions(q)}
 
 
+@router.post("/chat/feedback")
+async def chat_feedback(request: FeedbackRequest) -> dict:
+    try:
+        import datetime
+        feedbacks: list[dict] = []
+        if FEEDBACK_PATH.exists() and FEEDBACK_PATH.stat().st_size > 0:
+            with FEEDBACK_PATH.open("r", encoding="utf-8") as file:
+                try:
+                    feedbacks = json.load(file)
+                except json.JSONDecodeError:
+                    feedbacks = []
+
+        new_feedback = request.model_dump()
+        new_feedback["timestamp"] = datetime.datetime.now().isoformat()
+        feedbacks.append(new_feedback)
+
+        FEEDBACK_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with FEEDBACK_PATH.open("w", encoding="utf-8") as file:
+            json.dump(feedbacks, file, indent=2, ensure_ascii=False)
+
+        return {"status": "ok"}
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+
 @router.post("/chat")
 async def chat(request: ChatRequest) -> EventSourceResponse:
     # Use history directly from the frontend request to be 100% stateless
@@ -104,12 +131,18 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
         with profile_block(f"Chat request: {request.message[:20]}..."):
             response = ""
             try:
-                from rag.pipeline import generate_profiler_response, generate_recommender_response
+                import asyncio
+                from rag.embeddings import embed_text
+                from rag.retriever import check_semantic_cache, save_to_semantic_cache
+                from rag.pipeline import generate_profiler_response, generate_recommender_response, requires_catalog_search, generate_contextual_query
 
-                # 1. Analizar el perfil UNA sola vez (regex, rápido) y avisar a la UI.
+                # 1. Analizar el perfil y la intención en PARALELO para ahorrar latencia.
                 yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
                 
-                profile = await extract_client_profile(request.message, history, frontend_profile=request.profile)
+                profile_task = asyncio.create_task(extract_client_profile(request.message, history, frontend_profile=request.profile))
+                needs_search_task = asyncio.create_task(requires_catalog_search(request.message, history))
+                
+                profile, needs_search = await asyncio.gather(profile_task, needs_search_task)
                 has_profile = not profile.get("missing_fields")
                 yield {"event": "profile", "data": json.dumps(profile)}
 
@@ -126,11 +159,6 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                     if "chips" in profiler_data:
                         yield {"event": "chips", "data": json.dumps(profiler_data["chips"])}
                 else:
-                    # 2. Analizar Intención
-                    from rag.pipeline import requires_catalog_search, generate_contextual_query
-                    
-                    needs_search = await requires_catalog_search(request.message, history)
-                    
                     if not needs_search:
                         yield {
                             "event": "context_done",
@@ -143,13 +171,37 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
                     else:
-                        # 3. Reescribir consulta para búsqueda
+                        # 3. Cache Check
+                        query_embedding = await asyncio.to_thread(embed_text, request.message)
+                        cached_data = await check_semantic_cache(query_embedding, profile)
+
+                        if cached_data:
+                            yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi recuperó la respuesta en milisegundos…"})}
+                            products = cached_data.get("products", [])
+                            guides = cached_data.get("guides", [])
+                            response_text = cached_data.get("response", "")
+
+                            for idx, product in enumerate(products):
+                                product_with_index = {**product, "product_index": idx + 1}
+                                yield {"event": "product", "data": json.dumps(product_with_index)}
+                                
+                            yield {
+                                "event": "context_done",
+                                "data": json.dumps({"guides": guides, "total": len(products), "mode": "match"}),
+                            }
+
+                            yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando tu recomendación…"})}
+                            yield {"event": "token", "data": json.dumps({"token": response_text})}
+                            yield {"event": "done", "data": json.dumps({"ok": True})}
+                            return
+
+                        # 4. Reescribir consulta para búsqueda
                         yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi está procesando tu consulta…"})}
-                        search_query = await generate_contextual_query(request.message, history, profile)
+                        search_queries = await generate_contextual_query(request.message, history, profile)
                         
-                        # 4. Buscar en el catálogo.
+                        # 5. Buscar en el catálogo.
                         yield {"event": "status", "data": json.dumps({"stage": "searching", "label": "Lumi está buscando en el catálogo…"})}
-                        context_payload, retrieved_items = await retrieve_context(search_query, filters=profile)
+                        context_payload, retrieved_items = await retrieve_context(request.message, search_queries, filters=profile)
 
                         products = context_payload.get("products", [])
                         guides = context_payload.get("guides", [])
@@ -207,6 +259,18 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             async for token in generate_recommender_response(request.message, history, retrieved_items, profile=profile):
                                 response += token
                                 yield {"event": "token", "data": json.dumps({"token": token})}
+
+                            # Save to semantic cache
+                            await save_to_semantic_cache(
+                                query=request.message,
+                                query_embedding=query_embedding,
+                                profile=profile,
+                                response_data={
+                                    "products": products,
+                                    "guides": guides,
+                                    "response": response
+                                }
+                            )
 
                 yield {"event": "done", "data": json.dumps({"ok": True})}
             except Exception as exc:

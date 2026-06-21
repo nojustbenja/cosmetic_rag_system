@@ -206,18 +206,32 @@ def infer_filters(query: str) -> dict | None:
     return {"skin_type": skin_type, "category": category}
 
 
-async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
-    # Generar embedding en un hilo separado para no bloquear el loop
-    query_embedding = await asyncio.to_thread(embed_text, query)
-    active_filters = filters if filters is not None else infer_filters(query)
+async def retrieve_all(queries: str | list[str], filters: dict | None = None) -> list[dict]:
+    query_list = [queries] if isinstance(queries, str) else queries
+    original_query = query_list[0]
+    active_filters = filters if filters is not None else infer_filters(original_query)
     
-    # Obtener más candidatos para el reranking híbrido
-    products_task = retrieve_products(query_embedding, active_filters, top_k=15)
-    guides_task = retrieve_guides(query_embedding, top_k=8)
+    # Generar embeddings concurrentemente
+    embed_tasks = [asyncio.to_thread(embed_text, q) for q in query_list]
+    embeddings = await asyncio.gather(*embed_tasks)
     
-    products, guides = await asyncio.gather(products_task, guides_task)
+    search_tasks = []
+    for emb in embeddings:
+        search_tasks.append(retrieve_products(emb, active_filters, top_k=20))
+        search_tasks.append(retrieve_guides(emb, top_k=10))
+        
+    search_results = await asyncio.gather(*search_tasks)
     
-    results = products + guides
+    all_results = []
+    seen_ids = set()
+    for res_list in search_results:
+        for item in res_list:
+            item_id = item.get("id")
+            if item_id not in seen_ids:
+                seen_ids.add(item_id)
+                all_results.append(item)
+                
+    results = all_results
     if not results:
         return []
         
@@ -228,18 +242,12 @@ async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
         def _tokenize(text: str) -> list[str]:
             return re.findall(r"\w+", text.lower())
 
-        # El campo "Tipo de piel" es una lista de etiquetas separadas por comas
-        # (ej. "todas,sensible,seca,grasa,mixta"). Si se tokeniza junto al resto,
-        # cualquier mención de un tipo de piel en la consulta hace match con
-        # productos "todas" aunque no sean relevantes, distorsionando el ranking.
-        # Se excluye del texto usado para BM25 (la búsqueda semántica y los
-        # filtros de tipo de piel ya se encargan de eso).
         skin_type_pattern = re.compile(r"tipo de piel:[^.]*\.", re.IGNORECASE)
         corpus = [skin_type_pattern.sub("", item["text"]) for item in results]
         tokenized_corpus = [_tokenize(doc) for doc in corpus]
         bm25 = BM25Okapi(tokenized_corpus)
 
-        tokenized_query = _tokenize(query)
+        tokenized_query = _tokenize(original_query)
         bm25_scores = bm25.get_scores(tokenized_query)
         
         max_bm25 = max(bm25_scores) if max(bm25_scores) > 0 else 1.0
@@ -247,12 +255,62 @@ async def retrieve_all(query: str, filters: dict | None = None) -> list[dict]:
         
         for item, bm_score in zip(results, normalized_bm25):
             dense_score = item.get("score", 0.0)
-            # RRF (Reciprocal Rank Fusion) style blending: 70% dense, 30% keyword
             item["score"] = (0.7 * dense_score) + (0.3 * bm_score)
+            
     except ImportError:
         pass
         
-    return sorted(results, key=lambda item: item["score"], reverse=True)[:10]
+    # Ordenar por el score híbrido inicial
+    results = sorted(results, key=lambda item: item["score"], reverse=True)
+    
+    # RERANKING con CrossEncoder
+    try:
+        from sentence_transformers import CrossEncoder
+        import logging
+        import os
+        from config import settings
+        logger = logging.getLogger(__name__)
+        
+        # Cargar el reranker de forma lazy. Podés cambiar el modelo por uno en español si es necesario
+        # e.g. "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+        model_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        
+        def _get_reranker():
+            if not hasattr(_get_reranker, "model"):
+                if not settings.allow_embedding_download:
+                    os.environ.setdefault("HF_HUB_OFFLINE", "1")
+                    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+                try:
+                    _get_reranker.model = CrossEncoder(model_name, local_files_only=True)
+                except Exception as e:
+                    if settings.allow_embedding_download:
+                        _get_reranker.model = CrossEncoder(model_name)
+                    else:
+                        raise e
+            return _get_reranker.model
+
+        def _sync_rerank():
+            reranker = _get_reranker()
+            # Preparar pares (original_query, documento)
+            pairs = [[original_query, item["text"]] for item in results]
+            scores = reranker.predict(pairs)
+            
+            # Actualizar scores con la predicción del CrossEncoder
+            for item, score in zip(results, scores):
+                item["score"] = float(score)
+            
+            # Reordenar basado en el score del Reranker
+            return sorted(results, key=lambda item: item["score"], reverse=True)
+            
+        # Ejecutar reranking en thread separado para no bloquear el loop
+        results = await asyncio.to_thread(_sync_rerank)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Reranking no ejecutado, se usará el ranking híbrido original. Error: {e}")
+        pass
+        
+    return results[:10]
 
 
 def get_all_products_from_db() -> list[dict]:
@@ -287,3 +345,62 @@ def get_all_products_from_db() -> list[dict]:
             "benefits": [item.strip() for item in str(meta.get("benefits", "")).split(",") if item.strip()],
         })
     return formatted
+
+async def check_semantic_cache(query_embedding: list[float], profile: dict, threshold: float = 0.95) -> dict | None:
+    def _sync_query():
+        collection = _client().get_or_create_collection(
+            name="semantic_cache",
+            metadata={"hnsw:space": "cosine"},
+        )
+        if collection.count() == 0:
+            return None
+            
+        skin_type = profile.get("skin_type") or "todas"
+        
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=1,
+            include=["documents", "metadatas", "distances"],
+            where={"skin_type": skin_type}
+        )
+        
+        distances = results.get("distances", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0]
+        
+        if distances and len(distances) > 0:
+            score = 1 - float(distances[0])
+            if score >= threshold:
+                import json
+                try:
+                    data = json.loads(metadatas[0].get("response_data", "{}"))
+                    return data
+                except Exception:
+                    pass
+        return None
+        
+    return await asyncio.to_thread(_sync_query)
+
+async def save_to_semantic_cache(query: str, query_embedding: list[float], profile: dict, response_data: dict) -> None:
+    def _sync_save():
+        collection = _client().get_or_create_collection(
+            name="semantic_cache",
+            metadata={"hnsw:space": "cosine"},
+        )
+        skin_type = profile.get("skin_type") or "todas"
+        import json
+        import uuid
+        
+        doc_id = str(uuid.uuid4())
+        
+        collection.add(
+            ids=[doc_id],
+            embeddings=[query_embedding],
+            documents=[query],
+            metadatas=[{
+                "skin_type": skin_type,
+                "response_data": json.dumps(response_data, ensure_ascii=False)
+            }]
+        )
+        
+    await asyncio.to_thread(_sync_save)
+
