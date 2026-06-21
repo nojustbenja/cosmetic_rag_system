@@ -5289,5 +5289,608 @@
       "producto-28-protector-solar-fluido-con-color-spf50",
       "producto-30-after-sun-gel-reparador-aloe"
     ]
+  },
+  {
+    "timestamp": "2026-06-21T14:52:57.654011+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:53:04.942653+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "sent",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:54:41.535240+00:00",
+    "session_id": "321fc83a-268b-47c3-9c58-7ec41b702224",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:54:59.012571+00:00",
+    "session_id": "321fc83a-268b-47c3-9c58-7ec41b702224",
+    "event_type": "sent",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:56:00.093878+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "answered",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:56:06.816373+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "sent",
+    "question": "Piel Sensible",
+    "normalized_question": "piel sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:56:55.715230+00:00",
+    "session_id": "321fc83a-268b-47c3-9c58-7ec41b702224",
+    "event_type": "answered",
+    "question": "Skincare básico",
+    "normalized_question": "skincare basico",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:57:14.252751+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T14:57:16.822266+00:00",
+    "session_id": "321fc83a-268b-47c3-9c58-7ec41b702224",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:06:50.741577+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:08:20.856933+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:11:03.696141+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:12:12.781443+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:12:36.234007+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "sent",
+    "question": "Hidratación sin pesadez",
+    "normalized_question": "hidratacion pesadez",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:14:52.836977+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "stop",
+    "question": "Hidratación sin pesadez",
+    "normalized_question": "hidratacion pesadez",
+    "suggestion_id": "",
+    "source": "chat",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:14:59.988942+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "click",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:00.004761+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "sent",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:09.619155+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "stop",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "",
+    "source": "chat",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:11.289588+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:12.554611+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:12.565878+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "impression",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "event-control-brillo",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:13.111619+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "click",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "event-control-brillo",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:13.117072+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "event-control-brillo",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:16.346790+00:00",
+    "session_id": "f8860523-f75d-427c-a03b-be4e9d26363b",
+    "event_type": "stop",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "chat",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:25.084603+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "impression",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "event-proteccion-solar",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:25.606752+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "impression",
+    "question": "Busco una crema hidratante de día",
+    "normalized_question": "busco crema hidratante dia",
+    "suggestion_id": "faq-crema-dia",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:26.118498+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "click",
+    "question": "Busco una crema hidratante de día",
+    "normalized_question": "busco crema hidratante dia",
+    "suggestion_id": "faq-crema-dia",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:26.131026+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "sent",
+    "question": "Busco una crema hidratante de día",
+    "normalized_question": "busco crema hidratante dia",
+    "suggestion_id": "faq-crema-dia",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:52.250498+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:15:58.448944+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:02.773809+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:04.318841+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "sent",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:07.944569+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "answered",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:10.023125+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "sent",
+    "question": "Grasa",
+    "normalized_question": "grasa",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:13.995555+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "answered",
+    "question": "Grasa",
+    "normalized_question": "grasa",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:15.193197+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "sent",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:16:24.320824+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "answered",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-3-protector-solar-invisible-spf50",
+      "producto-18-protector-solar-corporal-spray-fps50",
+      "producto-29-stick-solar-facial-spf50",
+      "producto-28-protector-solar-fluido-con-color-spf50",
+      "producto-30-after-sun-gel-reparador-aloe"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:16:58.863232+00:00",
+    "session_id": "5dcec97f-c74d-4521-97ed-89f6b514219b",
+    "event_type": "product_view",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-3-protector-solar-invisible-spf50"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:17:57.962804+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "sent",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:18:02.340739+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "answered",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:18:04.600353+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "sent",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:18:13.938177+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "answered",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-14-crema-hidratante-anti-rojez",
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:18:23.618284+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "product_view",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:18:26.283639+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "product_view",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-14-crema-hidratante-anti-rojez"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:19:16.839061+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "sent",
+    "question": "soy alergico a los peptidos",
+    "normalized_question": "soy alergico peptidos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:19:22.041984+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "answered",
+    "question": "soy alergico a los peptidos",
+    "normalized_question": "soy alergico peptidos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:19:40.435293+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "sent",
+    "question": "estas seguro",
+    "normalized_question": "estas seguro",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:19:43.893701+00:00",
+    "session_id": "1ec9b8a7-e9b2-4614-953a-0da3d1b2ece7",
+    "event_type": "answered",
+    "question": "estas seguro",
+    "normalized_question": "estas seguro",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:01.094569+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "sent",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:04.599588+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "answered",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:09.000102+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "sent",
+    "question": "Sensible",
+    "normalized_question": "sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:12.438015+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "answered",
+    "question": "Sensible",
+    "normalized_question": "sensible",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:21.450607+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "sent",
+    "question": "Elasticidad",
+    "normalized_question": "elasticidad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:24.831768+00:00",
+    "session_id": "8185f032-4145-4d7b-b002-96dd83e7695e",
+    "event_type": "answered",
+    "question": "Elasticidad",
+    "normalized_question": "elasticidad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:20:52.883571+00:00",
+    "session_id": "2b4fb7a2-4a54-492e-bf56-d8e487fb603b",
+    "event_type": "sent",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T15:21:08.715760+00:00",
+    "session_id": "2b4fb7a2-4a54-492e-bf56-d8e487fb603b",
+    "event_type": "answered",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga",
+      "producto-22-srum-cido-hialurnico-multi-peso"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:21:15.499149+00:00",
+    "session_id": "2b4fb7a2-4a54-492e-bf56-d8e487fb603b",
+    "event_type": "product_view",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T15:21:22.367065+00:00",
+    "session_id": "2b4fb7a2-4a54-492e-bf56-d8e487fb603b",
+    "event_type": "product_view",
+    "question": "Cuidado antiedad",
+    "normalized_question": "cuidado antiedad",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-22-srum-cido-hialurnico-multi-peso"
+    ]
   }
 ]

@@ -2,11 +2,14 @@
 
 Este documento contiene las tareas pendientes y futuras mejoras para el proyecto.
 
-## Despliegue y Configuración
+## Mejoras de Arquitectura RAG (Completadas ✅)
 
-- [ ] **Configurar conexión Backend - Frontend en Producción:**
-  - Crear el Space en Hugging Face (tipo Docker -> Blank).
-  - Poner los secretos `HF_USERNAME` y `HF_SPACE_NAME` en GitHub.
-  - Hacer commit y push del código actual para activar las GitHub Actions.
-  - Configurar el secreto `FRONTEND_ORIGIN` en Hugging Face con la URL de Vercel.
-  - Configurar la variable `VITE_API_URL` en Vercel con la URL del Space de Hugging Face.
+- [x] **Query Expansion (Multi-Query):** Generación de 3 variantes de cada pregunta, búsquedas paralelas y unificación de resultados antes del reranking.
+- [x] **Enriquecimiento de Metadata (Guías):** Inyección de títulos y secciones dentro del texto de los chunks de las guías.
+- [x] **Evaluación Sistemática (RAGAS):** Implementación del script `evaluate.py` para medir `context_precision`, `context_recall` y `faithfulness`.
+
+## Próximos Pasos (En cola de espera 🚀)
+
+- [x] **Frontend - Source Citations:** Mostrar en la interfaz de chat (UI) exactamente de qué guía o producto (y en qué página) sacó la información el RAG para darle más confianza al usuario.
+- [x] **Sistema de Feedback (Pulgares arriba/abajo):** Agregar botones en la UI para que el usuario califique la respuesta y guardar eso en base de datos para armar un dataset real para RAGAS.
+- [x] **Semantic Caching:** Cachear las respuestas de consultas repetidas (ej: "rutina de noche") para responder en milisegundos y ahorrar llamadas al LLM.
