@@ -281,10 +281,10 @@ async def retrieve_all(queries: str | list[str], filters: dict | None = None) ->
                     os.environ.setdefault("HF_HUB_OFFLINE", "1")
                     os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
                 try:
-                    _get_reranker.model = CrossEncoder(model_name, local_files_only=True)
+                    _get_reranker.model = CrossEncoder(model_name, local_files_only=True, device="cpu")
                 except Exception as e:
                     if settings.allow_embedding_download:
-                        _get_reranker.model = CrossEncoder(model_name)
+                        _get_reranker.model = CrossEncoder(model_name, device="cpu")
                     else:
                         raise e
             return _get_reranker.model
