@@ -157,17 +157,41 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                         best_score = max([item["score"] for item in retrieved_items], default=0.0)
 
                         if best_score < 0.4 or not products:
-                            # No hay un calce fuerte.
-                            yield {
-                                "event": "context_done",
-                                "data": json.dumps({"guides": [], "total": 0, "mode": "soft"}),
-                            }
-                            yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando una recomendación cercana…"})}
-                            async for token in generate_recommender_response(
-                                request.message, history, retrieved_items=retrieved_items[:3], soft_match=True
-                            ):
-                                response += token
-                                yield {"event": "token", "data": json.dumps({"token": token})}
+                            # Detectar si estamos en el paso de confirmación
+                            last_msg = history[-1]["content"].lower() if history and history[-1].get("role") == "assistant" else ""
+                            is_confirming = False
+                            
+                            if "porcentaje de compatibilidad" in last_msg or "opciones más cercanas" in last_msg:
+                                user_reply = request.message.lower()
+                                if any(w in user_reply for w in ["si", "sí", "ver", "dale", "ok", "muéstra", "muestra", "bueno", "claro"]):
+                                    is_confirming = True
+
+                            if is_confirming:
+                                # El usuario confirmó que quiere ver los productos a pesar del bajo porcentaje
+                                soft_products = products[:3]
+                                for idx, product in enumerate(soft_products):
+                                    product_with_index = {**product, "product_index": idx + 1}
+                                    yield {"event": "product", "data": json.dumps(product_with_index)}
+
+                                yield {
+                                    "event": "context_done",
+                                    "data": json.dumps({"guides": [], "total": len(soft_products), "mode": "soft"}),
+                                }
+                                yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando las opciones…"})}
+                                async for token in generate_recommender_response(
+                                    request.message, history, retrieved_items=retrieved_items[:3], soft_match=True
+                                ):
+                                    response += token
+                                    yield {"event": "token", "data": json.dumps({"token": token})}
+                            else:
+                                # Primera vez que buscamos y no hay calce exacto. Avisamos y preguntamos.
+                                yield {
+                                    "event": "context_done",
+                                    "data": json.dumps({"guides": [], "total": 0, "mode": "profiler"}),
+                                }
+                                warning_msg = "Revisé nuestro catálogo y los productos que tenemos actualmente no coinciden perfectamente con tu perfil (tienen un porcentaje de compatibilidad bajo). ¿Te gustaría que te muestre las opciones más cercanas de todos modos?"
+                                yield {"event": "token", "data": json.dumps({"token": warning_msg})}
+                                yield {"event": "chips", "data": json.dumps(["Sí, ver opciones", "No, gracias"])}
                         else:
                             # Emitir cada producto
                             for idx, product in enumerate(products):
