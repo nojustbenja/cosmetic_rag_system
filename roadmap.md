@@ -13,3 +13,5 @@ Este documento contiene las tareas pendientes y futuras mejoras para el proyecto
 - [x] **Frontend - Source Citations:** Mostrar en la interfaz de chat (UI) exactamente de qué guía o producto (y en qué página) sacó la información el RAG para darle más confianza al usuario.
 - [x] **Sistema de Feedback (Pulgares arriba/abajo):** Agregar botones en la UI para que el usuario califique la respuesta y guardar eso en base de datos para armar un dataset real para RAGAS.
 - [x] **Semantic Caching:** Cachear las respuestas de consultas repetidas (ej: "rutina de noche") para responder en milisegundos y ahorrar llamadas al LLM.
+- [x] **Contexto Global de Perfil:** Inyección de perfil de usuario estructurado (tipo de piel, alergias) persistente en los prompts para evitar repeticiones innecesarias.
+- [x] **Mejora UX - Retención de Scroll:** Se implementó una retención del auto-scroll si el usuario mueve la vista durante la generación del mensaje, sumando un botón flotante para ir al final.

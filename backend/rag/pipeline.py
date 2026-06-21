@@ -509,9 +509,18 @@ async def generate_recommender_response(
     messages.extend(session_history[-20:])
 
     context_text = build_context(retrieved_items)
-    augmented_message = f"{message}\n\n{context_text}"
-    if profile and profile.get("allergies"):
-        augmented_message += f"\n\n[INFO IMPORTANTE] Restricciones o condiciones del usuario: {', '.join(profile['allergies'])}. TENER EXTREMO CUIDADO DE NO RECOMENDAR PRODUCTOS CONTRAINDICADOS (ej. evitar retinol o ácidos fuertes si está embarazada, o evitar ingredientes si son alergias)."
+    
+    # Inyectar el perfil COMPLETO para que Lumi no pierda contexto
+    profile_summary = ""
+    if profile:
+        known_attributes = {k: v for k, v in profile.items() if v and k not in ("missing_fields", "confidence")}
+        if known_attributes:
+            profile_summary = f"\n\n[PERFIL DEL USUARIO ACTIVO]: {json.dumps(known_attributes, ensure_ascii=False)}\nTen este perfil SIEMPRE en cuenta para tus recomendaciones, no le preguntes por esta información."
+        
+        if profile.get("allergies"):
+            profile_summary += f"\n[INFO IMPORTANTE DE SALUD]: Restricciones o alergias del usuario: {', '.join(profile['allergies'])}. TENER EXTREMO CUIDADO DE NO RECOMENDAR PRODUCTOS CONTRAINDICADOS (ej. evitar retinol o ácidos fuertes si está embarazada, o evitar ingredientes si son alergias)."
+
+    augmented_message = f"{message}\n\n{context_text}{profile_summary}"
     messages.append({"role": "user", "content": augmented_message})
 
     async for token in client.stream_completion(messages):

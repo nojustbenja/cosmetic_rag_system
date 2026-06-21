@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Markdown } from "../Markdown";
 import { fetchProductReason } from "@/lib/api";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
-import { CircleNotch, Sparkle, ArrowCounterClockwise, BookOpen, ThumbsUp, ThumbsDown } from "@phosphor-icons/react";
+import { CircleNotch, Sparkle, ArrowCounterClockwise, BookOpen, ThumbsUp, ThumbsDown, ArrowDown } from "@phosphor-icons/react";
 
 type ChatMessageListProps = {
   messages: ChatMessage[];
@@ -26,27 +26,50 @@ export function ChatMessageList({
   onFeedback,
 }: ChatMessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    // Consider at bottom if within 50px
+    setIsAtBottom(scrollHeight - scrollTop - clientHeight < 50);
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const performScroll = () => {
-      el.scrollTo({
-        top: el.scrollHeight,
-        behavior: loading ? "auto" : "smooth",
-      });
+      // Solo auto-scroll si el usuario ya estaba abajo o está cargando un nuevo mensaje corto
+      if (isAtBottom) {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: loading ? "auto" : "smooth",
+        });
+      }
     };
 
     const frameId = requestAnimationFrame(performScroll);
     return () => cancelAnimationFrame(frameId);
-  }, [messages, loading]);
+  }, [messages, loading, isAtBottom]);
+
+  const scrollToBottom = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
   return (
-    <div
-      ref={scrollRef}
-      className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-6 pb-4 pr-1 ${messages.length <= 1 ? "justify-center" : ""}`}
-    >
+    <div className="relative flex-1 flex flex-col min-h-0">
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className={`flex-1 overflow-y-auto scrollbar-hide flex flex-col gap-6 pb-4 pr-1 ${messages.length <= 1 ? "justify-center" : ""}`}
+      >
       <AnimatePresence mode="popLayout">
         {messages.map((m) => (
           <motion.div
@@ -132,6 +155,19 @@ export function ChatMessageList({
           </motion.div>
         ))}
       </AnimatePresence>
+      </div>
+
+      {!isAtBottom && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <button
+            onClick={scrollToBottom}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-sm border border-foreground/10 shadow-md hover:bg-foreground hover:text-background transition-all text-[12px] font-bold text-foreground"
+          >
+            <ArrowDown weight="bold" className="size-3.5" />
+            <span>Ir hacia abajo</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
