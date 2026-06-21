@@ -425,3 +425,22 @@ export async function fetchProductAction(
   }
   return response.json();
 }
+
+export async function submitFeedback(
+  messageId: string,
+  question: string,
+  answer: string,
+  feedback: "up" | "down",
+  guides: any[]
+): Promise<void> {
+  const url = endpoint('/chat/feedback');
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message_id: messageId, question, answer, feedback, guides }),
+    });
+  } catch (err) {
+    console.warn("Error enviando feedback:", err);
+  }
+}

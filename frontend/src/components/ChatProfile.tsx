@@ -92,10 +92,10 @@ export function ChatProfile({ profile, onUpdate }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="allergies" className="text-xs">Alergias o ingredientes a evitar</Label>
+            <Label htmlFor="allergies" className="text-xs">Condiciones médicas o alergias</Label>
             <Input
               id="allergies"
-              placeholder="Ej: fragancias, nueces, retinol"
+              placeholder="Ej: Estoy embarazada, tengo rosácea, alergia al retinol..."
               className="h-8 text-sm"
               value={allergies}
               onChange={(e) => setAllergies(e.target.value)}

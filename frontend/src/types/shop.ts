@@ -54,6 +54,8 @@ export type ChatMessage = {
   recIds?: string[];
   products?: Product[];
   chips?: string[];
+  guides?: { filename: string; page: string; snippet: string; source: string; score: number }[];
+  feedback?: "up" | "down";
 };
 
 export type CartItem = { product: Product; qty: number };

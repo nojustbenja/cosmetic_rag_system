@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Markdown } from "../Markdown";
 import { fetchProductReason } from "@/lib/api";
 import { FALLBACK_IMAGE_URL, getProductImage } from "@/lib/images";
-import { CircleNotch, Sparkle, ArrowCounterClockwise, BookOpen } from "@phosphor-icons/react";
+import { CircleNotch, Sparkle, ArrowCounterClockwise, BookOpen, ThumbsUp, ThumbsDown } from "@phosphor-icons/react";
 
 type ChatMessageListProps = {
   messages: ChatMessage[];
@@ -13,6 +13,7 @@ type ChatMessageListProps = {
   onSendChip: (text: string, meta: { source: string }) => void;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   onUpdateProductReason: (productId: string, reason: string) => void;
+  onFeedback: (messageId: string, feedback: "up" | "down") => void;
 };
 
 export function ChatMessageList({
@@ -22,6 +23,7 @@ export function ChatMessageList({
   onSendChip,
   setMessages,
   onUpdateProductReason,
+  onFeedback,
 }: ChatMessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -70,6 +72,22 @@ export function ChatMessageList({
                         <ProductMentionGroup products={m.products} onUpdateProductReason={onUpdateProductReason} />
                       </div>
                     )}
+                    {m.guides && m.guides.length > 0 && (
+                      <div className="mt-4 flex flex-col gap-2 border-t border-foreground/5 pt-3">
+                        <p className="text-eyebrow text-muted-foreground/80 mb-1">Fuentes consultadas por Lumi:</p>
+                        <div className="flex flex-col gap-2">
+                          {m.guides.map((guide, idx) => (
+                            <div key={idx} className="flex flex-col gap-1.5 p-2.5 rounded-[1.25rem] bg-background/50 border border-foreground/10">
+                              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-500">
+                                <BookOpen className="size-3.5" />
+                                <span className="text-[12px] font-bold truncate">{guide.filename} {guide.page && `(Pág. ${guide.page})`}</span>
+                              </div>
+                              <span className="text-[11.5px] text-muted-foreground leading-relaxed line-clamp-2 italic">"{guide.snippet?.replace(/\[Documento: .*?\] - /, '') || ''}"</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {m.chips && m.chips.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {m.chips.map((chip, idx) => (
@@ -85,6 +103,24 @@ export function ChatMessageList({
                             {chip}
                           </button>
                         ))}
+                      </div>
+                    )}
+                    {!loading && m.id !== "welcome" && m.content && (
+                      <div className="mt-1 flex items-center gap-1.5 border-t border-foreground/5 pt-2">
+                        <button
+                          onClick={() => onFeedback(m.id, "up")}
+                          className={`inline-flex items-center justify-center rounded-full p-1.5 transition-colors ${m.feedback === "up" ? "text-emerald-500 bg-emerald-500/10" : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"}`}
+                          title="Buena respuesta"
+                        >
+                          <ThumbsUp weight={m.feedback === "up" ? "fill" : "regular"} className="size-4" />
+                        </button>
+                        <button
+                          onClick={() => onFeedback(m.id, "down")}
+                          className={`inline-flex items-center justify-center rounded-full p-1.5 transition-colors ${m.feedback === "down" ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-foreground hover:bg-foreground/5"}`}
+                          title="Mala respuesta"
+                        >
+                          <ThumbsDown weight={m.feedback === "down" ? "fill" : "regular"} className="size-4" />
+                        </button>
                       </div>
                     )}
                   </>

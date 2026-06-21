@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { ChatMessage, ClientProfile, Product, QuestionSuggestion, ChatSession } from "@/types/shop";
-import { streamChat, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent } from "@/lib/api";
+import { streamChat, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent, submitFeedback } from "@/lib/api";
 import { toast } from "sonner";
 import { loadSessions, saveSession } from "@/utils/storage";
 import { generateWelcomeContext } from "@/utils/profileRules";
@@ -286,6 +286,14 @@ export function useChatStream({
         },
         onContextDone: ({ guides }) => {
           onRecommendations(streamedProducts, guides);
+          if (guides && guides.length > 0) {
+            // @ts-ignore
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMessageId ? { ...m, guides } : m
+              )
+            );
+          }
         },
         onToken: (token) => {
           setStatusLabel("");
@@ -391,6 +399,29 @@ export function useChatStream({
     onRestoreSession?.(session);
   }
 
+  const handleMessageFeedback = useCallback((messageId: string, feedback: "up" | "down") => {
+    setMessages((prev) => {
+      const msgIndex = prev.findIndex((m) => m.id === messageId);
+      if (msgIndex === -1) return prev;
+      
+      const msg = prev[msgIndex];
+      // Buscar la última pregunta del usuario antes de esta respuesta
+      let question = "";
+      for (let i = msgIndex - 1; i >= 0; i--) {
+        if (prev[i].role === "user") {
+          question = prev[i].content;
+          break;
+        }
+      }
+      
+      submitFeedback(messageId, question, msg.content, feedback, msg.guides || []);
+      
+      const next = [...prev];
+      next[msgIndex] = { ...msg, feedback };
+      return next;
+    });
+  }, []);
+
   return {
     messages,
     setMessages,
@@ -409,5 +440,6 @@ export function useChatStream({
     handleClear,
     handleInternalUpdateProductReason,
     restoreSession,
+    handleMessageFeedback,
   };
 }

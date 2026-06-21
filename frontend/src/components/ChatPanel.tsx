@@ -45,6 +45,7 @@ export function ChatPanel({
     handleClear,
     handleInternalUpdateProductReason,
     restoreSession,
+    handleMessageFeedback,
   } = useChatStream({
     clientProfile,
     onProfile,
@@ -82,6 +83,7 @@ export function ChatPanel({
           onSendChip={send}
           setMessages={setMessages}
           onUpdateProductReason={handleInternalUpdateProductReason}
+          onFeedback={handleMessageFeedback}
         />
 
         <QuestionSuggestionRail

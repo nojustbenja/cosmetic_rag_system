@@ -81,7 +81,7 @@ describe("ChatPanel User Flow", () => {
     
     const ageInput = screen.getByLabelText(/Edad/i);
     const skinSelect = screen.getByLabelText(/Piel/i);
-    const allergiesInput = screen.getByLabelText(/Alergias o ingredientes a evitar/i);
+    const allergiesInput = screen.getByLabelText(/Condiciones médicas o alergias/i);
     const saveButton = screen.getByRole("button", { name: /Guardar Perfil/i });
 
     await user.type(ageInput, "30");
