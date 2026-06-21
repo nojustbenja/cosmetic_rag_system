@@ -89,6 +89,12 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
         concern = extracted.get("concern") or frontend_profile.get("concern")
         budget_max = extracted.get("budget_max") or frontend_profile.get("budget_max")
         
+        # Merge de alergias
+        f_allergies = frontend_profile.get("allergies") or []
+        e_allergies = extracted.get("allergies") or []
+        allergies = list(set(f_allergies + e_allergies))
+
+        
         # Recalcular missing fields por si acaso el merge llenó algo
         missing_fields = []
         if not skin_type and category != "fragancias":
@@ -106,6 +112,7 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
             "category": category,
             "budget_max": budget_max,
             "usage_moment": usage_moment,
+            "allergies": allergies,
             "sensitivity": skin_type == "sensible",
             "confidence": min(0.95, 0.35 + filled * 0.1),
             "missing_fields": missing_fields,
@@ -123,6 +130,7 @@ async def extract_client_profile(message: str, session_history: list[dict] | Non
             "category": category,
             "budget_max": frontend_profile.get("budget_max"),
             "usage_moment": frontend_profile.get("usage_moment"),
+            "allergies": frontend_profile.get("allergies") or [],
             "sensitivity": skin_type == "sensible",
             "confidence": 0.35,
             "missing_fields": missing_fields,
@@ -456,6 +464,7 @@ async def generate_recommender_response(
     session_history: list[dict],
     retrieved_items: list[dict] | None = None,
     soft_match: bool = False,
+    profile: dict | None = None,
 ) -> AsyncGenerator[str, None]:
     if retrieved_items is None:
         retrieved_items = await retrieve_all(message)
@@ -475,6 +484,8 @@ async def generate_recommender_response(
 
     context_text = build_context(retrieved_items)
     augmented_message = f"{message}\n\n{context_text}"
+    if profile and profile.get("allergies"):
+        augmented_message += f"\n\n[INFO IMPORTANTE] Alergias confirmadas del usuario: {', '.join(profile['allergies'])}. NO RECOMENDAR PRODUCTOS CON ESTOS INGREDIENTES."
     messages.append({"role": "user", "content": augmented_message})
 
     async for token in client.stream_completion(messages):

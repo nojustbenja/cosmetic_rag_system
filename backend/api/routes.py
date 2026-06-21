@@ -138,7 +138,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                         }
                         yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando respuesta conversacional…"})}
                         async for token in generate_recommender_response(
-                            request.message, history, retrieved_items=[], soft_match=True
+                            request.message, history, retrieved_items=[], soft_match=True, profile=profile
                         ):
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
@@ -179,7 +179,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                                 }
                                 yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando las opciones…"})}
                                 async for token in generate_recommender_response(
-                                    request.message, history, retrieved_items=retrieved_items[:3], soft_match=True
+                                    request.message, history, retrieved_items=retrieved_items[:3], soft_match=True, profile=profile
                                 ):
                                     response += token
                                     yield {"event": "token", "data": json.dumps({"token": token})}
@@ -204,7 +204,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             }
 
                             yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando tu recomendación…"})}
-                            async for token in generate_recommender_response(request.message, history, retrieved_items):
+                            async for token in generate_recommender_response(request.message, history, retrieved_items, profile=profile):
                                 response += token
                                 yield {"event": "token", "data": json.dumps({"token": token})}
 

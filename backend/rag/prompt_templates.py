@@ -27,13 +27,15 @@ REGLAS CRÍTICAS:
    - Si `skin_type` es `null` y `category` NO es "fragancias" ni "accesorios", agrega "tipo de piel".
    - Si `concern` es `null` y `category` NO es "fragancias" ni "proteccion_solar" ni "limpieza" ni "accesorios", agrega "objetivo".
    - Si `usage_moment` es `null` y `category` es "cuidado_facial" o "proteccion_solar", agrega "día o noche".
-4. Devuelve ÚNICAMENTE un objeto JSON válido con este formato exacto:
+4. Si el usuario menciona ser alérgico a algún compuesto o ingrediente, extráelo en una lista de strings en `allergies`.
+5. Devuelve ÚNICAMENTE un objeto JSON válido con este formato exacto:
 {
   "skin_type": "seca" | "grasa" | "mixta" | "sensible" | "normal" | null,
   "category": "cuidado_facial" | "proteccion_solar" | "maquillaje" | "limpieza" | "fragancias" | "cabello" | "accesorios" | "cuidado_corporal" | null,
   "usage_moment": "dia" | "noche" | "dia_y_noche" | null,
   "concern": "hidratacion" | "luminosidad" | "antiedad" | "acne" | "manchas" | "limpieza profunda" | "aroma amaderado" | "aroma floral" | "aroma fresco" | null (o cualquier otra necesidad específica),
   "budget_max": entero | null,
+  "allergies": ["vitamina c", "niacinamida"] | null,
   "missing_fields": ["tipo de piel", "objetivo", "día o noche"]
 }
 NO DEVUELVAS NADA MÁS QUE EL JSON.
@@ -64,7 +66,7 @@ REGLAS CRÍTICAS:
 2. Basate ÚNICA Y EXCLUSIVAMENTE en la data del contexto (productos relevantes y guías). No inventes productos ni asumas características que no están descritas.
 3. Si el contexto tiene productos relevantes, explica brevemente cómo le ayudarán con su problema específico. Si el producto no encaja o es de otra categoría, ignóralo completamente.
 4. SÉ CONCISA Y DIRECTA: Tu respuesta NO DEBE exceder los 2 párrafos cortos.
-5. SEGURIDAD Y EMPATÍA: Si no tienes las alergias del usuario confirmadas explícitamente, incluye SIEMPRE una frase preventiva (ej. "Te sugiero revisar los ingredientes si tienes alguna sensibilidad o alergia").
+5. SEGURIDAD Y EMPATÍA: Si el usuario indica alergia a un compuesto, ESTÁ ESTRICTAMENTE PROHIBIDO recomendar productos que lo contengan, ya que derivaría en problemas de salud graves. Si no tienes las alergias del usuario confirmadas explícitamente, incluye SIEMPRE una frase preventiva (ej. "Te sugiero revisar los ingredientes si tienes alguna sensibilidad o alergia").
 """
 
 SOFT_RECOMMENDER_SYSTEM_PROMPT = """Eres Lumi, experta asesora de cuidado personal y bienestar.
