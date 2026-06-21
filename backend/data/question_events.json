@@ -4508,5 +4508,786 @@
     "suggestion_id": "case-contorno-ojos",
     "source": "chip_mixed",
     "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T01:02:39.033967+00:00",
+    "session_id": "b6b24af8-e4df-4b12-acf7-dd2c1a7e0673",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T01:03:12.063231+00:00",
+    "session_id": "b6b24af8-e4df-4b12-acf7-dd2c1a7e0673",
+    "event_type": "sent",
+    "question": "Sérum luminoso",
+    "normalized_question": "serum luminoso",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T01:03:18.546751+00:00",
+    "session_id": "b6b24af8-e4df-4b12-acf7-dd2c1a7e0673",
+    "event_type": "answered",
+    "question": "Sérum luminoso",
+    "normalized_question": "serum luminoso",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T01:03:25.076048+00:00",
+    "session_id": "b6b24af8-e4df-4b12-acf7-dd2c1a7e0673",
+    "event_type": "sent",
+    "question": "Día",
+    "normalized_question": "dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-17T01:03:45.847953+00:00",
+    "session_id": "b6b24af8-e4df-4b12-acf7-dd2c1a7e0673",
+    "event_type": "answered",
+    "question": "Día",
+    "normalized_question": "dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-19-srum-vitamina-c-antioxidante",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-23-tnico-calmante-agua-de-rosas",
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-22-srum-cido-hialurnico-multi-peso",
+      "producto-16-contorno-de-ojos-descongestionante"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T02:41:25.238100+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "impression",
+    "question": "Necesito un buen contorno de ojos",
+    "normalized_question": "necesito buen contorno ojos",
+    "suggestion_id": "case-contorno-ojos",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:41:39.999611+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:41:40.633539+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "impression",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:41:43.077566+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "click",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:41:43.087902+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "sent",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:41:52.338794+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "answered",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-17-blsamo-desmaquillante-nutritivo",
+      "producto-26-agua-micelar-3-en-1",
+      "producto-27-exfoliante-enzimtico-en-polvo"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T02:46:45.629902+00:00",
+    "session_id": "4acb31fb-556d-4a2c-8fec-5cdf24f3de2a",
+    "event_type": "product_view",
+    "question": "limpiador para piel sensible que no reseque la piel e hidrate",
+    "normalized_question": "limpiador piel sensible no reseque piel e hidrate",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T02:56:53.422313+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "click",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:56:53.433034+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "sent",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:57:35.037724+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "answered",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:57:39.471762+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T02:58:51.082224+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "answered",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:00:58.714150+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "sent",
+    "question": "Larga duración",
+    "normalized_question": "larga duracion",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:01:14.534976+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "answered",
+    "question": "Larga duración",
+    "normalized_question": "larga duracion",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:32:54.987248+00:00",
+    "session_id": "63de42ff-bc6a-46e2-8ffa-54e624993eaf",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:34:01.083408+00:00",
+    "session_id": "d126464c-083e-4a71-8723-59ab36434046",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:34:22.129751+00:00",
+    "session_id": "d126464c-083e-4a71-8723-59ab36434046",
+    "event_type": "impression",
+    "question": "Busco un limpiador que no reseque la piel",
+    "normalized_question": "busco limpiador no reseque piel",
+    "suggestion_id": "case-limpiador-suave",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:34:49.684255+00:00",
+    "session_id": "d126464c-083e-4a71-8723-59ab36434046",
+    "event_type": "sent",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:35:16.140303+00:00",
+    "session_id": "d126464c-083e-4a71-8723-59ab36434046",
+    "event_type": "answered",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-25-gel-limpiador-cido-saliclico",
+      "producto-26-agua-micelar-3-en-1"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T03:36:00.084126+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:41:26.607226+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:45:00.081180+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:45:50.729126+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:46:17.018060+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "answered",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:46:51.401913+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "sent",
+    "question": "Poros visibles",
+    "normalized_question": "poros visibles",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:47:01.994180+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "answered",
+    "question": "Poros visibles",
+    "normalized_question": "poros visibles",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:47:05.778810+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "sent",
+    "question": "Día",
+    "normalized_question": "dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:47:29.371131+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "answered",
+    "question": "Día",
+    "normalized_question": "dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-21-crema-hidratante-gel-oil-free",
+      "producto-15-exfoliante-lquido-ahabha",
+      "producto-20-srum-niacinamida-poros-cero",
+      "producto-19-srum-vitamina-c-antioxidante",
+      "producto-16-contorno-de-ojos-descongestionante",
+      "producto-22-srum-cido-hialurnico-multi-peso"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T03:47:35.778837+00:00",
+    "session_id": "4edf38b5-34b3-4e4c-86de-1b0bd56dfbb8",
+    "event_type": "product_view",
+    "question": "mejor crema de día para piel grasa con control de brillo y poros visibles",
+    "normalized_question": "mejor crema dia piel grasa control brillo poros visibles",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-21-crema-hidratante-gel-oil-free"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T03:55:19.690666+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "sent",
+    "question": "Contorno de ojos",
+    "normalized_question": "contorno ojos",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:55:52.068669+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "answered",
+    "question": "Contorno de ojos",
+    "normalized_question": "contorno ojos",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:56:15.004221+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "sent",
+    "question": "Bolsas",
+    "normalized_question": "bolsas",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:56:24.152796+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "answered",
+    "question": "Bolsas",
+    "normalized_question": "bolsas",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:56:29.900118+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "sent",
+    "question": "ambos",
+    "normalized_question": "ambos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T03:56:42.671315+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "answered",
+    "question": "ambos",
+    "normalized_question": "ambos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": [
+      "producto-16-contorno-de-ojos-descongestionante",
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga",
+      "producto-15-exfoliante-lquido-ahabha",
+      "producto-19-srum-vitamina-c-antioxidante",
+      "producto-22-srum-cido-hialurnico-multi-peso",
+      "producto-21-crema-hidratante-gel-oil-free"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T03:56:49.116167+00:00",
+    "session_id": "3bec8917-b038-4a4a-829f-705c7d88973a",
+    "event_type": "product_view",
+    "question": "Contorno de ojos para bolsas de día y noche para piel grasa",
+    "normalized_question": "contorno ojos bolsas dia noche piel grasa",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-16-contorno-de-ojos-descongestionante"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:16:26.601859+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:16:36.770560+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:17:00.243379+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:18:01.584453+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "answered",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:18:04.934017+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "sent",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:20:06.197487+00:00",
+    "session_id": "3a6713a1-e8ff-41e7-8bae-1678935bd292",
+    "event_type": "answered",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-16-contorno-de-ojos-descongestionante",
+      "producto-45-srum-retinol-0.3-renovacin",
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga",
+      "producto-15-exfoliante-lquido-ahabha"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:23:28.334515+00:00",
+    "session_id": "5063718c-5739-4cfb-a633-d4f062f7e3fd",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:23:37.453263+00:00",
+    "session_id": "5063718c-5739-4cfb-a633-d4f062f7e3fd",
+    "event_type": "stop",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "chat",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:23:56.362943+00:00",
+    "session_id": "5063718c-5739-4cfb-a633-d4f062f7e3fd",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:24:03.684154+00:00",
+    "session_id": "5063718c-5739-4cfb-a633-d4f062f7e3fd",
+    "event_type": "sent",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:24:31.182865+00:00",
+    "session_id": "5063718c-5739-4cfb-a633-d4f062f7e3fd",
+    "event_type": "answered",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-25-gel-limpiador-cido-saliclico",
+      "producto-26-agua-micelar-3-en-1"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:27:12.120688+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "sent",
+    "question": "Control de brillo",
+    "normalized_question": "control brillo",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:27:57.344863+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:28:05.963797+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "sent",
+    "question": "Rutina de día",
+    "normalized_question": "rutina dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:28:09.503123+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "answered",
+    "question": "Rutina de día",
+    "normalized_question": "rutina dia",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:28:12.357693+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "sent",
+    "question": "Anti-edad",
+    "normalized_question": "anti edad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:28:17.934539+00:00",
+    "session_id": "cde7fcc9-e19b-4189-a42a-10e87bb59e36",
+    "event_type": "answered",
+    "question": "Anti-edad",
+    "normalized_question": "anti edad",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-16-contorno-de-ojos-descongestionante",
+      "producto-19-srum-vitamina-c-antioxidante",
+      "producto-23-tnico-calmante-agua-de-rosas",
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga",
+      "producto-0-srum-hidratante-glow-drops"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:29:31.860724+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:29:34.931701+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:29:36.592050+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "sent",
+    "question": "Rutina mañana",
+    "normalized_question": "rutina manana",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:29:42.621393+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "answered",
+    "question": "Rutina mañana",
+    "normalized_question": "rutina manana",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-29-stick-solar-facial-spf50",
+      "producto-18-protector-solar-corporal-spray-fps50",
+      "producto-28-protector-solar-fluido-con-color-spf50",
+      "producto-30-after-sun-gel-reparador-aloe"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:30:07.076376+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:30:18.524411+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "sent",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:30:29.919024+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "product_view",
+    "question": "limpieza profunda para piel mixta",
+    "normalized_question": "limpieza profunda piel mixta",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:30:34.453239+00:00",
+    "session_id": "17d502e6-7637-445e-a8b1-374f8524a6e3",
+    "event_type": "answered",
+    "question": "Limpieza profunda",
+    "normalized_question": "limpieza profunda",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-2-limpiador-facial-espuma-suave",
+      "producto-25-gel-limpiador-cido-saliclico",
+      "producto-26-agua-micelar-3-en-1"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:36:54.668431+00:00",
+    "session_id": "62e90c69-086e-48e4-b7b6-d5a1ccb985b1",
+    "event_type": "sent",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:37:13.488937+00:00",
+    "session_id": "62e90c69-086e-48e4-b7b6-d5a1ccb985b1",
+    "event_type": "answered",
+    "question": "Protección solar",
+    "normalized_question": "proteccion solar",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:38:10.176246+00:00",
+    "session_id": "62e90c69-086e-48e4-b7b6-d5a1ccb985b1",
+    "event_type": "sent",
+    "question": "ambos",
+    "normalized_question": "ambos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T04:39:11.138197+00:00",
+    "session_id": "62e90c69-086e-48e4-b7b6-d5a1ccb985b1",
+    "event_type": "product_view",
+    "question": "Protección solar para piel normal de día y de noche",
+    "normalized_question": "proteccion solar piel normal dia noche",
+    "suggestion_id": "",
+    "source": "product_detail",
+    "product_ids": [
+      "producto-29-stick-solar-facial-spf50"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T04:39:54.568036+00:00",
+    "session_id": "62e90c69-086e-48e4-b7b6-d5a1ccb985b1",
+    "event_type": "answered",
+    "question": "ambos",
+    "normalized_question": "ambos",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": [
+      "producto-29-stick-solar-facial-spf50",
+      "producto-18-protector-solar-corporal-spray-fps50",
+      "producto-3-protector-solar-invisible-spf50",
+      "producto-28-protector-solar-fluido-con-color-spf50",
+      "producto-30-after-sun-gel-reparador-aloe"
+    ]
   }
 ]
