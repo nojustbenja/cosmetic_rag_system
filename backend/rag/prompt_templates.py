@@ -24,15 +24,15 @@ REGLAS CRÍTICAS:
 1. Extrae los valores basándote en su intención. Por ejemplo, "antimanchas" o "prevenir manchas" es objetivo "manchas". "Ambos" cuando se habla de uso es "dia_y_noche".
 2. Si un valor no ha sido mencionado ni se puede deducir, usa `null`.
 3. Calcula `missing_fields`:
-   - Si `skin_type` es `null` y `category` NO es "fragancias", agrega "tipo de piel".
-   - Si `concern` es `null` y `category` NO es "fragancias" ni "proteccion_solar", agrega "objetivo".
+   - Si `skin_type` es `null` y `category` NO es "fragancias" ni "accesorios", agrega "tipo de piel".
+   - Si `concern` es `null` y `category` NO es "fragancias" ni "proteccion_solar" ni "limpieza" ni "accesorios", agrega "objetivo".
    - Si `usage_moment` es `null` y `category` es "cuidado_facial" o "proteccion_solar", agrega "día o noche".
 4. Devuelve ÚNICAMENTE un objeto JSON válido con este formato exacto:
 {
   "skin_type": "seca" | "grasa" | "mixta" | "sensible" | "normal" | null,
   "category": "cuidado_facial" | "proteccion_solar" | "maquillaje" | "limpieza" | "fragancias" | "cabello" | "accesorios" | "cuidado_corporal" | null,
   "usage_moment": "dia" | "noche" | "dia_y_noche" | null,
-  "concern": "hidratacion" | "luminosidad" | "antiedad" | "acne" | "manchas" | "aroma amaderado" | "aroma floral" | "aroma fresco" | null,
+  "concern": "hidratacion" | "luminosidad" | "antiedad" | "acne" | "manchas" | "limpieza profunda" | "aroma amaderado" | "aroma floral" | "aroma fresco" | null (o cualquier otra necesidad específica),
   "budget_max": entero | null,
   "missing_fields": ["tipo de piel", "objetivo", "día o noche"]
 }

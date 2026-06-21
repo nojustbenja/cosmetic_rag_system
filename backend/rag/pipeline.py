@@ -50,6 +50,8 @@ def _profile_signals(message: str) -> list[str]:
         ("uso de dia", ["dia", "mañana", "am", "spf", "solar"]),
         ("antiedad", ["antiedad", "arrugas", "lineas", "edad"]),
         ("acne o poros", ["acne", "granitos", "poros", "imperfecciones"]),
+        ("manchas o tono", ["manchas", "tono", "despigmentante", "vitamina c"]),
+        ("limpieza profunda", ["limpieza", "limpiar", "desmaquillante", "exfoliante", "purificante"]),
         ("aroma amaderado", ["amaderado", "madera", "cedro", "oud"]),
     ]
     for label, needles in checks:
