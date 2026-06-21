@@ -22,6 +22,9 @@ ENV CHROMA_PERSIST_DIR=./chroma_db
 # durante el build para que el contenedor arranque sin red.
 RUN ALLOW_EMBEDDING_DOWNLOAD=true python -m ingestion.run_ingestion
 
+# Descarga el modelo de reranking para evitar timeouts en producción
+RUN python -c "from huggingface_hub import snapshot_download; snapshot_download(repo_id='cross-encoder/ms-marco-MiniLM-L-6-v2')"
+
 # Exponer el puerto por defecto de Hugging Face Spaces
 EXPOSE 7860
 
