@@ -6049,5 +6049,202 @@
       "producto-30-after-sun-gel-reparador-aloe",
       "producto-3-protector-solar-invisible-spf50"
     ]
+  },
+  {
+    "timestamp": "2026-06-21T17:02:41.188464+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:02:55.654262+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Sérum luminoso",
+    "normalized_question": "serum luminoso",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:03:00.686436+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Sérum luminoso",
+    "normalized_question": "serum luminoso",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:03:01.762936+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:03:12.426738+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-22-srum-cido-hialurnico-multi-peso",
+      "producto-19-srum-vitamina-c-antioxidante"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T17:18:43.357525+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:26.096843+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "click",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:26.135228+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:30.652020+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:32.031363+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:36.918665+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:38.158363+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "sent",
+    "question": "Fijación",
+    "normalized_question": "fijacion",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:20:52.712389+00:00",
+    "session_id": "7f59a56b-1c7d-47e1-b327-16f34196e4cd",
+    "event_type": "answered",
+    "question": "Fijación",
+    "normalized_question": "fijacion",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-5-base-lquida-second-skin",
+      "producto-31-corrector-alta-cobertura-eternal",
+      "producto-6-labial-mate-velvet-kiss",
+      "producto-34-delineador-lquido-precisin-black",
+      "producto-33-polvo-fijador-translcido",
+      "producto-8-mscara-de-pestaas-volumen-xl"
+    ]
+  },
+  {
+    "timestamp": "2026-06-21T17:23:23.158036+00:00",
+    "session_id": "85bd6c7c-7926-4199-8488-2aeb0435508c",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:23:29.891928+00:00",
+    "session_id": "85bd6c7c-7926-4199-8488-2aeb0435508c",
+    "event_type": "sent",
+    "question": "Rutina súper hidratante",
+    "normalized_question": "rutina super hidratante",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:23:35.172777+00:00",
+    "session_id": "85bd6c7c-7926-4199-8488-2aeb0435508c",
+    "event_type": "answered",
+    "question": "Rutina súper hidratante",
+    "normalized_question": "rutina super hidratante",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:23:37.093443+00:00",
+    "session_id": "85bd6c7c-7926-4199-8488-2aeb0435508c",
+    "event_type": "sent",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-21T17:23:39.935327+00:00",
+    "session_id": "85bd6c7c-7926-4199-8488-2aeb0435508c",
+    "event_type": "answered",
+    "question": "Noche",
+    "normalized_question": "noche",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-1-crema-reparadora-noche-velvet",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-22-srum-cido-hialurnico-multi-peso",
+      "producto-19-srum-vitamina-c-antioxidante"
+    ]
   }
 ]
