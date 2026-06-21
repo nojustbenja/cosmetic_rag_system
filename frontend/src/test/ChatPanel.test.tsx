@@ -51,7 +51,7 @@ describe("ChatPanel User Flow", () => {
     vi.clearAllMocks();
     
     // Default mock implementation
-    (api.fetchQuestionSuggestions as any).mockResolvedValue([
+    vi.mocked(api.fetchQuestionSuggestions).mockResolvedValue([
       { id: "sugg-1", text: "Busco un serum antimanchas", group: "frequent", label: "Frecuentes", score: 1, is_trending: false },
       { id: "sugg-2", text: "Recomendacion de crema de dia", group: "trending", label: "Trending", score: 1, is_trending: true },
     ]);

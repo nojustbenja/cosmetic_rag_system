@@ -33,8 +33,9 @@ jobs:
           git reset --hard origin/main || echo "No main to reset to"
           
           # Sincronizar los archivos del backend al entorno raíz del Space
-          # Excluimos .git y README.md para no sobrescribir la configuración del Space
-          rsync -av --exclude='.git' --exclude='README.md' ../backend/ .
+          # Excluimos .git y README.md para no sobrescribir la configuración del Space, 
+          # y también excluimos los PDFs para que git push no falle (Hugging Face bloquea binarios pesados sin LFS/Xet)
+          rsync -av --exclude='.git' --exclude='README.md' --exclude='data/guias/*.pdf' ../backend/ .
           
           git add -A
           git commit -m "Deploy backend from GitHub Actions" || echo "No changes to commit"

@@ -431,7 +431,7 @@ export async function submitFeedback(
   question: string,
   answer: string,
   feedback: "up" | "down",
-  guides: any[]
+  guides: unknown[]
 ): Promise<void> {
   const url = endpoint('/chat/feedback');
   try {

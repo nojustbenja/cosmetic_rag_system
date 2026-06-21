@@ -4,7 +4,7 @@ type ChatInputAreaProps = {
   input: string;
   setInput: (val: string) => void;
   loading: boolean;
-  onSend: (text: string, meta?: any) => void;
+  onSend: (text: string, meta?: { source?: string; suggestionId?: string }) => void;
   onStop: () => void;
 };
 

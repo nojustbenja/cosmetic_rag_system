@@ -287,7 +287,7 @@ export function useChatStream({
         onContextDone: ({ guides }) => {
           onRecommendations(streamedProducts, guides);
           if (guides && guides.length > 0) {
-            // @ts-ignore
+            // @ts-expect-error - ignoring type mismatch for guides
             setMessages((prev) =>
               prev.map((m) =>
                 m.id === assistantMessageId ? { ...m, guides } : m
