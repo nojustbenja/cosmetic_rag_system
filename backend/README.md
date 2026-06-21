@@ -21,4 +21,4 @@ imagen Docker.
 - `KILO_MODE` (`free` | `general` | `pro`)
 - `FRONTEND_ORIGIN` — origen(es) permitidos para CORS, separados por coma
 
-Ver `.env.example` para la lista completa de opciones.
+Ver `.env.example` para la lista completa de opciones. 
