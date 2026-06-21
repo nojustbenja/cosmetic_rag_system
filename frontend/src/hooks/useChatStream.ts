@@ -3,7 +3,7 @@ import { ChatMessage, ClientProfile, Product, QuestionSuggestion, ChatSession } 
 import { streamChat, fetchQuestionSuggestions, getQuestionSessionId, trackQuestionEvent } from "@/lib/api";
 import { toast } from "sonner";
 import { loadSessions, saveSession } from "@/utils/storage";
-
+import { generateWelcomeContext } from "@/utils/profileRules";
 const INITIAL_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
@@ -96,31 +96,21 @@ export function useChatStream({
   const rafIdRef = useRef<number | null>(null);
 
   const getWelcomeMessage = useCallback(() => {
-    if (!clientProfile) return INITIAL_MESSAGE;
-    
-    const skin = clientProfile.skin_type ? `piel ${clientProfile.skin_type}` : "";
-    const age = clientProfile.age ? ` (${clientProfile.age} años)` : "";
-    const text = `¡Hola! Ya tengo configurado tu perfil${age}${skin ? ' con ' + skin : ''}. ¿En qué te puedo ayudar hoy?`;
-    
-    const chips = [];
-    if (clientProfile.skin_type === "seca") chips.push("Rutina súper hidratante", "Sérum luminoso");
-    else if (clientProfile.skin_type === "grasa" || clientProfile.skin_type === "mixta") chips.push("Control de brillo", "Limpieza profunda");
-    else chips.push("Skincare básico", "Rutina de día");
-    
-    if (clientProfile.age && Number(clientProfile.age) > 28) chips.push("Cuidado antiedad", "Contorno de ojos");
-    else chips.push("Protección solar");
-
+    const context = generateWelcomeContext(clientProfile || null);
     return {
       id: "welcome",
       role: "assistant" as const,
-      content: text,
-      chips: chips.slice(0, 4)
+      content: context.message,
+      chips: context.chips
     };
   }, [clientProfile]);
 
   useEffect(() => {
-    if (messages.length === 1 && messages[0].id === "welcome" && messages[0] === INITIAL_MESSAGE && clientProfile) {
-      setMessages([getWelcomeMessage()]);
+    if (messages.length === 1 && messages[0].role === "assistant") {
+      const welcome = getWelcomeMessage();
+      if (messages[0].content !== welcome.content) {
+        setMessages([{ ...welcome, id: messages[0].id }]);
+      }
     }
   }, [clientProfile, messages, getWelcomeMessage]);
 
@@ -216,7 +206,7 @@ export function useChatStream({
       return prev;
     });
 
-    setMessages([{ ...INITIAL_MESSAGE, id: crypto.randomUUID() }]);
+    setMessages([{ ...getWelcomeMessage(), id: crypto.randomUUID() }]);
     const nextSessionId = crypto.randomUUID();
     window.sessionStorage.setItem("lumi_question_session_id", nextSessionId);
     setSessionId(nextSessionId);
@@ -226,7 +216,7 @@ export function useChatStream({
     activeQuestionRef.current = "";
     onClearChat();
     toast.success("Nueva conversación iniciada.");
-  }, [onClearChat, sessionId, clientProfile]);
+  }, [onClearChat, sessionId, clientProfile, getWelcomeMessage]);
 
   async function send(text: string, meta: { suggestionId?: string; source?: string } = {}) {
     if (!text.trim() || loading) return;
