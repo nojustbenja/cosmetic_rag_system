@@ -190,6 +190,7 @@ Panel administrativo en `/admin` con seis secciones:
          │    Vector Database (ChromaDB) │
          │  • Catálogo de productos      │
          │  • Guías PDF indexadas        │
+         │  • Papers científicos         │
          │  • Información técnica        │
          └──────────────────────────────┘
 ```
@@ -200,6 +201,8 @@ Panel administrativo en `/admin` con seis secciones:
 
 - **CSV Products**: Carga y parseo automático del catálogo desde `backend/data/productos.csv`
 - **PDF Ingestion**: Extracción inteligente de guías y materiales educativos desde `backend/data/guias/`
+- **Scientific Papers**: Capacidad de leer e ingestar papers científicos y documentos de investigación para fundamentar respuestas.
+- **Hugging Face Integration**: Script para subir y respaldar guías/datasets directamente a Hugging Face.
 - **Chunking**: Fragmentación semántica para máxima relevancia en recuperación
 - **Embedding**: Conversión a vectores usando `paraphrase-multilingual-MiniLM-L12-v2` (multilingüe)
 - **Re-ingestion automática**: Al crear, editar o importar productos desde el BackOffice, ChromaDB se re-indexa sin intervención manual
@@ -278,6 +281,8 @@ Esta arquitectura protege completamente tus credenciales, garantizando que el us
 ### Catálogo y Productos
 - [x] Ingestion de catálogo CSV con embeddings vectoriales
 - [x] Ingestion de guías educativas PDF
+- [x] Lectura e ingestión de papers científicos y artículos de investigación
+- [x] Publicación y respaldo de guías en Hugging Face
 - [x] Búsqueda semántica contextual en ChromaDB
 - [x] Bento grid responsivo con hero card
 - [x] Badge de match calibrado (60–99%)
