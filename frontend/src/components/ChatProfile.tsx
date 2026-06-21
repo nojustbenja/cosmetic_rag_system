@@ -79,7 +79,7 @@ export function ChatProfile({ profile, onUpdate }: Props) {
                 id="skinType"
                 value={skinType}
                 onChange={(e) => setSkinType(e.target.value)}
-                className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
                 <option value="">Selecciona...</option>
                 <option value="seca">Seca</option>
@@ -108,7 +108,7 @@ export function ChatProfile({ profile, onUpdate }: Props) {
               id="climate"
               value={climate}
               onChange={(e) => setClimate(e.target.value)}
-              className="flex h-8 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
             >
               <option value="">Selecciona...</option>
               <option value="seco">Seco</option>
