@@ -39,16 +39,16 @@ jobs:
           
           # Habilitar persistent_storage: true en el frontmatter del Space si no existe
           python3 -c "
-import os
-if os.path.exists('README.md'):
-    content = open('README.md').read()
-    if 'persistent_storage:' not in content:
-        parts = content.split('---', 2)
-        if len(parts) >= 3:
-            parts[1] += '\npersistent_storage: true\n'
-            open('README.md', 'w').write('---'.join(parts))
-            print('Persistent storage enabled in README.md')
-"
+          import os
+          if os.path.exists('README.md'):
+              content = open('README.md').read()
+              if 'persistent_storage:' not in content:
+                  parts = content.split('---', 2)
+                  if len(parts) >= 3:
+                      parts[1] += '\npersistent_storage: true\n'
+                      open('README.md', 'w').write('---'.join(parts))
+                      print('Persistent storage enabled in README.md')
+          "
           
           git add -A
           git commit -m "Deploy backend from GitHub Actions" || echo "No changes to commit"
