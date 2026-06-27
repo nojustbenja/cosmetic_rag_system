@@ -193,6 +193,38 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                 from rag.cache import is_cache_enabled, lookup_cached_response, store_response
                 from rag.pipeline import generate_profiler_response, generate_recommender_response, analyze_conversation_intent
 
+                # 0. Cache Check anticipado — si está activo, revisamos antes de llamar al LLM.
+                #    Esto evita la latencia de Kilo/LLM en consultas recurrentes ya cacheadas.
+                cache_on = is_cache_enabled()
+                query_embedding = None
+                cached_data = None
+                if cache_on:
+                    frontend_profile = request.profile or {}
+                    query_embedding = await asyncio.to_thread(embed_text, request.message)
+                    cached_data = await lookup_cached_response(
+                        query_embedding, frontend_profile, query_preview=request.message
+                    )
+
+                if cached_data:
+                    yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi recuperó la respuesta en milisegundos…"})}
+                    products = cached_data.get("products", [])
+                    guides = cached_data.get("guides", [])
+                    response_text = cached_data.get("response", "")
+
+                    for idx, product in enumerate(products):
+                        product_with_index = {**product, "product_index": idx + 1}
+                        yield {"event": "product", "data": json.dumps(product_with_index)}
+                        
+                    yield {
+                        "event": "context_done",
+                        "data": json.dumps({"guides": guides, "total": len(products), "mode": "match"}),
+                    }
+
+                    yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando tu recomendación…"})}
+                    yield {"event": "token", "data": json.dumps({"token": response_text})}
+                    yield {"event": "done", "data": json.dumps({"ok": True})}
+                    return
+
                 # 1. Analizar intención, perfil y generar queries en un solo llamado LLM para evitar latencia de cascada.
                 yield {"event": "status", "data": json.dumps({"stage": "analyzing", "label": "Lumi está analizando tu consulta…"})}
                 
@@ -232,11 +264,12 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                         # 3. Cache Check — solo si el modo caché está activo.
                         #    Si está OFF, ni siquiera calculamos el embedding del
                         #    caché ni consultamos el almacén: flujo original puro.
+                        #    Reutilizamos el embedding calculado en el paso 0 si ya existe.
                         cache_on = is_cache_enabled()
-                        query_embedding = None
                         cached_data = None
                         if cache_on:
-                            query_embedding = await asyncio.to_thread(embed_text, request.message)
+                            if query_embedding is None:
+                                query_embedding = await asyncio.to_thread(embed_text, request.message)
                             cached_data = await lookup_cached_response(
                                 query_embedding, profile, query_preview=request.message
                             )
