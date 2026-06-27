@@ -6,6 +6,7 @@
 [![Universidad](https://img.shields.io/badge/Universidad-San%20Sebastián-red)](#)
 [![Taller](https://img.shields.io/badge/Taller-Innovación%20--%203er%20año-green)](#)
 [![Licencia](https://img.shields.io/badge/Licencia-Custom%20Source--Available%20%2B%20Commons%20Clause-red)](#)
+[![Demo Vercel](https://img.shields.io/badge/Demo-Vercel-black?style=flat&logo=vercel)](https://cosmetic-rag-system.vercel.app/)
 
 ---
 
