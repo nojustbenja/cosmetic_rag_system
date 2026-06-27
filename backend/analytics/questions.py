@@ -23,15 +23,15 @@ class DynamicConfigPath:
         from config import resolve_data_path
         return resolve_data_path(self.filename)
 
-    def exists(self) -> bool:
-        return self._path.exists()
+    def __getattr__(self, name: str):
+        return getattr(self._path, name)
 
-    def open(self, *args, **kwargs):
-        return self._path.open(*args, **kwargs)
+    def __str__(self) -> str:
+        return str(self._path)
 
-    @property
-    def parent(self) -> Path:
-        return self._path.parent
+    def __fspath__(self) -> str:
+        import os
+        return os.fspath(self._path)
 
 
 EVENTS_PATH = DynamicConfigPath("question_events.json")

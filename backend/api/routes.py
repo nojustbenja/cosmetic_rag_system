@@ -47,19 +47,15 @@ class DynamicConfigPath:
         from config import resolve_data_path
         return resolve_data_path(self.filename)
 
-    def exists(self) -> bool:
-        return self._path.exists()
+    def __getattr__(self, name: str):
+        return getattr(self._path, name)
 
-    def open(self, *args, **kwargs):
-        return self._path.open(*args, **kwargs)
+    def __str__(self) -> str:
+        return str(self._path)
 
-    @property
-    def parent(self) -> Path:
-        return self._path.parent
-
-    @property
-    def stat(self):
-        return self._path.stat
+    def __fspath__(self) -> str:
+        import os
+        return os.fspath(self._path)
 
 
 ORDERS_PATH = DynamicConfigPath("orders.json")
