@@ -27,6 +27,12 @@ class Settings(BaseSettings):
     chroma_persist_dir: str = "../chroma_db"
     frontend_origin: str = "http://localhost:5173"
 
+    # Modo caché de respuestas (env CACHE_ENABLED). Es solo el DEFAULT: el
+    # BackOffice puede activarlo/desactivarlo en caliente y ese valor (en
+    # data/cache_config.json) tiene prioridad. True conserva el comportamiento
+    # histórico en que el caché semántico estaba siempre activo.
+    cache_enabled: bool = True
+
     model_config = SettingsConfigDict(
         env_file=Path(__file__).parent / ".env",
         env_file_encoding="utf-8",

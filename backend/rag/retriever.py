@@ -346,61 +346,30 @@ def get_all_products_from_db() -> list[dict]:
         })
     return formatted
 
-async def check_semantic_cache(query_embedding: list[float], profile: dict, threshold: float = 0.95) -> dict | None:
-    def _sync_query():
-        collection = _client().get_or_create_collection(
-            name="semantic_cache",
-            metadata={"hnsw:space": "cosine"},
-        )
-        if collection.count() == 0:
-            return None
-            
-        skin_type = profile.get("skin_type") or "todas"
-        
-        results = collection.query(
-            query_embeddings=[query_embedding],
-            n_results=1,
-            include=["documents", "metadatas", "distances"],
-            where={"skin_type": skin_type}
-        )
-        
-        distances = results.get("distances", [[]])[0]
-        metadatas = results.get("metadatas", [[]])[0]
-        
-        if distances and len(distances) > 0:
-            score = 1 - float(distances[0])
-            if score >= threshold:
-                import json
-                try:
-                    data = json.loads(metadatas[0].get("response_data", "{}"))
-                    return data
-                except Exception:
-                    pass
-        return None
-        
-    return await asyncio.to_thread(_sync_query)
+# --------------------------------------------------------------------------
+# Caché semántico (compatibilidad hacia atrás)
+#
+# La lógica del caché se movió al paquete desacoplado `rag.cache`. Estas dos
+# funciones se conservan como *shims* delgados para no romper imports
+# existentes; ahora delegan en el servicio, que honra el flag on/off del modo
+# caché y registra explícitamente cada CACHE HIT / CACHE MISS.
+#
+# El import es perezoso a propósito: el backend de Chroma importa `_client`
+# desde este módulo, así que importar `rag.cache` en el top-level crearía un
+# ciclo.
+# --------------------------------------------------------------------------
+async def check_semantic_cache(
+    query_embedding: list[float], profile: dict, threshold: float = 0.95
+) -> dict | None:
+    from rag.cache import lookup_cached_response
 
-async def save_to_semantic_cache(query: str, query_embedding: list[float], profile: dict, response_data: dict) -> None:
-    def _sync_save():
-        collection = _client().get_or_create_collection(
-            name="semantic_cache",
-            metadata={"hnsw:space": "cosine"},
-        )
-        skin_type = profile.get("skin_type") or "todas"
-        import json
-        import uuid
-        
-        doc_id = str(uuid.uuid4())
-        
-        collection.add(
-            ids=[doc_id],
-            embeddings=[query_embedding],
-            documents=[query],
-            metadatas=[{
-                "skin_type": skin_type,
-                "response_data": json.dumps(response_data, ensure_ascii=False)
-            }]
-        )
-        
-    await asyncio.to_thread(_sync_save)
+    return await lookup_cached_response(query_embedding, profile)
+
+
+async def save_to_semantic_cache(
+    query: str, query_embedding: list[float], profile: dict, response_data: dict
+) -> None:
+    from rag.cache import store_response
+
+    await store_response(query, query_embedding, profile, response_data)
 

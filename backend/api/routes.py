@@ -19,6 +19,7 @@ from api.models import (
     ProductUpdateRequest,
     ProviderConfigRequest,
     FeedbackRequest,
+    CacheConfigRequest,
 )
 from rag.pipeline import (
     extract_client_profile,
@@ -61,6 +62,40 @@ async def update_provider_config(request: ProviderConfigRequest) -> dict:
 @router.post("/provider-config/validate")
 async def validate_provider_config(request: ProviderConfigRequest) -> dict:
     return validate_provider_payload(settings, request.model_dump())
+
+
+@router.get("/cache-config")
+async def get_cache_config() -> dict:
+    """Estado actual del modo caché: enabled, backend, umbral y nº de entradas."""
+    from rag.cache import cache_status
+
+    return await cache_status()
+
+
+@router.put("/cache-config")
+async def update_cache_config(request: CacheConfigRequest) -> dict:
+    """Activa/desactiva el modo caché o cambia su backend/umbral en caliente."""
+    from rag.cache import cache_status, save_cache_config
+
+    try:
+        # Solo enviamos los campos presentes (PATCH-like).
+        payload = {k: v for k, v in request.model_dump().items() if v is not None}
+        save_cache_config(payload)
+        return await cache_status()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@router.post("/cache-config/clear")
+async def clear_cache_endpoint() -> dict:
+    """Vacía el caché del backend activo (útil para la demo y para pruebas)."""
+    from rag.cache import clear_cache
+
+    try:
+        removed = await clear_cache()
+        return {"status": "ok", "removed": removed}
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 @router.get("/products")
@@ -133,7 +168,7 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
             try:
                 import asyncio
                 from rag.embeddings import embed_text
-                from rag.retriever import check_semantic_cache, save_to_semantic_cache
+                from rag.cache import is_cache_enabled, lookup_cached_response, store_response
                 from rag.pipeline import generate_profiler_response, generate_recommender_response, analyze_conversation_intent
 
                 # 1. Analizar intención, perfil y generar queries en un solo llamado LLM para evitar latencia de cascada.
@@ -172,9 +207,17 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                             response += token
                             yield {"event": "token", "data": json.dumps({"token": token})}
                     else:
-                        # 3. Cache Check
-                        query_embedding = await asyncio.to_thread(embed_text, request.message)
-                        cached_data = await check_semantic_cache(query_embedding, profile)
+                        # 3. Cache Check — solo si el modo caché está activo.
+                        #    Si está OFF, ni siquiera calculamos el embedding del
+                        #    caché ni consultamos el almacén: flujo original puro.
+                        cache_on = is_cache_enabled()
+                        query_embedding = None
+                        cached_data = None
+                        if cache_on:
+                            query_embedding = await asyncio.to_thread(embed_text, request.message)
+                            cached_data = await lookup_cached_response(
+                                query_embedding, profile, query_preview=request.message
+                            )
 
                         if cached_data:
                             yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi recuperó la respuesta en milisegundos…"})}
@@ -257,17 +300,22 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                                 response += token
                                 yield {"event": "token", "data": json.dumps({"token": token})}
 
-                            # Save to semantic cache
-                            await save_to_semantic_cache(
-                                query=request.message,
-                                query_embedding=query_embedding,
-                                profile=profile,
-                                response_data={
-                                    "products": products,
-                                    "guides": guides,
-                                    "response": response
-                                }
-                            )
+                            # Guardar en caché (no-op si el modo caché está OFF).
+                            # Si está ON pero no calculamos el embedding antes
+                            # (caso defensivo), lo generamos ahora.
+                            if cache_on:
+                                if query_embedding is None:
+                                    query_embedding = await asyncio.to_thread(embed_text, request.message)
+                                await store_response(
+                                    query=request.message,
+                                    query_embedding=query_embedding,
+                                    profile=profile,
+                                    response_data={
+                                        "products": products,
+                                        "guides": guides,
+                                        "response": response
+                                    }
+                                )
 
                 yield {"event": "done", "data": json.dumps({"ok": True})}
             except Exception as exc:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -129,3 +131,16 @@ class ProviderConfigRequest(BaseModel):
     base_url: str = Field(default="")
     api_key: str = Field(default="")
     kilo_mode: str = Field(default="free")
+
+
+class CacheConfigRequest(BaseModel):
+    """Payload del modo caché. Todos los campos son opcionales: solo se
+    actualizan los que vengan presentes (PATCH-like).
+
+    Se usa Optional[...] (no `X | None`) a propósito: Pydantic evalúa las
+    anotaciones en tiempo de definición y el backend de producción corre en
+    Python 3.9, donde la sintaxis PEP 604 en modelos rompería el import.
+    """
+    enabled: Optional[bool] = Field(default=None)
+    backend: Optional[str] = Field(default=None)
+    threshold: Optional[float] = Field(default=None, ge=0.0, le=1.0)
