@@ -1,0 +1,5 @@
+{
+  "enabled": true,
+  "backend": "chroma",
+  "threshold": 0.95
+}

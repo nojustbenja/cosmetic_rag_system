@@ -6246,5 +6246,128 @@
       "producto-22-srum-cido-hialurnico-multi-peso",
       "producto-19-srum-vitamina-c-antioxidante"
     ]
+  },
+  {
+    "timestamp": "2026-06-27T16:12:28.044062+00:00",
+    "session_id": "663e2262-2769-4dc5-8e1b-60e8fa68db4e",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:13:07.401799+00:00",
+    "session_id": "663e2262-2769-4dc5-8e1b-60e8fa68db4e",
+    "event_type": "sent",
+    "question": "Busco una crema hidratante de día",
+    "normalized_question": "busco crema hidratante dia",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:13:14.948977+00:00",
+    "session_id": "663e2262-2769-4dc5-8e1b-60e8fa68db4e",
+    "event_type": "answered",
+    "question": "Busco una crema hidratante de día",
+    "normalized_question": "busco crema hidratante dia",
+    "suggestion_id": "",
+    "source": "typed",
+    "product_ids": [
+      "producto-14-crema-hidratante-anti-rojez",
+      "producto-0-srum-hidratante-glow-drops",
+      "producto-46-mascarilla-hidrogel-ojos-anti-fatiga",
+      "producto-22-srum-cido-hialurnico-multi-peso",
+      "producto-16-contorno-de-ojos-descongestionante",
+      "producto-1-crema-reparadora-noche-velvet"
+    ]
+  },
+  {
+    "timestamp": "2026-06-27T16:16:04.939472+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "impression",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip_mixed",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:14.980318+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "click",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:14.990872+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "sent",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:20.604761+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "answered",
+    "question": "Necesito una base de larga duración",
+    "normalized_question": "necesito base larga duracion",
+    "suggestion_id": "case-maquillaje-larga-duracion",
+    "source": "chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:21.493440+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "sent",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:27.179361+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "answered",
+    "question": "Mixta",
+    "normalized_question": "mixta",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:28.259247+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "sent",
+    "question": "Brillo natural",
+    "normalized_question": "brillo natural",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": []
+  },
+  {
+    "timestamp": "2026-06-27T16:16:40.825893+00:00",
+    "session_id": "150bd3cd-6d8d-47b7-afdf-436faa19adb9",
+    "event_type": "answered",
+    "question": "Brillo natural",
+    "normalized_question": "brillo natural",
+    "suggestion_id": "",
+    "source": "inline_chip",
+    "product_ids": [
+      "producto-5-base-lquida-second-skin",
+      "producto-31-corrector-alta-cobertura-eternal",
+      "producto-6-labial-mate-velvet-kiss",
+      "producto-34-delineador-lquido-precisin-black",
+      "producto-7-paleta-de-sombras-earth-tones"
+    ]
   }
 ]

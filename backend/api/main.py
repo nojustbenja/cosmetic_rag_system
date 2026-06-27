@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,6 +10,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import router
 from config import settings
+
+# Configura el logging raíz a INFO para que los mensajes de observabilidad
+# del modo caché (✅ CACHE HIT / ❌ CACHE MISS / 🚫 CACHE BYPASS / 💾 STORE)
+# sean visibles en los logs del servidor. Respeta LOG_LEVEL si está definido.
+# `force=True` evita que una configuración previa de uvicorn lo silencie.
+logging.basicConfig(
+    level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    force=True,
+)
 
 logger = logging.getLogger(__name__)
 

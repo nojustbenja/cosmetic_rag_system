@@ -32,6 +32,20 @@ _backend: SemanticCacheBackend | None = None
 _backend_name: str | None = None
 
 
+def _has_allergies(profile: dict) -> bool:
+    """Indica si el perfil declara alguna alergia/restricción de salud.
+
+    SEGURIDAD: una respuesta cacheada se generó para un perfil concreto. La
+    clave del caché particiona por ``skin_type`` pero NO por alergias, así que
+    una respuesta guardada para alguien SIN alergias podría recomendar un
+    producto contraindicado si se reutiliza con alguien que SÍ las tiene. Por
+    eso, ante cualquier alergia presente, se hace bypass total del caché y se
+    fuerza el pipeline (que sí filtra alérgenos en `retriever.py`).
+    """
+    allergies = profile.get("allergies")
+    return bool(allergies)
+
+
 def _build_backend(name: str) -> SemanticCacheBackend:
     """Fábrica de backends. Punto único donde registrar almacenes nuevos."""
     if name == "memory":
@@ -78,6 +92,15 @@ async def lookup_cached_response(
         logger.info("CACHE OFF — se ignora el caché y se ejecuta el flujo normal.")
         return None
 
+    # SEGURIDAD: si el perfil declara alergias, nunca reutilizamos respuestas
+    # cacheadas (generadas para perfiles potencialmente sin esas alergias).
+    if _has_allergies(profile):
+        logger.info(
+            "🚫 CACHE BYPASS (allergies present) — forzando pipeline por seguridad. query=%r",
+            query_preview[:60],
+        )
+        return None
+
     backend = get_backend()
     data = await backend.lookup(query_embedding, profile, config["threshold"])
 
@@ -106,6 +129,17 @@ async def store_response(
     """Guarda una respuesta recién generada (no-op si el caché está OFF)."""
     config = resolve_cache_config()
     if not config["enabled"]:
+        return
+
+    # SEGURIDAD: no cacheamos respuestas asociadas a un perfil con alergias.
+    # Esa respuesta solo es válida bajo esas restricciones y no debe poder
+    # reutilizarse para otros perfiles; además, el lookup ya hace bypass con
+    # alergias, así que guardarla sería almacenar una entrada inalcanzable.
+    if _has_allergies(profile):
+        logger.info(
+            "🚫 CACHE BYPASS (allergies present) — forzando pipeline por seguridad. (store no-op) query=%r",
+            query[:60],
+        )
         return
 
     backend = get_backend()
