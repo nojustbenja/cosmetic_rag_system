@@ -197,3 +197,5 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+# Trigger CI deploy workflow
