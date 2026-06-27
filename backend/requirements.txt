@@ -11,3 +11,5 @@ anthropic
 rank-bm25
 ragas
 datasets
+pytest
+pytest-asyncio
