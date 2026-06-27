@@ -48,6 +48,19 @@ export type ProviderValidation = {
   message: string;
 };
 
+export type CacheConfig = {
+  enabled: boolean;
+  backend: string;
+  threshold: number;
+  entries: number;
+};
+
+export type CacheConfigPayload = {
+  enabled?: boolean;
+  backend?: string;
+  threshold?: number;
+};
+
 export type QuestionEventPayload = {
   event_type: "impression" | "click" | "sent" | "answered" | "stop" | "product_view" | "cart_add" | "checkout";
   session_id?: string;
@@ -390,6 +403,40 @@ export async function validateProviderConfig(payload: ProviderConfigPayload): Pr
   });
   if (!response.ok) {
     throw new Error('No se pudo validar la configuración del proveedor.');
+  }
+  return response.json();
+}
+
+export async function fetchCacheConfig(): Promise<CacheConfig> {
+  const response = await fetch(endpoint('/cache-config'), {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo obtener la configuración del modo caché.');
+  }
+  return response.json();
+}
+
+export async function saveCacheConfig(payload: CacheConfigPayload): Promise<CacheConfig> {
+  const response = await fetch(endpoint('/cache-config'), {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo guardar la configuración del modo caché.');
+  }
+  return response.json();
+}
+
+export async function clearCache(): Promise<{ status: string; removed: number }> {
+  const response = await fetch(endpoint('/cache-config/clear'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo vaciar el caché.');
   }
   return response.json();
 }

@@ -21,6 +21,7 @@ import {
   PlugsConnected,
   ShieldCheck,
   Cpu,
+  Lightning,
 } from "@phosphor-icons/react";
 import {
   fetchProducts,
@@ -35,6 +36,10 @@ import {
   saveProviderConfig,
   validateProviderConfig,
   ProviderConfig,
+  fetchCacheConfig,
+  saveCacheConfig,
+  clearCache,
+  CacheConfig,
   fetchQuestionStats,
   searchQuestions,
 } from "@/lib/api";
@@ -117,10 +122,15 @@ export default function BackOffice() {
   const [questionSearchResults, setQuestionSearchResults] = useState<QuestionMetric[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
+  // Modo caché (Performance) state
+  const [cacheConfig, setCacheConfig] = useState<CacheConfig | null>(null);
+  const [cacheLoading, setCacheLoading] = useState(false);
+
   // Cargar datos al montar
   useEffect(() => {
     loadData();
     loadProviderConfig();
+    loadCacheConfig();
   }, []);
 
   const loadQuestionStats = async (period: "week" | "month" = questionPeriod) => {
@@ -221,6 +231,48 @@ export default function BackOffice() {
       toast.error("No se pudo guardar la configuración del proveedor.");
     } finally {
       setProviderLoading(false);
+    }
+  };
+
+  const loadCacheConfig = async () => {
+    try {
+      const config = await fetchCacheConfig();
+      setCacheConfig(config);
+    } catch (err) {
+      console.error(err);
+      // No bloqueamos el BackOffice si el endpoint de caché no responde.
+    }
+  };
+
+  const handleToggleCache = async (enabled: boolean) => {
+    setCacheLoading(true);
+    // Actualización optimista para que el switch responda al instante.
+    setCacheConfig((prev) => (prev ? { ...prev, enabled } : prev));
+    try {
+      const config = await saveCacheConfig({ enabled });
+      setCacheConfig(config);
+      toast.success(enabled ? "Modo caché activado." : "Modo caché desactivado.");
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo cambiar el modo caché.");
+      // Revertir el switch si falló.
+      setCacheConfig((prev) => (prev ? { ...prev, enabled: !enabled } : prev));
+    } finally {
+      setCacheLoading(false);
+    }
+  };
+
+  const handleClearCache = async () => {
+    setCacheLoading(true);
+    try {
+      const { removed } = await clearCache();
+      toast.success(`Caché vaciado (${removed} ${removed === 1 ? "entrada" : "entradas"}).`);
+      await loadCacheConfig();
+    } catch (err) {
+      console.error(err);
+      toast.error("No se pudo vaciar el caché.");
+    } finally {
+      setCacheLoading(false);
     }
   };
 
@@ -1131,6 +1183,70 @@ export default function BackOffice() {
                   <div className="inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-background/55 px-3 py-2 text-[11px] font-bold text-foreground/75 backdrop-blur-xl">
                     <ShieldCheck weight="light" className="size-4" />
                     <span>{providerConfig?.api_key_set ? "Clave activa" : "Clave pendiente"}</span>
+                  </div>
+                </div>
+
+                {/* ⚙️ Performance · Modo caché */}
+                <div className="glass-card rounded-[2rem] p-5 space-y-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="icon-orb size-11">
+                        <Lightning weight="light" className="size-5" />
+                      </div>
+                      <div>
+                        <p className="text-label">⚙️ Performance · Modo caché</p>
+                        <p className="text-[11px] text-muted-foreground max-w-[58ch] leading-relaxed">
+                          Reutiliza respuestas ya generadas para consultas equivalentes y evita re-ejecutar el pipeline RAG. Las repetidas responden casi al instante.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Switch activar/desactivar */}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={!!cacheConfig?.enabled}
+                      aria-label="Activar modo caché"
+                      disabled={cacheLoading || !cacheConfig}
+                      onClick={() => handleToggleCache(!cacheConfig?.enabled)}
+                      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors disabled:opacity-50 ${
+                        cacheConfig?.enabled ? "bg-foreground" : "bg-border/70"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block size-5 transform rounded-full bg-background shadow transition-transform ${
+                          cacheConfig?.enabled ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 border-t border-border/25 pt-4">
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold ${
+                        cacheConfig?.enabled
+                          ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-700"
+                          : "border-border/40 bg-background/45 text-muted-foreground"
+                      }`}
+                    >
+                      <Lightning weight={cacheConfig?.enabled ? "fill" : "light"} className="size-3.5" />
+                      {cacheConfig?.enabled ? "Caché activo" : "Caché desactivado"}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/45 px-3 py-1.5 text-[11px] font-bold text-foreground/70">
+                      Backend: <span className="font-mono">{cacheConfig?.backend ?? "—"}</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-background/45 px-3 py-1.5 text-[11px] font-bold text-foreground/70">
+                      Entradas: <span className="font-mono">{cacheConfig?.entries ?? 0}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleClearCache}
+                      disabled={cacheLoading || !cacheConfig}
+                      className="ml-auto inline-flex items-center gap-2 rounded-full bg-background/60 border border-border/40 px-4 py-2 text-[11px] font-bold text-foreground hover:border-foreground/20 active:scale-95 transition disabled:opacity-50"
+                    >
+                      {cacheLoading ? <CircleNotch weight="light" className="size-3.5 animate-spin" /> : <Trash weight="light" className="size-3.5" />}
+                      <span>Vaciar caché</span>
+                    </button>
                   </div>
                 </div>
 
