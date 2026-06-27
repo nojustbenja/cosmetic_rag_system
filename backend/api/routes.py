@@ -36,8 +36,34 @@ from analytics.questions import get_suggestions, get_stats, record_event, search
 
 
 router = APIRouter()
-ORDERS_PATH = Path(__file__).resolve().parents[1] / "data" / "orders.json"
-FEEDBACK_PATH = Path(__file__).resolve().parents[1] / "data" / "feedback.json"
+
+
+class DynamicConfigPath:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+
+    @property
+    def _path(self) -> Path:
+        from config import resolve_data_path
+        return resolve_data_path(self.filename)
+
+    def exists(self) -> bool:
+        return self._path.exists()
+
+    def open(self, *args, **kwargs):
+        return self._path.open(*args, **kwargs)
+
+    @property
+    def parent(self) -> Path:
+        return self._path.parent
+
+    @property
+    def stat(self):
+        return self._path.stat
+
+
+ORDERS_PATH = DynamicConfigPath("orders.json")
+FEEDBACK_PATH = DynamicConfigPath("feedback.json")
 
 @router.get("/health")
 async def health() -> dict[str, str]:

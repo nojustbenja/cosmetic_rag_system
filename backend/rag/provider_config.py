@@ -6,7 +6,27 @@ from pathlib import Path
 from typing import Any
 
 
-CONFIG_PATH = Path(__file__).resolve().parents[1] / "data" / "provider_config.json"
+class DynamicConfigPath:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+
+    @property
+    def _path(self) -> Path:
+        from config import resolve_data_path
+        return resolve_data_path(self.filename)
+
+    def exists(self) -> bool:
+        return self._path.exists()
+
+    def open(self, *args, **kwargs):
+        return self._path.open(*args, **kwargs)
+
+    @property
+    def parent(self) -> Path:
+        return self._path.parent
+
+
+CONFIG_PATH = DynamicConfigPath("provider_config.json")
 
 
 @dataclass(frozen=True)

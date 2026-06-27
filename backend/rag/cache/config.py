@@ -23,7 +23,28 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = Path(__file__).resolve().parents[2] / "data" / "cache_config.json"
+
+class DynamicConfigPath:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+
+    @property
+    def _path(self) -> Path:
+        from config import resolve_data_path
+        return resolve_data_path(self.filename)
+
+    def exists(self) -> bool:
+        return self._path.exists()
+
+    def open(self, *args, **kwargs):
+        return self._path.open(*args, **kwargs)
+
+    @property
+    def parent(self) -> Path:
+        return self._path.parent
+
+
+CONFIG_PATH = DynamicConfigPath("cache_config.json")
 
 #: Backends válidos reconocidos por el servicio.
 VALID_BACKENDS = ("chroma", "memory")

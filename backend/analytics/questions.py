@@ -12,7 +12,29 @@ from typing import Any
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SEED_PATH = DATA_DIR / "question_seed.json"
-EVENTS_PATH = DATA_DIR / "question_events.json"
+
+
+class DynamicConfigPath:
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+
+    @property
+    def _path(self) -> Path:
+        from config import resolve_data_path
+        return resolve_data_path(self.filename)
+
+    def exists(self) -> bool:
+        return self._path.exists()
+
+    def open(self, *args, **kwargs):
+        return self._path.open(*args, **kwargs)
+
+    @property
+    def parent(self) -> Path:
+        return self._path.parent
+
+
+EVENTS_PATH = DynamicConfigPath("question_events.json")
 
 STOPWORDS = {
     "a",

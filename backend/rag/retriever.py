@@ -264,51 +264,55 @@ async def retrieve_all(queries: str | list[str], filters: dict | None = None) ->
     results = sorted(results, key=lambda item: item["score"], reverse=True)
     
     # RERANKING con CrossEncoder
-    try:
-        from sentence_transformers import CrossEncoder
-        import logging
-        import os
-        from config import settings
-        logger = logging.getLogger(__name__)
-        
-        # Cargar el reranker de forma lazy. Podés cambiar el modelo por uno en español si es necesario
-        # e.g. "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
-        model_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-        
-        def _get_reranker():
-            if not hasattr(_get_reranker, "model"):
-                if not settings.allow_embedding_download:
-                    os.environ.setdefault("HF_HUB_OFFLINE", "1")
-                    os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
-                try:
-                    _get_reranker.model = CrossEncoder(model_name, local_files_only=True, device="cpu")
-                except Exception as e:
-                    if settings.allow_embedding_download:
-                        _get_reranker.model = CrossEncoder(model_name, device="cpu")
-                    else:
-                        raise e
-            return _get_reranker.model
+    if getattr(settings, "reranking_enabled", True):
+        try:
+            from sentence_transformers import CrossEncoder
+            import logging
+            import os
+            from config import settings
+            logger = logging.getLogger(__name__)
+            
+            # Cargar el reranker de forma lazy. Podés cambiar el modelo por uno en español si es necesario
+            # e.g. "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+            model_name = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+            
+            def _get_reranker():
+                if not hasattr(_get_reranker, "model"):
+                    if not settings.allow_embedding_download:
+                        os.environ.setdefault("HF_HUB_OFFLINE", "1")
+                        os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+                    try:
+                        _get_reranker.model = CrossEncoder(model_name, local_files_only=True, device="cpu")
+                    except Exception as e:
+                        if settings.allow_embedding_download:
+                            _get_reranker.model = CrossEncoder(model_name, device="cpu")
+                        else:
+                            raise e
+                return _get_reranker.model
 
-        def _sync_rerank():
-            reranker = _get_reranker()
-            # Preparar pares (original_query, documento)
-            pairs = [[original_query, item["text"]] for item in results]
-            scores = reranker.predict(pairs)
-            
-            # Actualizar scores con la predicción del CrossEncoder
-            for item, score in zip(results, scores):
-                item["score"] = float(score)
-            
-            # Reordenar basado en el score del Reranker
-            return sorted(results, key=lambda item: item["score"], reverse=True)
-            
-        # Ejecutar reranking en thread separado para no bloquear el loop
-        results = await asyncio.to_thread(_sync_rerank)
-    except Exception as e:
+            def _sync_rerank():
+                reranker = _get_reranker()
+                # Preparar pares (original_query, documento)
+                pairs = [[original_query, item["text"]] for item in results]
+                scores = reranker.predict(pairs)
+                
+                # Actualizar scores con la predicción del CrossEncoder
+                for item, score in zip(results, scores):
+                    item["score"] = float(score)
+                
+                # Reordenar basado en el score del Reranker
+                return sorted(results, key=lambda item: item["score"], reverse=True)
+                
+            # Ejecutar reranking en thread separado para no bloquear el loop
+            results = await asyncio.to_thread(_sync_rerank)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Reranking no ejecutado, se usará el ranking híbrido original. Error: {e}")
+            pass
+    else:
         import logging
-        logger = logging.getLogger(__name__)
-        logger.warning(f"Reranking no ejecutado, se usará el ranking híbrido original. Error: {e}")
-        pass
+        logging.getLogger(__name__).info("Reranking desactivado en la configuración; omitiendo rerank CrossEncoder.")
         
     return results[:10]
 

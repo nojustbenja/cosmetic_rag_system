@@ -1,9 +1,41 @@
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def resolve_data_path(filename: str) -> Path:
+    """
+    Retorna la ruta para un archivo de datos. Redirige a /data si existe el almacenamiento
+    persistente en Hugging Face Spaces. Si el archivo no existe en el almacenamiento persistente
+    pero sí localmente en el contenedor, se copia para sembrar la información inicial.
+    """
+    import shutil
+    import logging
+    logger = logging.getLogger(__name__)
+
+    persistent_root = Path("/data")
+    local_path = Path(__file__).resolve().parent / "data" / filename
+
+    if persistent_root.exists() and os.access(str(persistent_root), os.W_OK):
+        persistent_path = persistent_root / filename
+        if not persistent_path.exists() and local_path.exists():
+            try:
+                # Si el archivo/carpeta es un directorio, usar copytree
+                if local_path.is_dir():
+                    shutil.copytree(local_path, persistent_path)
+                else:
+                    persistent_path.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(local_path, persistent_path)
+                logger.info(f"Sembrado inicial exitoso: {filename} copiado a almacenamiento persistente.")
+            except Exception as e:
+                logger.warning(f"No se pudo copiar {filename} al almacenamiento persistente: {e}")
+        return persistent_path
+
+    return local_path
 
 
 class Settings(BaseSettings):
@@ -27,11 +59,11 @@ class Settings(BaseSettings):
     chroma_persist_dir: str = "../chroma_db"
     frontend_origin: str = "http://localhost:5173"
 
-    # Modo caché de respuestas (env CACHE_ENABLED). Es solo el DEFAULT: el
-    # BackOffice puede activarlo/desactivarlo en caliente y ese valor (en
-    # data/cache_config.json) tiene prioridad. True conserva el comportamiento
-    # histórico en que el caché semántico estaba siempre activo.
+    # Modo caché de respuestas (env CACHE_ENABLED).
     cache_enabled: bool = True
+
+    # Permite activar/desactivar el Reranker ( CrossEncoder ) local en CPU en producción
+    reranking_enabled: bool = True
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).parent / ".env",
@@ -41,8 +73,24 @@ class Settings(BaseSettings):
 
     @property
     def chroma_path(self) -> str:
-        path = Path(__file__).parent / self.chroma_persist_dir
-        return str(path.resolve())
+        import shutil
+        import logging
+        logger = logging.getLogger(__name__)
+
+        persistent_root = Path("/data")
+        local_path = Path(__file__).parent / self.chroma_persist_dir
+
+        if persistent_root.exists() and os.access(str(persistent_root), os.W_OK):
+            persistent_path = persistent_root / "chroma_db"
+            if not persistent_path.exists() and local_path.exists():
+                try:
+                    shutil.copytree(local_path, persistent_path)
+                    logger.info("Sembrado inicial exitoso: chroma_db copiado a almacenamiento persistente.")
+                except Exception as e:
+                    logger.warning(f"No se pudo copiar chroma_db al almacenamiento persistente: {e}")
+            return str(persistent_path.resolve())
+
+        return str(local_path.resolve())
 
     @property
     def frontend_origins(self) -> list[str]:
