@@ -269,7 +269,6 @@ async def retrieve_all(queries: str | list[str], filters: dict | None = None) ->
             from sentence_transformers import CrossEncoder
             import logging
             import os
-            from config import settings
             logger = logging.getLogger(__name__)
             
             # Cargar el reranker de forma lazy. Podés cambiar el modelo por uno en español si es necesario
