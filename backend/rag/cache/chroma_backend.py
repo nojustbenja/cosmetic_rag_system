@@ -47,7 +47,7 @@ class ChromaSemanticCache(SemanticCacheBackend):
             if collection.count() == 0:
                 return None
 
-            skin_type = profile.get("skin_type") or "todas"
+            skin_type = (profile.get("skin_type") or "todas").strip().lower()
             results = collection.query(
                 query_embeddings=[query_embedding],
                 n_results=1,
@@ -82,7 +82,7 @@ class ChromaSemanticCache(SemanticCacheBackend):
     ) -> None:
         def _sync_save() -> None:
             collection = self._collection()
-            skin_type = profile.get("skin_type") or "todas"
+            skin_type = (profile.get("skin_type") or "todas").strip().lower()
             collection.add(
                 ids=[str(uuid.uuid4())],
                 embeddings=[query_embedding],

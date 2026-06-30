@@ -205,23 +205,33 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                         query_embedding, frontend_profile, query_preview=request.message
                     )
 
+                # Una entrada de profiler cacheada es una PREGUNTA de seguimiento que
+                # depende del estado de la conversación. Solo es segura de servir al
+                # inicio (sin historial); a mitad de charla podría volver a preguntar
+                # algo ya respondido, así que la ignoramos y seguimos el flujo normal.
+                if cached_data and cached_data.get("mode") == "profiler" and history:
+                    cached_data = None
+
                 if cached_data:
                     yield {"event": "status", "data": json.dumps({"stage": "understanding", "label": "Lumi recuperó la respuesta en milisegundos…"})}
                     products = cached_data.get("products", [])
                     guides = cached_data.get("guides", [])
                     response_text = cached_data.get("response", "")
+                    cached_mode = cached_data.get("mode", "match")
 
                     for idx, product in enumerate(products):
                         product_with_index = {**product, "product_index": idx + 1}
                         yield {"event": "product", "data": json.dumps(product_with_index)}
-                        
+
                     yield {
                         "event": "context_done",
-                        "data": json.dumps({"guides": guides, "total": len(products), "mode": "match"}),
+                        "data": json.dumps({"guides": guides, "total": len(products), "mode": cached_mode}),
                     }
 
                     yield {"event": "status", "data": json.dumps({"stage": "writing", "label": "Preparando tu recomendación…"})}
                     yield {"event": "token", "data": json.dumps({"token": response_text})}
+                    if cached_data.get("chips"):
+                        yield {"event": "chips", "data": json.dumps(cached_data["chips"])}
                     yield {"event": "done", "data": json.dumps({"ok": True})}
                     return
 
@@ -248,6 +258,25 @@ async def chat(request: ChatRequest) -> EventSourceResponse:
                     yield {"event": "token", "data": json.dumps({"token": response})}
                     if "chips" in profiler_data:
                         yield {"event": "chips", "data": json.dumps(profiler_data["chips"])}
+
+                    # Cacheamos la pregunta de profiler SOLO en turno 1 (sin historial):
+                    # ahí es determinística respecto al query y no hay riesgo de volver a
+                    # preguntar algo ya respondido. El lookup anticipado la sirve sin LLM.
+                    if cache_on and not history:
+                        if query_embedding is None:
+                            query_embedding = await asyncio.to_thread(embed_text, request.message)
+                        await store_response(
+                            query=request.message,
+                            query_embedding=query_embedding,
+                            profile=profile,
+                            response_data={
+                                "products": [],
+                                "guides": [],
+                                "response": response,
+                                "chips": profiler_data.get("chips", []),
+                                "mode": "profiler",
+                            },
+                        )
                 else:
                     if not needs_search:
                         yield {
